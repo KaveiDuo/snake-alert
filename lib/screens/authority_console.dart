@@ -45,10 +45,10 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
     final openCount = s.hostelReports.where((r) => !r.safe).length;
     final filters = [
       ConsoleFilter.all,
-      if (!resolvedTab && inTab.any((r) => r.flagged)) ConsoleFilter.overdue,
       ConsoleFilter.venomous,
       ConsoleFilter.nonVenomous,
       ConsoleFilter.unsure,
+      if (!resolvedTab && inTab.any((r) => r.flagged)) ConsoleFilter.overdue,
     ];
     return DarkPage(
       body: LiveClock(
