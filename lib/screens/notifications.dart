@@ -16,6 +16,9 @@ class NotificationsScreen extends StatefulWidget {
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
   String _filter = 'All';
+
+  /// Second row of chips, shown under "Snake Alert".
+  _SnakeFilter _snake = _SnakeFilter.all;
   final _open = <String>{};
 
   /// Every update a student gets about one report, oldest first. Anyone sees
@@ -65,7 +68,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         body: 'Rohit K. joined your 6:30 AM cab to Guwahati Airport.',
       ),
     ]..sort((a, b) => b.time.compareTo(a.time));
-    final shown = cards.where((c) => _filter == 'All' || c.source == _filter.toUpperCase()).toList();
+    final snakeCards = cards.where((c) => c.report != null).toList();
+    final shown = cards
+        .where((c) => _filter == 'All' || c.source == _filter.toUpperCase())
+        .where((c) => _filter != 'Snake Alert' || _snake.matches(c.report!))
+        .toList();
     // Sections, so the student can tell their own reports from everyone else's.
     final sections = [
       ('YOUR REPORTS', shown.where((c) => c.report != null && s.isMine(c.report!)).toList()),
@@ -100,6 +107,33 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               ],
             ),
           ),
+          // Snake types, only under "Snake Alert".
+          AnimatedSize(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.topCenter,
+            child: _filter != 'Snake Alert'
+                ? const SizedBox(width: double.infinity)
+                : SizedBox(
+                    height: 44,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                      children: [
+                        for (final f in _SnakeFilter.values)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: _TypeChip(
+                              f,
+                              count: snakeCards.where((c) => f.matches(c.report!)).length,
+                              selected: _snake == f,
+                              onTap: () => setState(() => _snake = _snake == f ? _SnakeFilter.all : f),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+          ),
           Expanded(
             child: ListView(
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
@@ -130,6 +164,15 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       ),
                     const SizedBox(height: 8),
                   ],
+                if (shown.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 50),
+                    child: Text(
+                      _snake == _SnakeFilter.all ? 'No snake reports right now.' : 'No ${_snake.label.toLowerCase()} reports right now.',
+                      textAlign: TextAlign.center,
+                      style: ft(13.5, color: C.muted),
+                    ),
+                  ),
                 const SizedBox(height: 6),
                 Text(
                   'Snake Alert alerts can be turned off in Profile › Notification preferences.',
@@ -253,6 +296,71 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Snake-type filter under "Snake Alert". "Open area" is anywhere with no
+/// authority (fields, roads, lakes); the others are by venom.
+enum _SnakeFilter {
+  all('All snakes'),
+  venomous('Venomous'),
+  nonVenomous('Non-venomous'),
+  unsure('Not sure'),
+  openArea('Open area');
+
+  final String label;
+  const _SnakeFilter(this.label);
+
+  bool matches(Report r) => switch (this) {
+    _SnakeFilter.all => true,
+    _SnakeFilter.venomous => r.venom == Venom.venomous,
+    _SnakeFilter.nonVenomous => r.venom == Venom.nonVenomous,
+    _SnakeFilter.unsure => r.venom == Venom.unsure,
+    _SnakeFilter.openArea => !r.covered,
+  };
+}
+
+/// Small chip for one snake type, with the map's pin colour and a count.
+class _TypeChip extends StatelessWidget {
+  final _SnakeFilter f;
+  final int count;
+  final bool selected;
+  final VoidCallback onTap;
+  const _TypeChip(this.f, {required this.count, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final dot = switch (f) {
+      _SnakeFilter.all => null,
+      _SnakeFilter.venomous => pinVenomous,
+      _SnakeFilter.nonVenomous => pinNonVenomous,
+      _SnakeFilter.unsure => pinUnsure,
+      _SnakeFilter.openArea => const Color(0xFF8A8A8A),
+    };
+    return Material(
+      color: selected ? const Color(0xFF2A2A2A) : Colors.transparent,
+      shape: StadiumBorder(side: BorderSide(color: selected ? const Color(0xFF555555) : C.line2)),
+      child: InkWell(
+        customBorder: const StadiumBorder(),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 11),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (f == _SnakeFilter.openArea)
+                const Icon(Icons.park_outlined, size: 13, color: C.muted)
+              else if (dot != null)
+                Container(width: 8, height: 8, decoration: BoxDecoration(color: dot, shape: BoxShape.circle)),
+              if (dot != null) const SizedBox(width: 6),
+              Text(f.label, style: ft(12.5, w: selected ? 600 : 500, color: selected ? C.text : C.sub)),
+              const SizedBox(width: 5),
+              Text('$count', style: ft(12, w: 600, color: selected ? C.sub : C.faint)),
+            ],
+          ),
         ),
       ),
     );

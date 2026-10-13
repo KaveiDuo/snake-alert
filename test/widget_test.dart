@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:snake_watch/data/app_state.dart';
 import 'package:snake_watch/data/scanner.dart';
 import 'package:snake_watch/main.dart';
+import 'package:snake_watch/screens/notifications.dart';
 import 'package:snake_watch/screens/sighting_detail.dart';
 
 void main() {
@@ -172,5 +173,20 @@ void main() {
       expect(find.text('Call the authority now'), role == Role.student ? findsOneWidget : findsNothing);
       await tester.pumpWidget(const SizedBox()); // stop the live clock
     }
+  });
+
+  testWidgets('Notifications: snake-type filter under Snake Alert', (tester) async {
+    final s = AppState()..role = Role.student;
+    await tester.pumpWidget(AppScope(state: s, child: const MaterialApp(home: NotificationsScreen())));
+    expect(find.text('Open area'), findsNothing); // only under Snake Alert
+    await tester.tap(find.text('Snake Alert'));
+    await tester.pumpAndSettle();
+    await tester.drag(find.text('Venomous'), const Offset(-300, 0)); // swipe the type row
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Open area'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Lake-side Path'), findsOneWidget);
+    expect(find.textContaining('Cricket Ground'), findsOneWidget);
+    expect(find.textContaining('back gate'), findsNothing); // Kameng reports hidden
   });
 }

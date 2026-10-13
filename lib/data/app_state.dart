@@ -491,6 +491,18 @@ class AppState extends ChangeNotifier {
       outcome: Outcome.leftArea,
       searched: const ['Stairs & steps', 'Drains'],
     ),
+    // Open area · venomous, pin only (no authority)
+    Report(
+      id: 'r15',
+      speciesId: 'cobra',
+      venom: Venom.venomous,
+      place: 'Cricket Ground',
+      note: 'Cobra crossing the boundary line near the pavilion.',
+      reporter: 'Tanvi G.',
+      time: DateTime.now().subtract(const Duration(minutes: 18)),
+      pos: const LatLng(26.19506, 91.70221),
+      covered: false,
+    ),
     // ---- More Kameng reports: two of each type open, two of each resolved ----
     // Venomous · open, not opened yet (opening the console marks it seen)
     Report(
