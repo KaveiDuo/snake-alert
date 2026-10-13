@@ -371,18 +371,17 @@ class _ReportCardState extends State<_ReportCard> {
   Widget build(BuildContext context) {
     final r = widget.r;
     final s = AppScope.read(context);
-    final (String label, IconData icon, VoidCallback onTap, BtnKind kind) = switch (r.stage) {
+    final (String label, IconData icon, VoidCallback onTap) = switch (r.stage) {
       Stage.reported || Stage.seen => (
-        'I’m on my way',
+        'On my way',
         Icons.directions_walk_rounded,
         () {
           s.setOnTheWay(r);
           toast(context, '${r.reporter} has been told you’re on the way');
         },
-        BtnKind.primary,
       ),
       Stage.onTheWay => (
-        'I’ve reached the spot',
+        'Reached',
         Icons.place_rounded,
         () {
           s.arrive(r);
@@ -393,21 +392,11 @@ class _ReportCardState extends State<_ReportCard> {
                 : 'Arrival recorded · you’re ${r.onSiteMetres!.round()} m from the pin, so it shows as not verified',
           );
         },
-        BtnKind.primary,
       ),
-      Stage.onSite => ('Mark area safe', Icons.verified_outlined, () => _resolveSheet(context, r), BtnKind.primary),
-      Stage.resolved => ('Reopen report', Icons.replay_rounded, () => s.reopen(r), BtnKind.ghost),
+      Stage.onSite => ('Mark safe', Icons.verified_user_outlined, () => _resolveSheet(context, r)),
+      Stage.resolved => ('Reopen', Icons.replay_rounded, () => s.reopen(r)),
     };
-
-    final mapButton = Material(
-      color: const Color(0xFF262626),
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ReportLocationScreen(report: r))),
-        child: const SizedBox(width: 56, height: 50, child: Icon(Icons.location_on_outlined, color: C.sub)),
-      ),
-    );
+    final called = r.rescuerCalledAt != null;
     return Panel(
       border: r.flagged ? const Color(0xFF5A2424) : (r.safe ? const Color(0xFF22392A) : C.line2),
       padding: const EdgeInsets.all(14),
@@ -476,22 +465,18 @@ class _ReportCardState extends State<_ReportCard> {
           const SizedBox(height: 12),
           _Deadline(r),
           const SizedBox(height: 12),
-          // Resolved: one row (Reopen + map). Open: the next step on its own,
-          // then "Call rescuer" beside the map button.
-          if (r.safe)
-            Row(children: [Expanded(child: Btn(label, kind: kind, icon: icon, height: 50, onTap: onTap)), const SizedBox(width: 9), mapButton])
-          else ...[
-            Btn(label, kind: kind, icon: icon, height: 50, onTap: onTap),
-            const SizedBox(height: 9),
-            Row(
-              children: [
+          // One row: call the snake catcher, the next step, the map.
+          Row(
+            children: [
+              if (!r.safe) ...[
                 Expanded(
-                  child: Btn(
-                    r.rescuerCalledAt == null ? 'Call rescuer' : 'Rescuer called · ${clock(r.rescuerCalledAt!)}',
+                  flex: 5,
+                  child: _Pill(
+                    called ? 'Called' : 'Call rescuer',
+                    called ? Icons.phone_callback_rounded : Icons.call_rounded,
                     // Big or venomous snakes: the snake catcher / wildlife department.
-                    kind: r.rescuerCalledAt == null && r.treatAsVenomous ? BtnKind.danger : BtnKind.ghost,
-                    icon: Icons.call_rounded,
-                    height: 50,
+                    bg: !called && r.treatAsVenomous ? const Color(0xFFE5484D) : const Color(0xFF262626),
+                    fg: !called && r.treatAsVenomous ? Colors.white : C.sub,
                     onTap: () async {
                       s.callRescuer(r);
                       if (!await launchUrl(Uri.parse('tel:$rescuerPhone')) && context.mounted) {
@@ -500,11 +485,27 @@ class _ReportCardState extends State<_ReportCard> {
                     },
                   ),
                 ),
-                const SizedBox(width: 9),
-                mapButton,
+                const SizedBox(width: 8),
               ],
-            ),
-          ],
+              Expanded(
+                flex: 5,
+                child: r.safe
+                    ? _Pill(label, icon, bg: const Color(0xFF262626), fg: C.sub, onTap: onTap)
+                    : _Pill(label, icon, bg: const Color(0xFF173A24), fg: C.greenText, border: const Color(0xFF245A36), onTap: onTap),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                flex: 3,
+                child: _Pill(
+                  'Map',
+                  Icons.location_on_outlined,
+                  bg: const Color(0xFF262626),
+                  fg: C.text,
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ReportLocationScreen(report: r))),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -515,6 +516,45 @@ class _ReportCardState extends State<_ReportCard> {
     Venom.nonVenomous => const Tag('NON-VENOMOUS', fg: C.greenText, bg: C.greenSoft),
     Venom.unsure => const Tag('NOT SURE', fg: Color(0xFFFFC46B), bg: Color(0xFF2A1E0B)),
   };
+}
+
+/// Compact rounded button used in the report cards' action row.
+class _Pill extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final Color bg, fg;
+  final Color? border;
+  final VoidCallback onTap;
+  const _Pill(this.label, this.icon, {required this.bg, required this.fg, this.border, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) => Material(
+    color: bg,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(14),
+      side: border == null ? BorderSide.none : BorderSide(color: border!),
+    ),
+    child: InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: onTap,
+      child: SizedBox(
+        height: 48,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 18, color: fg),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: ft(14, w: 600, color: fg)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 /// The line under the progress bar: time left to reach the spot, the overdue
