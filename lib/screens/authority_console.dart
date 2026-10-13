@@ -474,9 +474,10 @@ class _ReportCardState extends State<_ReportCard> {
                   child: _Pill(
                     called ? 'Called' : 'Call rescuer',
                     called ? Icons.phone_callback_rounded : Icons.call_rounded,
-                    // Big or venomous snakes: the snake catcher / wildlife department.
-                    bg: !called && r.treatAsVenomous ? const Color(0xFFE5484D) : const Color(0xFF262626),
-                    fg: !called && r.treatAsVenomous ? Colors.white : C.sub,
+                    // The snake catcher / wildlife department, for big or dangerous snakes.
+                    // Red until called; grey once it has been done.
+                    bg: called ? const Color(0xFF262626) : const Color(0xFFE5484D),
+                    fg: called ? C.sub : Colors.white,
                     onTap: () async {
                       s.callRescuer(r);
                       if (!await launchUrl(Uri.parse('tel:$rescuerPhone')) && context.mounted) {
