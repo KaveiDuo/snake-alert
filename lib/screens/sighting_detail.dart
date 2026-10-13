@@ -6,7 +6,6 @@ import '../theme.dart';
 import '../widgets/common.dart';
 import '../widgets/response.dart';
 import 'report_location.dart';
-import 'sos.dart';
 
 class SightingDetailScreen extends StatelessWidget {
   final Report report;
@@ -120,49 +119,6 @@ class SightingDetailScreen extends StatelessWidget {
                     false,
                   ),
                 ],
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1C170C),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFF3A2E14)),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(Icons.warning_amber_rounded, color: C.amber, size: 18),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'Do not approach or try to move it. Keep 3 metres back, keep others away, and wait for the guard.',
-                          style: ft(13, color: const Color(0xFFD9B86A), height: 1.45),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Panel(
-                  border: const Color(0xFF4A1A17),
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SosScreen())),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.phone_in_talk_outlined, color: C.red, size: 20),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Someone was bitten?', style: ft(14.5, w: 600)),
-                            Text('Open emergency SOS', style: ft(12, color: C.muted)),
-                          ],
-                        ),
-                      ),
-                      const Icon(Icons.chevron_right_rounded, color: C.muted),
-                    ],
-                  ),
-                ),
               ],
             ),
           ),
