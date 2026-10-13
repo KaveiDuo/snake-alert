@@ -209,8 +209,8 @@ class _Response extends StatelessWidget {
                 Expanded(
                   child: Text(
                     r.escalated
-                        ? 'The reporter says the snake is still there. Campus security has been alerted.'
-                        : 'Nobody has reached the spot within ${respondWithin.inMinutes} minutes. Campus security has been alerted.',
+                        ? 'The reporter says the snake is still there. The hostel security guard has been alerted.'
+                        : 'Nobody has reached the spot within ${respondWithin.inMinutes} minutes. The hostel security guard has been alerted.',
                     style: ft(13, color: const Color(0xFFF2B8B5), height: 1.4),
                   ),
                 ),
@@ -232,8 +232,8 @@ class _Response extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     r.outcome == Outcome.notFound
-                        ? 'The authority searched but couldn’t find it. If you see it again, tap “Snake still here”: the report reopens and campus security is alerted.'
-                        : 'You reported this snake. Tell us if it’s really gone. If it’s still there, the report reopens and campus security is alerted.',
+                        ? 'The authority searched but couldn’t find it. If you see it again, tap “Snake still here”: the report reopens and the hostel security guard is alerted.'
+                        : 'You reported this snake. Tell us if it’s really gone. If it’s still there, the report reopens and the hostel security guard is alerted.',
                     style: ft(12.5, color: C.muted, height: 1.4),
                   ),
                   const SizedBox(height: 12),
@@ -257,7 +257,7 @@ class _Response extends StatelessWidget {
                           height: 46,
                           onTap: () {
                             s.reopen(r, byReporter: true);
-                            toast(context, 'Report reopened · campus security alerted');
+                            toast(context, 'Report reopened · hostel security guard alerted');
                           },
                         ),
                       ),

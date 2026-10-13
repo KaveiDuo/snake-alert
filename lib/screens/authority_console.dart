@@ -14,7 +14,7 @@ import 'sighting_detail.dart';
 /// Resolved and filterable by type. Opening it marks new reports as seen. Each report then moves one step at a time — on the way,
 /// at the spot (location checked), safe (outcome and photo required) — and
 /// students see every step. Reports not reached within [respondWithin] are
-/// flagged to campus security.
+/// flagged to the hostel security guard.
 class AuthorityConsole extends StatefulWidget {
   const AuthorityConsole({super.key});
   @override
@@ -340,7 +340,7 @@ void _rulesSheet(BuildContext context) {
             rule(
               Icons.timer_off_outlined,
               'Overdue',
-              'Reports not reached within ${respondWithin.inMinutes} min, or that the reporter says are still there, are flagged to campus security.',
+              'Reports not reached within ${respondWithin.inMinutes} min, or that the reporter says are still there, are flagged to the hostel security guard.',
             ),
             const SizedBox(height: 4),
             Btn('Got it', kind: BtnKind.ghost, height: 48, onTap: () => Navigator.pop(ctx)),
@@ -570,12 +570,12 @@ class _Deadline extends StatelessWidget {
       _ when r.escalated && !r.safe => (
         Icons.report_rounded,
         C.redText,
-        '${r.reporter} says the snake is still there · flagged to campus security',
+        '${r.reporter} says the snake is still there · flagged to the hostel security guard',
       ),
       _ when r.overdue => (
         Icons.timer_off_outlined,
         C.redText,
-        'Overdue by ${mins(-r.dueIn)} · flagged to campus security',
+        'Overdue by ${mins(-r.dueIn)} · flagged to the hostel security guard',
       ),
       _ when r.stage == Stage.onSite => (
         r.locationVerified ? Icons.gps_fixed_rounded : Icons.gps_not_fixed_rounded,

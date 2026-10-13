@@ -180,7 +180,7 @@ const searchSpots = ['Drains', 'Bushes & grass', 'Under vehicles', 'Stairs & ste
 const cautionFor = Duration(hours: 24);
 
 /// Time the authority has to reach the spot before the report counts as
-/// overdue and is escalated to campus security.
+/// overdue and is escalated to the hostel security guard.
 const respondWithin = Duration(minutes: 15);
 
 /// "At the spot" is location-verified when the authority's phone is this close
@@ -234,7 +234,7 @@ class Report {
   /// The reporter's answer to "Is the area clear now?" (null: not answered).
   bool? reporterConfirmed;
 
-  /// Escalated to campus security because the reporter said the snake is still there.
+  /// Escalated to the hostel security guard because the reporter said the snake is still there.
   bool escalated;
 
   Report({
@@ -432,7 +432,7 @@ class AppState extends ChangeNotifier {
       time: DateTime.now().subtract(const Duration(minutes: 32)),
       pos: const LatLng(26.19016, 91.70140),
       covered: true,
-      // Seen but nobody went: overdue, so it's flagged to campus security.
+      // Seen but nobody went: overdue, so it's flagged to the hostel security guard.
       stage: Stage.seen,
       handler: AppState.kamengAuthority,
       seenAt: DateTime.now().subtract(const Duration(minutes: 29)),
@@ -780,7 +780,7 @@ class AppState extends ChangeNotifier {
   }
 
   /// Back to "Seen". When the reporter says the snake is still there, the
-  /// report is also escalated to campus security.
+  /// report is also escalated to the hostel security guard.
   void reopen(Report r, {bool byReporter = false}) {
     if (r.safe) safeThisWeek--;
     r.stage = Stage.seen;
