@@ -221,7 +221,11 @@ class Tag extends StatelessWidget {
   const Tag(this.text, {super.key, required this.fg, required this.bg});
 
   factory Tag.forReport(Report r) {
-    if (r.safe) return const Tag('SAFE', fg: C.greenText, bg: C.greenSoft);
+    if (r.safe) {
+      return r.outcome == Outcome.notFound
+          ? const Tag('NOT FOUND', fg: Color(0xFFFFC46B), bg: Color(0xFF2A1E0B))
+          : const Tag('SAFE', fg: C.greenText, bg: C.greenSoft);
+    }
     switch (r.venom) {
       case Venom.venomous:
         return const Tag('VENOMOUS', fg: C.redText, bg: C.redSoft);

@@ -157,15 +157,23 @@ enum ConsoleFilter {
 /// checks their phone's location, and resolving needs an outcome and a photo.
 enum Stage { reported, seen, onTheWay, onSite, resolved }
 
-/// What the authority found when resolving a report.
+/// What the authority found, picked with one tap (no writing needed).
 enum Outcome {
-  caught('Snake caught and released away from people'),
-  leftArea('Snake had left · area searched and cleared'),
-  notFound('Area searched · no snake found');
+  caught('Caught & moved', 'Snake caught and released away from people'),
+  rescuer('Rescuer took it', 'A snake rescuer caught it and took it away'),
+  leftArea('It went away', 'Snake left on its own · area checked'),
+  notFound('Not found', 'Area searched · snake not found');
 
-  final String label;
-  const Outcome(this.label);
+  /// Short tile label and the sentence students see.
+  final String short, label;
+  const Outcome(this.short, this.label);
 }
+
+/// Places the authority can tap to say where they searched.
+const searchSpots = ['Drains', 'Bushes & grass', 'Under vehicles', 'Stairs & steps', 'Inside the building', 'Walls & holes', 'Garbage area'];
+
+/// After "Not found", the pin stays on the map as a caution for this long.
+const cautionFor = Duration(hours: 24);
 
 /// Time the authority has to reach the spot before the report counts as
 /// overdue and is escalated to campus security.
@@ -213,6 +221,9 @@ class Report {
   String? proofPhoto;
   String resolveNote;
 
+  /// Where the authority searched (tapped from [searchSpots]).
+  List<String> searched;
+
   /// The reporter's answer to "Is the area clear now?" (null: not answered).
   bool? reporterConfirmed;
 
@@ -241,11 +252,19 @@ class Report {
     this.outcome,
     this.proofPhoto,
     this.resolveNote = '',
+    this.searched = const [],
     this.reporterConfirmed,
     this.escalated = false,
   }) : time = time ?? DateTime.now();
 
   bool get safe => stage == Stage.resolved;
+
+  /// Closed as "not found" recently: the snake may still be nearby, so the pin
+  /// stays as a caution and students are told to stay alert.
+  bool get caution => safe && outcome == Outcome.notFound && DateTime.now().difference(resolvedAt!) < cautionFor;
+
+  /// Time spent at the spot before closing, recorded automatically.
+  Duration? get timeAtSpot => onSiteAt != null && resolvedAt != null ? resolvedAt!.difference(onSiteAt!) : null;
   String get handlerName => handler ?? 'The $place authority';
   bool get locationVerified => onSiteMetres != null && onSiteMetres! <= onSiteRadiusMetres;
 
@@ -262,7 +281,7 @@ class Report {
     Stage.seen => 'Seen by $handlerName · not on the way yet',
     Stage.onTheWay => '$handlerName is on the way',
     Stage.onSite => '$handlerName is at the spot',
-    Stage.resolved => 'Checked and marked safe',
+    Stage.resolved => outcome == Outcome.notFound ? 'Searched · not found, stay alert' : 'Checked and marked safe',
   };
 
   Species? get sp => speciesId == null ? null : speciesById(speciesId!);
@@ -439,6 +458,7 @@ class AppState extends ChangeNotifier {
       onSiteMetres: 40,
       resolvedAt: DateTime.now().subtract(const Duration(minutes: 41)),
       outcome: Outcome.caught,
+      searched: const ['Under vehicles'],
       proofPhoto: 'assets/snakes/wolf.jpg',
       resolveNote: 'Guard caught it with the snake hook and released it in the green belt behind the hostel.',
       reporterConfirmed: true,
@@ -461,8 +481,7 @@ class AppState extends ChangeNotifier {
       onSiteMetres: 25,
       resolvedAt: DateTime.now().subtract(const Duration(minutes: 100)),
       outcome: Outcome.leftArea,
-      proofPhoto: 'assets/snakes/rat.jpg',
-      resolveNote: 'Checked under the steps and the drain with a torch. It had gone into the bushes behind Core 3.',
+      searched: const ['Stairs & steps', 'Drains'],
     ),
   ];
 
@@ -470,6 +489,9 @@ class AppState extends ChangeNotifier {
 
   // ---------- campus ----------
   List<Report> get openReports => reports.where((r) => !r.safe).toList();
+
+  /// Pins on the map: open reports plus recent "not found" cautions.
+  List<Report> get mapReports => reports.where((r) => !r.safe || r.caution).toList();
   int get activeCount => openReports.length;
   Report? get latestOpen {
     final o = openReports..sort((a, b) => b.time.compareTo(a.time));
@@ -551,10 +573,13 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Only possible at the spot, with an outcome and a photo as proof.
-  void resolve(Report r, {required Outcome outcome, required String proofPhoto, String note = ''}) {
+  /// Only possible at the spot. "Not found" needs at least one searched place.
+  /// The photo and written note are optional.
+  void resolve(Report r, {required Outcome outcome, List<String> searched = const [], String? proofPhoto, String note = ''}) {
     assert(r.stage == Stage.onSite, 'Reach the spot before resolving');
+    assert(outcome != Outcome.notFound || searched.isNotEmpty, 'Say where you searched');
     r.outcome = outcome;
+    r.searched = List.unmodifiable(searched);
     r.proofPhoto = proofPhoto;
     r.resolveNote = note.trim();
     r.resolvedAt = DateTime.now();
@@ -575,6 +600,7 @@ class AppState extends ChangeNotifier {
     r.outcome = null;
     r.proofPhoto = null;
     r.resolveNote = '';
+    r.searched = const [];
     r.reporterConfirmed = byReporter ? false : null;
     r.escalated = r.escalated || byReporter;
     notifyListeners();

@@ -20,9 +20,10 @@ void main() {
     s.arrive(r);
     expect(r.stage, Stage.onSite);
     expect(r.locationVerified, isTrue); // the demo location is beside Kameng
-    s.resolve(r, outcome: Outcome.notFound, proofPhoto: 'assets/snakes/keelback.jpg', note: ' Checked the drain. ');
+    s.resolve(r, outcome: Outcome.caught, note: ' Moved it to the green belt. '); // photo and note are optional
     expect(r.safe, isTrue);
-    expect(r.resolveNote, 'Checked the drain.');
+    expect(r.caution, isFalse);
+    expect(r.resolveNote, 'Moved it to the green belt.');
     expect(r.reporterConfirmed, isNull); // the reporter is asked next
     expect(s.hostelOpen, before - 1);
   });
@@ -125,5 +126,18 @@ void main() {
     s.setConsoleFilter(ConsoleFilter.nonVenomous);
     s.setConsoleFilter(ConsoleFilter.nonVenomous); // tap again: back to all
     expect(s.consoleFilter, ConsoleFilter.all);
+  });
+
+  test('"Not found" needs where they searched and keeps a caution pin', () {
+    final s = AppState();
+    final r = s.reports.firstWhere((r) => r.id == 'r1');
+    s.arrive(r);
+    expect(() => s.resolve(r, outcome: Outcome.notFound), throwsA(isA<AssertionError>()));
+    s.resolve(r, outcome: Outcome.notFound, searched: ['Drains', 'Under vehicles']);
+    expect(r.safe, isTrue);
+    expect(r.caution, isTrue);
+    expect(r.proofPhoto, isNull);
+    expect(s.mapReports, contains(r)); // still on the map as a caution
+    expect(s.openReports, isNot(contains(r)));
   });
 }

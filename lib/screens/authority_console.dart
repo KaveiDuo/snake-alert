@@ -475,7 +475,7 @@ class _Deadline extends StatelessWidget {
       _ when r.safe => (
         r.reporterConfirmed == false ? Icons.report_rounded : Icons.check_circle_outline_rounded,
         C.greenText,
-        'Resolved in ${mins(r.resolvedAt!.difference(r.time))} · ${switch (r.reporterConfirmed) {
+        '${r.outcome == Outcome.notFound ? 'Closed as not found' : 'Resolved'} in ${mins(r.resolvedAt!.difference(r.time))} · ${switch (r.reporterConfirmed) {
           true => '${r.reporter} confirmed it’s clear',
           false => '${r.reporter} disputed it',
           null => 'waiting for ${r.reporter} to confirm',
@@ -494,10 +494,14 @@ class _Deadline extends StatelessWidget {
   }
 }
 
-/// "Mark area safe": what happened, plus a photo from the spot as proof.
+/// Closing a report, by tapping only: what happened, where they checked, and
+/// optionally a photo or a written note. Arrival time and the location check
+/// are recorded automatically and shared with students as proof.
 Future<void> _resolveSheet(BuildContext context, Report r) async {
   Outcome? outcome;
+  final checked = <String>{};
   String? photo;
+  var writing = false;
   final note = TextEditingController();
   await showModalBottomSheet<void>(
     context: context,
@@ -511,7 +515,9 @@ Future<void> _resolveSheet(BuildContext context, Report r) async {
           if (x != null) set(() => photo = x.path);
         }
 
-        final ready = outcome != null && photo != null;
+        final notFound = outcome == Outcome.notFound;
+        final ready = outcome != null && (!notFound || checked.isNotEmpty);
+        final onSite = DateTime.now().difference(r.onSiteAt ?? DateTime.now());
         return Padding(
           padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
           child: SingleChildScrollView(
@@ -527,62 +533,79 @@ Future<void> _resolveSheet(BuildContext context, Report r) async {
                   ),
                 ),
                 const SizedBox(height: 14),
-                Text('Mark area safe', style: ft(20, w: 700)),
+                Text('What happened?', style: ft(21, w: 700)),
                 const SizedBox(height: 4),
-                Text(
-                  '${r.reporter} and students nearby will see what you found and your photo.',
-                  style: ft(13, color: C.muted, height: 1.4),
+                Text('Tap one. ${r.reporter} and students nearby will see it.', style: ft(13, color: C.muted, height: 1.4)),
+                const SizedBox(height: 14),
+                GridView.count(
+                  crossAxisCount: 2,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
+                  childAspectRatio: 1.45,
+                  children: [
+                    for (final o in Outcome.values)
+                      _OutcomeTile(o, selected: outcome == o, onTap: () => set(() => outcome = o)),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                Text('WHAT DID YOU FIND?', style: ft(11.5, w: 700, color: C.muted, ls: 1.2)),
-                const SizedBox(height: 8),
-                for (final o in Outcome.values)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Panel(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                      border: outcome == o ? C.green : C.line2,
-                      onTap: () => set(() => outcome = o),
-                      child: Row(
-                        children: [
-                          Icon(
-                            outcome == o ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded,
-                            size: 20,
-                            color: outcome == o ? C.green : C.muted,
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(child: Text(o.label, style: ft(14))),
-                        ],
-                      ),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    Text('WHERE DID YOU CHECK?', style: ft(11.5, w: 700, color: C.muted, ls: 1.2)),
+                    const SizedBox(width: 6),
+                    Text(
+                      notFound ? '· tap at least one' : '· optional',
+                      style: ft(11.5, w: 600, color: notFound && checked.isEmpty ? const Color(0xFFFFC46B) : C.faint),
                     ),
-                  ),
-                const SizedBox(height: 8),
-                Text('PHOTO FROM THE SPOT (REQUIRED)', style: ft(11.5, w: 700, color: C.muted, ls: 1.2)),
-                const SizedBox(height: 8),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final spot in searchSpots)
+                      FilterChip(
+                        label: Text(spot, style: ft(13.5, w: 600, color: checked.contains(spot) ? C.greenInk : C.sub)),
+                        selected: checked.contains(spot),
+                        showCheckmark: true,
+                        checkmarkColor: C.greenInk,
+                        selectedColor: C.green,
+                        backgroundColor: C.card2,
+                        side: BorderSide(color: checked.contains(spot) ? C.green : C.line2),
+                        shape: const StadiumBorder(),
+                        onSelected: (on) => set(() => on ? checked.add(spot) : checked.remove(spot)),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                Text('PHOTO · OPTIONAL', style: ft(11.5, w: 700, color: C.muted, ls: 1.2)),
+                const SizedBox(height: 10),
                 if (photo != null)
                   Row(
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: SizedBox(width: 72, height: 72, child: photoOf(photo!)),
+                        child: SizedBox(width: 64, height: 64, child: photoOf(photo!)),
                       ),
                       const SizedBox(width: 12),
                       Expanded(child: Text('Photo added', style: ft(14, w: 600, color: C.greenText))),
                       TextButton(
                         onPressed: () => set(() => photo = null),
-                        child: Text('Change', style: ft(13, w: 600, color: C.sub)),
+                        child: Text('Remove', style: ft(13, w: 600, color: C.sub)),
                       ),
                     ],
                   )
-                else ...[
+                else
                   Row(
                     children: [
                       Expanded(
                         child: Btn(
-                          'Take photo',
+                          'Camera',
                           kind: BtnKind.ghost,
                           icon: Icons.photo_camera_outlined,
-                          height: 46,
+                          height: 44,
                           onTap: () => pick(ImageSource.camera),
                         ),
                       ),
@@ -592,42 +615,105 @@ Future<void> _resolveSheet(BuildContext context, Report r) async {
                           'Gallery',
                           kind: BtnKind.ghost,
                           icon: Icons.photo_library_outlined,
-                          height: 46,
+                          height: 44,
                           onTap: () => pick(ImageSource.gallery),
                         ),
                       ),
                     ],
                   ),
+                if (photo == null)
                   Align(
                     alignment: Alignment.centerLeft,
                     child: TextButton(
                       onPressed: () => set(() => photo = r.sp?.photo ?? 'assets/snakes/wolf.jpg'),
-                      child: Text('Use a sample photo (demo)', style: ft(12.5, color: C.muted)),
+                      child: Text('Use a sample photo (demo)', style: ft(12.5, color: C.faint)),
                     ),
                   ),
-                ],
-                const SizedBox(height: 8),
-                TextField(
-                  controller: note,
-                  maxLines: 2,
-                  style: ft(14),
-                  decoration: InputDecoration(
-                    hintText: 'Add a note for students (optional)',
-                    hintStyle: ft(14, color: C.muted),
-                    filled: true,
-                    fillColor: C.card2,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                if (writing)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: TextField(
+                      controller: note,
+                      maxLines: 2,
+                      autofocus: true,
+                      style: ft(14),
+                      decoration: InputDecoration(
+                        hintText: 'Write a note for students',
+                        hintStyle: ft(14, color: C.muted),
+                        filled: true,
+                        fillColor: C.card2,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                      ),
+                    ),
+                  )
+                else
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      onPressed: () => set(() => writing = true),
+                      icon: const Icon(Icons.edit_outlined, size: 16, color: C.muted),
+                      label: Text('Write a note (optional)', style: ft(13, color: C.muted)),
+                    ),
+                  ),
+                const SizedBox(height: 10),
+                // Shared automatically, so nothing has to be typed as proof.
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF151515),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: C.line),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        r.locationVerified ? Icons.gps_fixed_rounded : Icons.gps_not_fixed_rounded,
+                        size: 18,
+                        color: r.locationVerified ? C.greenText : const Color(0xFFFFC46B),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          '${r.locationVerified ? 'Location verified' : 'Location not verified'} · at the spot for ${mins(onSite)}. '
+                          'Students see this automatically.',
+                          style: ft(12.5, color: C.muted, height: 1.4),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                if (notFound) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    'The pin stays on the map for 24 hours as a caution, and students are told to stay alert.',
+                    style: ft(12.5, color: const Color(0xFFFFC46B), height: 1.4),
+                  ),
+                ],
+                const SizedBox(height: 14),
                 Btn(
-                  ready ? 'Mark area safe' : (outcome == null ? 'Choose what you found' : 'Add a photo to continue'),
-                  icon: ready ? Icons.verified_rounded : null,
+                  switch (outcome) {
+                    null => 'Tap what happened',
+                    Outcome.notFound when checked.isEmpty => 'Tap where you checked',
+                    Outcome.notFound => 'Close as not found',
+                    _ => 'Mark area safe',
+                  },
+                  icon: ready ? (notFound ? Icons.search_off_rounded : Icons.verified_rounded) : null,
                   onTap: ready
                       ? () {
-                          AppScope.read(context).resolve(r, outcome: outcome!, proofPhoto: photo!, note: note.text);
+                          AppScope.read(context).resolve(
+                            r,
+                            outcome: outcome!,
+                            searched: [for (final spot in searchSpots) if (checked.contains(spot)) spot],
+                            proofPhoto: photo,
+                            note: note.text,
+                          );
                           Navigator.pop(ctx);
-                          toast(context, 'Marked safe · ${r.reporter} has been asked to confirm');
+                          toast(
+                            context,
+                            notFound
+                                ? 'Closed as not found · students told to stay alert'
+                                : 'Marked safe · ${r.reporter} has been asked to confirm',
+                          );
                         }
                       : null,
                 ),
@@ -638,6 +724,58 @@ Future<void> _resolveSheet(BuildContext context, Report r) async {
       },
     ),
   );
+}
+
+/// One big tap target for an outcome: icon, short label, one line of help.
+class _OutcomeTile extends StatelessWidget {
+  final Outcome o;
+  final bool selected;
+  final VoidCallback onTap;
+  const _OutcomeTile(this.o, {required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final (IconData icon, Color color, String help) = switch (o) {
+      Outcome.caught => (Icons.back_hand_outlined, C.green, 'Released far from people'),
+      Outcome.rescuer => (Icons.health_and_safety_outlined, C.green, 'A snake rescuer took it'),
+      Outcome.leftArea => (Icons.directions_run_rounded, C.green, 'Left on its own'),
+      Outcome.notFound => (Icons.search_off_rounded, const Color(0xFFFFC46B), 'Searched, couldn’t find it'),
+    };
+    return Material(
+      color: selected ? Color.alphaBlend(color.withValues(alpha: 0.14), C.card2) : C.card2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: selected ? color : C.line2, width: selected ? 2 : 1),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(icon, size: 26, color: color),
+                  const Spacer(),
+                  if (selected) Icon(Icons.check_circle_rounded, size: 20, color: color),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(o.short, style: ft(14.5, w: 700)),
+                  Text(help, style: ft(11.5, color: C.muted), maxLines: 1, overflow: TextOverflow.ellipsis),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class AuthorityProfile extends StatelessWidget {

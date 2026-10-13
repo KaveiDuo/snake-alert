@@ -228,10 +228,12 @@ class _Response extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Is the area clear now?', style: ft(15.5, w: 700)),
+                  Text(r.outcome == Outcome.notFound ? 'Have you seen the snake again?' : 'Is the area clear now?', style: ft(15.5, w: 700)),
                   const SizedBox(height: 4),
                   Text(
-                    'You reported this snake. Tell us if it’s really gone. If it’s still there, the report reopens and campus security is alerted.',
+                    r.outcome == Outcome.notFound
+                        ? 'The authority searched but couldn’t find it. If you see it again, tap “Snake still here”: the report reopens and campus security is alerted.'
+                        : 'You reported this snake. Tell us if it’s really gone. If it’s still there, the report reopens and campus security is alerted.',
                     style: ft(12.5, color: C.muted, height: 1.4),
                   ),
                   const SizedBox(height: 12),
@@ -239,7 +241,7 @@ class _Response extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Btn(
-                          'Yes, it’s clear',
+                          r.outcome == Outcome.notFound ? 'Not seen again' : 'Yes, it’s clear',
                           height: 46,
                           onTap: () {
                             s.confirmSafe(r);
@@ -269,7 +271,10 @@ class _Response extends StatelessWidget {
               children: [
                 const Icon(Icons.check_circle_rounded, size: 16, color: C.greenText),
                 const SizedBox(width: 6),
-                Text('You confirmed the area is clear', style: ft(13, w: 600, color: C.greenText)),
+                Text(
+                  r.outcome == Outcome.notFound ? 'You haven’t seen it again' : 'You confirmed the area is clear',
+                  style: ft(13, w: 600, color: C.greenText),
+                ),
               ],
             ),
         ],

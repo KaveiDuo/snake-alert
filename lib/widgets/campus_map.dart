@@ -380,7 +380,8 @@ class CampusMapState extends State<CampusMap> with TickerProviderStateMixin {
                   ),
                 ),
               ),
-            LocationPin(color: c, width: _pinW),
+            // A recent "not found" stays as a faded caution pin.
+            Opacity(opacity: r.caution ? 0.7 : 1, child: LocationPin(color: c, width: _pinW)),
           ],
         );
       },

@@ -22,9 +22,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         _Item(
           'SNAKE ALERT',
           r.time,
-          r.safe ? 'Area marked safe' : (r.venom == Venom.venomous ? 'Venomous snake reported' : 'Snake sighting reported'),
           r.safe
-              ? '${r.where} has been checked and marked safe. Safe to pass.'
+              ? (r.outcome == Outcome.notFound ? 'Snake not found after search' : 'Area marked safe')
+              : (r.venom == Venom.venomous ? 'Venomous snake reported' : 'Snake sighting reported'),
+          r.safe
+              ? (r.outcome == Outcome.notFound
+                    ? '${r.where} was searched but the snake wasn’t found. Stay alert nearby.'
+                    : '${r.where} has been checked and marked safe. Safe to pass.')
               : '${r.title} spotted near ${r.where}. Avoid the area until it is marked safe.',
           report: r,
         ),
@@ -35,7 +39,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           if (r.onTheWayAt != null) (r.onTheWayAt!, 'Authority on the way', '${r.handlerName} is heading to ${r.where}.'),
           if (r.onSiteAt != null) (r.onSiteAt!, 'Authority at the spot', '${r.handlerName} has reached ${r.where}.'),
           if (r.safe && r.reporterConfirmed == null)
-            (r.resolvedAt!, 'Is the area clear now?', '${r.where} was marked safe. Tap to confirm, or tell us if the snake is still there.'),
+            r.outcome == Outcome.notFound
+                ? (r.resolvedAt!, 'Have you seen the snake again?', 'It wasn’t found at ${r.where}. Tap if it’s still there.')
+                : (r.resolvedAt!, 'Is the area clear now?', '${r.where} was marked safe. Tap to confirm, or tell us if the snake is still there.'),
         ])
           _Item('SNAKE ALERT', at, title, body, report: r),
       _Item(

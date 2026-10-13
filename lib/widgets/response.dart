@@ -43,6 +43,7 @@ class StatusChip extends StatelessWidget {
             Stage.seen => (Icons.done_all_rounded, 'SEEN', _amberText, const Color(0xFF2A1E0B)),
             Stage.onTheWay => (Icons.directions_walk_rounded, 'ON THE WAY', const Color(0xFF8AB4FF), const Color(0xFF142033)),
             Stage.onSite => (Icons.place_rounded, 'AT THE SPOT', const Color(0xFF8AB4FF), const Color(0xFF142033)),
+            Stage.resolved when r.outcome == Outcome.notFound => (Icons.search_off_rounded, 'NOT FOUND', _amberText, const Color(0xFF2A1E0B)),
             Stage.resolved => (Icons.verified_rounded, 'SAFE', C.greenText, C.greenSoft),
           };
     return Container(
@@ -137,11 +138,19 @@ class ResponseTimeline extends StatelessWidget {
         warn: r.onSiteAt == null && r.overdue,
         badge: r.onSiteAt != null && r.locationVerified ? Icons.gps_fixed_rounded : null,
       ),
-      _StepData(
-        r.safe ? 'Marked safe' : 'Area checked and marked safe',
-        r.safe ? '${clock(r.resolvedAt!)} · ${r.outcome!.label}' : 'Needs a photo from the spot as proof',
-        r.safe,
-      ),
+      if (r.safe && r.outcome == Outcome.notFound)
+        _StepData(
+          'Searched · snake not found',
+          '${clock(r.resolvedAt!)} · it may still be nearby, so stay alert here for the next ${cautionFor.inHours} hours',
+          true,
+          caution: true,
+        )
+      else
+        _StepData(
+          r.safe ? 'Marked safe' : 'Area checked and marked safe',
+          r.safe ? '${clock(r.resolvedAt!)} · ${r.outcome!.label}' : 'After checking the spot',
+          r.safe,
+        ),
     ];
     final current = steps.indexWhere((s) => !s.done);
     return Column(
@@ -154,39 +163,63 @@ class ResponseTimeline extends StatelessWidget {
             last: i == steps.length - 1,
             nextDone: i + 1 < steps.length && steps[i + 1].done,
           ),
-        if (r.safe && r.proofPhoto != null) ...[
+        if (r.safe) ...[
           const SizedBox(height: 2),
-          Padding(
-            padding: const EdgeInsets.only(left: 26),
-            child: Panel(
-              padding: const EdgeInsets.all(10),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: SizedBox(width: 64, height: 64, child: photoOf(r.proofPhoto!)),
+          Padding(padding: const EdgeInsets.only(left: 26), child: _Proof(r)),
+        ],
+      ],
+    );
+  }
+}
+
+/// What the authority recorded when closing: where they checked, how long
+/// they were at the spot, and any photo or note.
+class _Proof extends StatelessWidget {
+  final Report r;
+  const _Proof(this.r);
+
+  @override
+  Widget build(BuildContext context) {
+    Widget line(IconData icon, String text) => Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 15, color: C.muted),
+          const SizedBox(width: 8),
+          Expanded(child: Text(text, style: ft(12.5, color: C.sub, height: 1.35))),
+        ],
+      ),
+    );
+    final t = r.timeAtSpot;
+    return Panel(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (r.proofPhoto != null) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: SizedBox(width: 64, height: 64, child: photoOf(r.proofPhoto!)),
+            ),
+            const SizedBox(width: 12),
+          ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (r.searched.isNotEmpty) line(Icons.search_rounded, 'Checked: ${r.searched.join(', ')}'),
+                if (t != null)
+                  line(
+                    r.locationVerified ? Icons.gps_fixed_rounded : Icons.timer_outlined,
+                    'At the spot for ${mins(t)}${r.locationVerified ? ' · location verified' : ''}',
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Proof from the spot', style: ft(13, w: 600)),
-                        const SizedBox(height: 3),
-                        Text(
-                          r.resolveNote.isEmpty ? 'Photo taken by $who when resolving.' : '“${r.resolveNote}”',
-                          style: ft(12, color: C.muted, height: 1.4),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                if (r.resolveNote.isNotEmpty) line(Icons.chat_bubble_outline_rounded, '“${r.resolveNote}”'),
+              ],
             ),
           ),
         ],
-      ],
+      ),
     );
   }
 }
@@ -195,8 +228,9 @@ class _StepData {
   final String title, sub;
   final bool done;
   final bool warn;
+  final bool caution;
   final IconData? badge;
-  _StepData(this.title, this.sub, this.done, {this.warn = false, this.badge});
+  _StepData(this.title, this.sub, this.done, {this.warn = false, this.caution = false, this.badge});
 }
 
 class _TimelineRow extends StatelessWidget {
@@ -206,8 +240,8 @@ class _TimelineRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dot = s.done ? C.green : (s.warn ? C.red : (isCurrent ? C.amber : const Color(0xFF444444)));
-    final titleColor = s.done ? C.text : (s.warn ? C.redText : (isCurrent ? _amberText : C.muted));
+    final dot = s.caution ? C.amber : (s.done ? C.green : (s.warn ? C.red : (isCurrent ? C.amber : const Color(0xFF444444))));
+    final titleColor = s.caution ? _amberText : (s.done ? C.text : (s.warn ? C.redText : (isCurrent ? _amberText : C.muted)));
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
