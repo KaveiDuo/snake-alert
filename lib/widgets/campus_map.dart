@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart' hide Path;
 
 import '../data/app_state.dart';
 import '../data/kv_buildings.dart';
+import '../data/pitches.dart';
 import '../data/quarters_buildings.dart';
 import '../data/zones.dart';
 import '../theme.dart';
@@ -225,6 +226,14 @@ class CampusMapState extends State<CampusMap> with TickerProviderStateMixin {
                   // same style as the map's other buildings.
                   PolygonLayer(
                     polygons: [
+                      // Sports pitches in soft light green instead of the tiles' strong teal.
+                      for (final pts in pitchShapes)
+                        Polygon(
+                          points: pts,
+                          color: widget.dark ? const Color(0xFF1E3326) : const Color(0xFFDFFCE2),
+                          borderColor: widget.dark ? const Color(0xFF2F5A3C) : const Color(0xFFADEBB3),
+                          borderStrokeWidth: 1.2,
+                        ),
                       // Faculty & staff quarters: a little more see-through than KV.
                       for (final pts in quartersBuildingShapes)
                         Polygon(
