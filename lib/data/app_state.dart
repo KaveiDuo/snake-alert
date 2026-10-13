@@ -636,7 +636,7 @@ class AppState extends ChangeNotifier {
       place: 'Kameng Hostel',
       spot: 'near the garbage bins',
       note: 'Something long slid behind the garbage bins.',
-      reporter: 'Meera K.',
+      reporter: 'Ananya S.',
       time: DateTime.now().subtract(const Duration(minutes: 120)),
       pos: const LatLng(26.1906, 91.7019),
       covered: true,

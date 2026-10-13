@@ -66,6 +66,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       ),
     ]..sort((a, b) => b.time.compareTo(a.time));
     final shown = cards.where((c) => _filter == 'All' || c.source == _filter.toUpperCase()).toList();
+    // Sections, so the student can tell their own reports from everyone else's.
+    final sections = [
+      ('YOUR REPORTS', shown.where((c) => c.report != null && s.isMine(c.report!)).toList()),
+      ('ALERTS NEAR YOU', shown.where((c) => c.report != null && !s.isMine(c.report!)).toList()),
+      ('OTHER', shown.where((c) => c.report == null).toList()),
+    ];
 
     return DarkPage(
       header: const AppHeader('Notifications'),
@@ -98,11 +104,32 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
               children: [
-                for (final c in shown)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: c.report == null ? _plain(c) : _reportCard(context, s, c.report!),
-                  ),
+                for (final (title, list) in sections)
+                  if (list.isNotEmpty) ...[
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(2, 6, 0, 10),
+                      child: Row(
+                        children: [
+                          if (title == 'YOUR REPORTS') ...[
+                            const Icon(Icons.person_rounded, size: 15, color: Color(0xFF8AB4FF)),
+                            const SizedBox(width: 6),
+                          ],
+                          Text(
+                            title,
+                            style: ft(11.5, w: 700, color: title == 'YOUR REPORTS' ? const Color(0xFF8AB4FF) : C.muted, ls: 1.2),
+                          ),
+                          const SizedBox(width: 6),
+                          Text('${list.length}', style: ft(11.5, w: 600, color: C.faint)),
+                        ],
+                      ),
+                    ),
+                    for (final c in list)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: c.report == null ? _plain(c) : _reportCard(context, s, c.report!),
+                      ),
+                    const SizedBox(height: 8),
+                  ],
                 const SizedBox(height: 6),
                 Text(
                   'Snake Alert alerts can be turned off in Profile › Notification preferences.',
@@ -160,8 +187,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               ),
             ),
           );
+    final mine = s.isMine(r);
     return Panel(
       padding: EdgeInsets.zero,
+      // The student's own reports get a blue border and tint.
+      color: mine ? const Color(0xFF141B27) : C.card,
+      border: mine ? const Color(0xFF2E4A78) : null,
       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SightingDetailScreen(report: r))),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 10, 12),
