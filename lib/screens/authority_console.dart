@@ -451,6 +451,7 @@ class _ReportCardState extends State<_ReportCard> {
                       Text('Reported by ${r.reporter} · ${ago(r.time)}', style: ft(12, color: const Color(0xFF7A7A7A))),
                       const SizedBox(height: 14),
                       StageBar(r),
+                      const SizedBox(height: 8),
                       Align(
                         alignment: Alignment.centerLeft,
                         child: TextButton(
