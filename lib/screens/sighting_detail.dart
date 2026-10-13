@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../data/app_state.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/response.dart';
 import 'sos.dart';
 
 class SightingDetailScreen extends StatelessWidget {
@@ -96,21 +98,20 @@ class SightingDetailScreen extends StatelessWidget {
                     ),
                   ),
                 const SizedBox(height: 20),
-                Text('STATUS', style: ft(11.5, w: 700, color: C.muted, ls: 1.2)),
-                const SizedBox(height: 12),
-                _Step('Reported', '${r.reporter} · ${ago(r.time)}', C.green, true),
-                _Step('Students nearby notified', '412 students within 500 m', C.green, true),
                 if (r.covered)
-                  r.safe
-                      ? _Step('Marked safe by the ${r.place} authority', 'Pin removed for everyone · reporter notified', C.green, false)
-                      : _Step('Sent to the ${r.place} authority', 'Awaiting their reply', C.amber, false)
-                else
+                  LiveClock(builder: (context) => _Response(r))
+                else ...[
+                  Text('STATUS', style: ft(11.5, w: 700, color: C.muted, ls: 1.2)),
+                  const SizedBox(height: 12),
+                  _Step('Reported', '${r.reporter} · ${ago(r.time)}', C.green, true),
+                  _Step('Students nearby notified', '412 students within 500 m', C.green, true),
                   _Step(
                     'Open area · pin only, no authority',
                     r.safe ? 'Marked safe' : 'The pin clears itself after 2–3 days',
                     r.safe ? C.green : C.amber,
                     false,
                   ),
+                ],
                 const SizedBox(height: 16),
                 Container(
                   padding: const EdgeInsets.all(14),
@@ -159,6 +160,125 @@ class SightingDetailScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// How the responsible authority is handling the report, step by step, with
+/// the overdue warning, a call button and — for the reporter — the final
+/// "Is the area clear now?" check.
+class _Response extends StatelessWidget {
+  final Report r;
+  const _Response(this.r);
+
+  @override
+  Widget build(BuildContext context) {
+    final s = AppScope.read(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text('AUTHORITY RESPONSE', style: ft(11.5, w: 700, color: C.muted, ls: 1.2)),
+            const Spacer(),
+            StatusChip(r),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (r.flagged) ...[
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: C.redSoft,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xFF5A2424)),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.report_rounded, color: C.redText, size: 18),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    r.escalated
+                        ? 'The reporter says the snake is still there. Campus security has been alerted.'
+                        : 'Nobody has reached the spot within ${respondWithin.inMinutes} minutes. Campus security has been alerted.',
+                    style: ft(13, color: const Color(0xFFF2B8B5), height: 1.4),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+        ],
+        ResponseTimeline(r),
+        if (r.safe && s.isMine(r)) ...[
+          const SizedBox(height: 12),
+          if (r.reporterConfirmed == null)
+            Panel(
+              border: const Color(0xFF245A36),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Is the area clear now?', style: ft(15.5, w: 700)),
+                  const SizedBox(height: 4),
+                  Text(
+                    'You reported this snake. Tell us if it’s really gone. If it’s still there, the report reopens and campus security is alerted.',
+                    style: ft(12.5, color: C.muted, height: 1.4),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Btn(
+                          'Yes, it’s clear',
+                          height: 46,
+                          onTap: () {
+                            s.confirmSafe(r);
+                            toast(context, 'Thanks for confirming');
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Btn(
+                          'Snake still here',
+                          kind: BtnKind.danger,
+                          height: 46,
+                          onTap: () {
+                            s.reopen(r, byReporter: true);
+                            toast(context, 'Report reopened · campus security alerted');
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            )
+          else if (r.reporterConfirmed == true)
+            Row(
+              children: [
+                const Icon(Icons.check_circle_rounded, size: 16, color: C.greenText),
+                const SizedBox(width: 6),
+                Text('You confirmed the area is clear', style: ft(13, w: 600, color: C.greenText)),
+              ],
+            ),
+        ],
+        if (!r.safe) ...[
+          const SizedBox(height: 12),
+          Btn(
+            'Call the authority now',
+            icon: Icons.call_rounded,
+            height: 48,
+            onTap: () async {
+              if (!await launchUrl(Uri.parse('tel:$authorityPhone')) && context.mounted) {
+                toast(context, 'Could not open the dialler');
+              }
+            },
+          ),
+        ],
+      ],
     );
   }
 }

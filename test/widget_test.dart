@@ -11,11 +11,41 @@ void main() {
     expect(find.text('Hostel authority sign-in'), findsOneWidget);
   });
 
-  test('Marking a report safe lowers the open count', () {
+  test('Marking safe takes the full response: on the way, at the spot, then outcome and photo', () {
     final s = AppState();
+    final r = s.hostelReports.firstWhere((r) => r.stage == Stage.seen);
     final before = s.hostelOpen;
-    s.markSafe(s.hostelReports.firstWhere((r) => !r.safe), true);
+    s.setOnTheWay(r);
+    expect(r.stage, Stage.onTheWay);
+    s.arrive(r);
+    expect(r.stage, Stage.onSite);
+    expect(r.locationVerified, isTrue); // the demo location is beside Kameng
+    s.resolve(r, outcome: Outcome.notFound, proofPhoto: 'assets/snakes/keelback.jpg', note: ' Checked the drain. ');
+    expect(r.safe, isTrue);
+    expect(r.resolveNote, 'Checked the drain.');
+    expect(r.reporterConfirmed, isNull); // the reporter is asked next
     expect(s.hostelOpen, before - 1);
+  });
+
+  test('Opening the console marks reports seen; overdue and disputed reports are flagged', () {
+    final s = AppState();
+    s.startDraft(at: s.locFromMap(const LatLng(26.19043, 91.70156)));
+    final mine = s.submit();
+    expect(mine.stage, Stage.reported);
+    s.markSeen(s.hostelReports);
+    expect(mine.stage, Stage.seen);
+    expect(mine.seenAt, isNotNull);
+    expect(mine.flagged, isFalse);
+
+    // Seen 30 min ago but nobody went: overdue.
+    expect(s.reports.firstWhere((r) => r.id == 'r2').flagged, isTrue);
+
+    // The reporter says the snake is still there: reopened and escalated.
+    final done = s.reports.firstWhere((r) => r.id == 'r4');
+    s.reopen(done, byReporter: true);
+    expect(done.safe, isFalse);
+    expect(done.proofPhoto, isNull);
+    expect(done.flagged, isTrue);
   });
 
   test('Pins on a hostel or campus building go to its authority; open areas go to nobody', () {

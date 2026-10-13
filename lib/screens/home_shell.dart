@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../data/app_state.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/response.dart';
 import 'notifications.dart';
 import 'profile.dart';
 import 'snake_watch.dart';
@@ -224,9 +225,26 @@ class _HomeTab extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '${latest.spot.isEmpty ? latest.place : latest.spot} · ${ago(latest.time)} · not yet cleared',
+                              '${latest.spot.isEmpty ? latest.place : latest.spot} · ${ago(latest.time)}',
                               style: ft(13, color: C.muted),
                             ),
+                            if (latest.covered) ...[
+                              const SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  StatusChip(latest),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      latest.flagged ? 'Campus security alerted' : latest.statusLine,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: ft(12.5, w: 600, color: latest.flagged ? C.redText : C.sub),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ] else
                             Text('No active reports on campus', style: ft(15, color: C.muted)),
                         ],

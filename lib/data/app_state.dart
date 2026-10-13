@@ -128,6 +128,30 @@ const authorityPhone = '8277992838';
 
 enum Role { none, student, authority }
 
+/// How far the responsible authority has got with a report. Every step is
+/// timestamped and shown to students, so a report can't just be clicked away:
+/// "Seen" is recorded when the authority opens their console, "At the spot"
+/// checks their phone's location, and resolving needs an outcome and a photo.
+enum Stage { reported, seen, onTheWay, onSite, resolved }
+
+/// What the authority found when resolving a report.
+enum Outcome {
+  caught('Snake caught and released away from people'),
+  leftArea('Snake had left · area searched and cleared'),
+  notFound('Area searched · no snake found');
+
+  final String label;
+  const Outcome(this.label);
+}
+
+/// Time the authority has to reach the spot before the report counts as
+/// overdue and is escalated to campus security.
+const respondWithin = Duration(minutes: 15);
+
+/// "At the spot" is location-verified when the authority's phone is this close
+/// to the reported pin.
+const onSiteRadiusMetres = 200.0;
+
 class Loc {
   final String name;
   final String source;
@@ -152,7 +176,25 @@ class Report {
   final LatLng pos;
   final bool covered;
   final String? photoPath;
-  bool safe;
+
+  // Response by the responsible authority (see [Stage]).
+  Stage stage;
+  DateTime? seenAt, onTheWayAt, onSiteAt, resolvedAt;
+
+  /// Who is handling it; null means "The [place] authority".
+  String? handler;
+
+  /// How far the authority's phone was from the pin when they marked arrival.
+  double? onSiteMetres;
+  Outcome? outcome;
+  String? proofPhoto;
+  String resolveNote;
+
+  /// The reporter's answer to "Is the area clear now?" (null: not answered).
+  bool? reporterConfirmed;
+
+  /// Escalated to campus security because the reporter said the snake is still there.
+  bool escalated;
 
   Report({
     required this.id,
@@ -166,14 +208,53 @@ class Report {
     this.reporter = 'Ananya S.',
     DateTime? time,
     this.photoPath,
-    this.safe = false,
+    this.stage = Stage.reported,
+    this.seenAt,
+    this.onTheWayAt,
+    this.onSiteAt,
+    this.resolvedAt,
+    this.handler,
+    this.onSiteMetres,
+    this.outcome,
+    this.proofPhoto,
+    this.resolveNote = '',
+    this.reporterConfirmed,
+    this.escalated = false,
   }) : time = time ?? DateTime.now();
+
+  bool get safe => stage == Stage.resolved;
+  String get handlerName => handler ?? 'The $place authority';
+  bool get locationVerified => onSiteMetres != null && onSiteMetres! <= onSiteRadiusMetres;
+
+  /// Not reached the spot within [respondWithin].
+  bool get overdue => covered && stage.index < Stage.onSite.index && DateTime.now().difference(time) > respondWithin;
+  bool get flagged => overdue || (escalated && !safe);
+
+  /// Time left to reach the spot (negative once overdue).
+  Duration get dueIn => respondWithin - DateTime.now().difference(time);
+
+  /// One line for students on how the response is going.
+  String get statusLine => switch (stage) {
+    Stage.reported => 'Waiting for the authority to open it',
+    Stage.seen => 'Seen by $handlerName · not on the way yet',
+    Stage.onTheWay => '$handlerName is on the way',
+    Stage.onSite => '$handlerName is at the spot',
+    Stage.resolved => 'Checked and marked safe',
+  };
 
   Species? get sp => speciesId == null ? null : speciesById(speciesId!);
   String get title => sp?.name ?? (venom == Venom.nonVenomous ? 'Non-venomous snake' : 'Unidentified snake');
   String get where => spot.isEmpty ? place : '$place · $spot';
   bool get treatAsVenomous => venom != Venom.nonVenomous;
 }
+
+/// "9:41 AM" style clock time.
+String clock(DateTime t) {
+  final h = t.hour % 12 == 0 ? 12 : t.hour % 12;
+  return '$h:${t.minute.toString().padLeft(2, '0')} ${t.hour < 12 ? 'AM' : 'PM'}';
+}
+
+String mins(Duration d) => d.inMinutes < 1 ? 'under a minute' : '${d.inMinutes} min';
 
 String ago(DateTime t) {
   final d = DateTime.now().difference(t);
@@ -203,6 +284,7 @@ class AppState extends ChangeNotifier {
   bool mapDark = false; // light map first; the moon button switches to dark
   bool filterOpenOnly = false;
   final String authorityHostel = 'Kameng Hostel';
+  static const kamengAuthority = 'Dr. P. Saikia';
   final String studentName = 'Ananya Sharma';
   final String studentEmail = '210102043@iitg.ac.in';
 
@@ -282,6 +364,10 @@ class AppState extends ChangeNotifier {
       time: DateTime.now().subtract(const Duration(minutes: 9)),
       pos: const LatLng(26.19068, 91.70186),
       covered: true,
+      stage: Stage.onTheWay,
+      handler: AppState.kamengAuthority,
+      seenAt: DateTime.now().subtract(const Duration(minutes: 8)),
+      onTheWayAt: DateTime.now().subtract(const Duration(minutes: 6)),
     ),
     Report(
       id: 'r2',
@@ -294,6 +380,10 @@ class AppState extends ChangeNotifier {
       time: DateTime.now().subtract(const Duration(minutes: 32)),
       pos: const LatLng(26.19016, 91.70140),
       covered: true,
+      // Seen but nobody went: overdue, so it's flagged to campus security.
+      stage: Stage.seen,
+      handler: AppState.kamengAuthority,
+      seenAt: DateTime.now().subtract(const Duration(minutes: 29)),
     ),
     Report(
       id: 'r3',
@@ -316,7 +406,17 @@ class AppState extends ChangeNotifier {
       time: DateTime.now().subtract(const Duration(hours: 1)),
       pos: const LatLng(26.19080, 91.70128),
       covered: true,
-      safe: true,
+      stage: Stage.resolved,
+      handler: AppState.kamengAuthority,
+      seenAt: DateTime.now().subtract(const Duration(minutes: 58)),
+      onTheWayAt: DateTime.now().subtract(const Duration(minutes: 56)),
+      onSiteAt: DateTime.now().subtract(const Duration(minutes: 49)),
+      onSiteMetres: 40,
+      resolvedAt: DateTime.now().subtract(const Duration(minutes: 41)),
+      outcome: Outcome.caught,
+      proofPhoto: 'assets/snakes/wolf.jpg',
+      resolveNote: 'Guard caught it with the snake hook and released it in the green belt behind the hostel.',
+      reporterConfirmed: true,
     ),
     Report(
       id: 'r5',
@@ -329,7 +429,15 @@ class AppState extends ChangeNotifier {
       time: DateTime.now().subtract(const Duration(hours: 2)),
       pos: const LatLng(26.18590, 91.69060),
       covered: true,
-      safe: true,
+      stage: Stage.resolved,
+      seenAt: DateTime.now().subtract(const Duration(minutes: 117)),
+      onTheWayAt: DateTime.now().subtract(const Duration(minutes: 115)),
+      onSiteAt: DateTime.now().subtract(const Duration(minutes: 108)),
+      onSiteMetres: 25,
+      resolvedAt: DateTime.now().subtract(const Duration(minutes: 100)),
+      outcome: Outcome.leftArea,
+      proofPhoto: 'assets/snakes/rat.jpg',
+      resolveNote: 'Checked under the steps and the drain with a torch. It had gone into the bushes behind Core 3.',
     ),
   ];
 
@@ -349,6 +457,15 @@ class AppState extends ChangeNotifier {
   List<Report> get hostelReports =>
       reports.where((r) => r.covered && r.place == authorityHostel).toList()..sort((a, b) => b.time.compareTo(a.time));
   int get hostelOpen => hostelReports.where((r) => !r.safe).length;
+  int get hostelFlagged => hostelReports.where((r) => r.flagged).length;
+
+  /// Average time from report to reaching the spot, for this hostel.
+  Duration? get avgArrival {
+    final arrived = hostelReports.where((r) => r.onSiteAt != null).toList();
+    if (arrived.isEmpty) return null;
+    final total = arrived.fold<int>(0, (a, r) => a + r.onSiteAt!.difference(r.time).inSeconds);
+    return Duration(seconds: total ~/ arrived.length);
+  }
   int safeThisWeek = 5;
 
   void setRole(Role r) {
@@ -366,11 +483,77 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void markSafe(Report r, bool safe) {
-    r.safe = safe;
-    safeThisWeek += safe ? 1 : -1;
+  // ---------- response steps ----------
+
+  /// Recorded when the authority opens their console, so the reporter knows
+  /// the report has been read.
+  void markSeen(Iterable<Report> rs) {
+    var changed = false;
+    for (final r in rs) {
+      if (r.stage == Stage.reported) {
+        r.stage = Stage.seen;
+        r.seenAt = DateTime.now();
+        changed = true;
+      }
+    }
+    if (changed) notifyListeners();
+  }
+
+  void setOnTheWay(Report r) {
+    final now = DateTime.now();
+    r.seenAt ??= now;
+    r.onTheWayAt = now;
+    r.stage = Stage.onTheWay;
     notifyListeners();
   }
+
+  /// Marks arrival and records how far the authority's phone is from the pin.
+  void arrive(Report r) {
+    final now = DateTime.now();
+    r.seenAt ??= now;
+    r.onTheWayAt ??= now;
+    r.onSiteAt = now;
+    r.onSiteMetres = metresFromYou(r.pos);
+    r.stage = Stage.onSite;
+    notifyListeners();
+  }
+
+  /// Only possible at the spot, with an outcome and a photo as proof.
+  void resolve(Report r, {required Outcome outcome, required String proofPhoto, String note = ''}) {
+    assert(r.stage == Stage.onSite, 'Reach the spot before resolving');
+    r.outcome = outcome;
+    r.proofPhoto = proofPhoto;
+    r.resolveNote = note.trim();
+    r.resolvedAt = DateTime.now();
+    r.reporterConfirmed = null;
+    r.escalated = false;
+    r.stage = Stage.resolved;
+    safeThisWeek++;
+    notifyListeners();
+  }
+
+  /// Back to "Seen". When the reporter says the snake is still there, the
+  /// report is also escalated to campus security.
+  void reopen(Report r, {bool byReporter = false}) {
+    if (r.safe) safeThisWeek--;
+    r.stage = Stage.seen;
+    r.onTheWayAt = r.onSiteAt = r.resolvedAt = null;
+    r.onSiteMetres = null;
+    r.outcome = null;
+    r.proofPhoto = null;
+    r.resolveNote = '';
+    r.reporterConfirmed = byReporter ? false : null;
+    r.escalated = r.escalated || byReporter;
+    notifyListeners();
+  }
+
+  void confirmSafe(Report r) {
+    r.reporterConfirmed = true;
+    notifyListeners();
+  }
+
+  /// Reports filed from this phone (the signed-in student).
+  bool isMine(Report r) => r.reporter == 'Ananya S.';
 
   // ---------- reporting ----------
   void startDraft({Loc? at}) {
@@ -424,7 +607,22 @@ class AppState extends ChangeNotifier {
     );
     reports.insert(0, r);
     notifyListeners();
+    if (r.covered && role == Role.student) _demoResponse(r);
     return r;
+  }
+
+  /// Demo only: there is no real authority on another phone, so a student's
+  /// new report is "opened" after a few seconds and the authority sets off
+  /// soon after. Reaching the spot and resolving are left to the authority
+  /// console (sign in as hostel authority to try them).
+  void _demoResponse(Report r) {
+    if (r.place == authorityHostel) r.handler = kamengAuthority;
+    Timer(const Duration(seconds: 12), () {
+      if (r.stage == Stage.reported) markSeen([r]);
+    });
+    Timer(const Duration(seconds: 35), () {
+      if (r.stage == Stage.seen) setOnTheWay(r);
+    });
   }
 
   /// Place picked from the list. Buildings with an OpenStreetMap outline use

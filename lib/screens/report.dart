@@ -10,7 +10,9 @@ import '../data/species.dart';
 import '../theme.dart';
 import '../widgets/campus_map.dart';
 import '../widgets/common.dart';
+import '../widgets/response.dart';
 import 'identify.dart';
+import 'sighting_detail.dart';
 import 'snake_watch.dart';
 
 Future<String?> pickPhoto(BuildContext context) async {
@@ -867,6 +869,7 @@ class _ReportedScreenState extends State<ReportedScreen> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
+    AppScope.of(context); // follow the authority's response live
     final r = widget.report;
     return DarkPage(
       body: Stack(
@@ -923,10 +926,32 @@ class _ReportedScreenState extends State<ReportedScreen> with TickerProviderStat
                             const SizedBox(height: 4),
                             Text(
                               r.covered
-                                  ? 'It’s in their Snake Alert console now. They’ll check the area and mark it safe, and you’ll be notified.'
+                                  ? 'They must reach the spot within ${respondWithin.inMinutes} min and send a photo when it’s safe. You’ll see every step.'
                                   : 'No authority is notified for open areas. Students nearby can see your pin, and it clears itself after 2–3 days.',
                               style: ft(12.5, color: C.muted, height: 1.4),
                             ),
+                            if (r.covered) ...[
+                              const SizedBox(height: 10),
+                              GestureDetector(
+                                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SightingDetailScreen(report: r))),
+                                child: Row(
+                                  children: [
+                                    StatusChip(r),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        r.statusLine,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: ft(12.5, w: 600, color: C.sub),
+                                      ),
+                                    ),
+                                    Text('Track', style: ft(12.5, w: 700, color: C.green)),
+                                    const Icon(Icons.chevron_right_rounded, size: 18, color: C.green),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),

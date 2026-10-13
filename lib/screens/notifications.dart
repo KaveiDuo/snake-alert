@@ -28,6 +28,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               : '${r.title} spotted near ${r.where}. Avoid the area until it is marked safe.',
           report: r,
         ),
+      // Updates on the student's own reports, one per response step.
+      for (final r in s.reports.where(s.isMine))
+        for (final (at, title, body) in [
+          if (r.seenAt != null) (r.seenAt!, 'Your report was seen', '${r.handlerName} has opened your report on ${r.title}.'),
+          if (r.onTheWayAt != null) (r.onTheWayAt!, 'Authority on the way', '${r.handlerName} is heading to ${r.where}.'),
+          if (r.onSiteAt != null) (r.onSiteAt!, 'Authority at the spot', '${r.handlerName} has reached ${r.where}.'),
+          if (r.safe && r.reporterConfirmed == null)
+            (r.resolvedAt!, 'Is the area clear now?', '${r.where} was marked safe. Tap to confirm, or tell us if the snake is still there.'),
+        ])
+          _Item('SNAKE ALERT', at, title, body, report: r),
       _Item(
         'GATELOG',
         DateTime.now().subtract(const Duration(days: 1)),
