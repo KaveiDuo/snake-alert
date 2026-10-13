@@ -141,6 +141,9 @@ class CampusMap extends StatefulWidget {
   final bool dark;
   final List<Report> reports;
   final LatLng? selected;
+
+  /// Opens framed on this spot and on you, without dropping a pin.
+  final LatLng? focus;
   final void Function(LatLng point)? onTapMap;
   final void Function(Report r)? onTapReport;
   final EdgeInsets controlsPadding;
@@ -151,6 +154,7 @@ class CampusMap extends StatefulWidget {
     required this.dark,
     this.reports = const [],
     this.selected,
+    this.focus,
     this.onTapMap,
     this.onTapReport,
     this.controlsPadding = const EdgeInsets.all(10),
@@ -221,14 +225,14 @@ class CampusMapState extends State<CampusMap> with TickerProviderStateMixin {
               child: FlutterMap(
                 mapController: _map,
                 options: MapOptions(
-                  initialCenter: widget.selected ?? const LatLng(26.1888, 91.6962),
-                  initialZoom: widget.selected != null ? 17.2 : 15.6,
-                  // Open zoomed so every report (and you) fits on screen.
-                  initialCameraFit: widget.selected == null && widget.reports.isNotEmpty
+                  initialCenter: widget.selected ?? widget.focus ?? const LatLng(26.1888, 91.6962),
+                  initialZoom: widget.selected != null || widget.focus != null ? 17.2 : 15.6,
+                  // Open zoomed so the focused spot, or every report, fits on screen with you.
+                  initialCameraFit: widget.selected == null && (widget.focus != null || widget.reports.isNotEmpty)
                       ? CameraFit.coordinates(
-                          coordinates: [for (final r in widget.reports) r.pos, s.you],
-                          padding: const EdgeInsets.fromLTRB(40, 90, 60, 80),
-                          maxZoom: 17.5,
+                          coordinates: widget.focus != null ? [widget.focus!, s.you] : [for (final r in widget.reports) r.pos, s.you],
+                          padding: const EdgeInsets.fromLTRB(50, 100, 70, 90),
+                          maxZoom: widget.focus != null ? 18 : 17.5,
                         )
                       : null,
                   minZoom: 14.5,

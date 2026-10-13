@@ -5,6 +5,7 @@ import '../data/app_state.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
 import '../widgets/response.dart';
+import 'report_location.dart';
 import 'sos.dart';
 
 class SightingDetailScreen extends StatelessWidget {
@@ -15,7 +16,9 @@ class SightingDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     AppScope.of(context); // rebuild when the report is marked safe
     final r = report;
-    final photo = r.photoPath != null ? photoOf(r.photoPath!) : (r.sp != null ? Image.asset(r.sp!.photo, fit: BoxFit.cover) : null);
+    final photo = r.photoPath != null
+        ? photoOf(r.photoPath!)
+        : (r.sp != null ? Image.asset(r.sp!.photo, fit: BoxFit.cover) : null);
     final d = AppScope.read(context).metresFromYou(r.pos);
     return Scaffold(
       backgroundColor: C.bg,
@@ -69,20 +72,25 @@ class SightingDetailScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF142033),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFF203556)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.near_me_outlined, size: 15, color: C.blue),
-                      const SizedBox(width: 6),
-                      Text('About ${(d / 10).round() * 10} m from you', style: ft(13, w: 600, color: const Color(0xFF8AB4FF))),
-                    ],
+                GestureDetector(
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ReportLocationScreen(report: r))),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF142033),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFF203556)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.near_me_outlined, size: 15, color: C.blue),
+                        const SizedBox(width: 6),
+                        Text('About ${(d / 10).round() * 10} m from you', style: ft(13, w: 600, color: const Color(0xFF8AB4FF))),
+                        Text('  ·  View on map', style: ft(13, w: 700, color: C.blue)),
+                        const Icon(Icons.chevron_right_rounded, size: 16, color: C.blue),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 14),

@@ -6,6 +6,7 @@ import '../theme.dart';
 import '../widgets/common.dart';
 import '../widgets/response.dart';
 import 'profile.dart';
+import 'report_location.dart';
 import 'sighting_detail.dart';
 
 /// Hostel authority console: only this hostel's reports, split into Open and
@@ -427,7 +428,7 @@ class _ReportCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
-                  onTap: () => _open(context),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ReportLocationScreen(report: r))),
                   child: const SizedBox(width: 56, height: 50, child: Icon(Icons.location_on_outlined, color: C.sub)),
                 ),
               ),
