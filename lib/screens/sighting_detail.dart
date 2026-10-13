@@ -234,7 +234,8 @@ class _Response extends StatelessWidget {
               ],
             ),
         ],
-        if (!r.safe) ...[
+        // Students can phone the authority; the authority viewing their own report can't call themselves.
+        if (!r.safe && s.role != Role.authority) ...[
           const SizedBox(height: 12),
           Btn(
             'Call the authority now',

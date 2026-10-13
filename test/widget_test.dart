@@ -1,8 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:snake_watch/data/app_state.dart';
 import 'package:snake_watch/data/scanner.dart';
 import 'package:snake_watch/main.dart';
+import 'package:snake_watch/screens/sighting_detail.dart';
 
 void main() {
   testWidgets('Sign-in screen shows both sign-in options', (tester) async {
@@ -159,5 +161,16 @@ void main() {
     expect(r.rescuerCalledAt, isNull);
     s.callRescuer(r);
     expect(r.rescuerCalledAt, isNotNull);
+  });
+
+  testWidgets('Only students see "Call the authority now" on a sighting', (tester) async {
+    for (final role in [Role.student, Role.authority]) {
+      final s = AppState()..role = role;
+      await tester.pumpWidget(
+        AppScope(state: s, child: MaterialApp(home: SightingDetailScreen(report: s.reports.firstWhere((r) => r.id == 'r1')))),
+      );
+      expect(find.text('Call the authority now'), role == Role.student ? findsOneWidget : findsNothing);
+      await tester.pumpWidget(const SizedBox()); // stop the live clock
+    }
   });
 }
