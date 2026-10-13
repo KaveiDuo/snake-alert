@@ -37,6 +37,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         for (final (at, title, body) in [
           if (r.seenAt != null) (r.seenAt!, 'Your report was seen', '${r.handlerName} has opened your report on ${r.title}.'),
           if (r.onTheWayAt != null) (r.onTheWayAt!, 'Authority on the way', '${r.handlerName} is heading to ${r.where}.'),
+          if (r.rescuerCalledAt != null)
+            (r.rescuerCalledAt!, 'Snake catcher called', '${r.handlerName} has called the snake catcher for ${r.where}.'),
           if (r.onSiteAt != null) (r.onSiteAt!, 'Authority at the spot', '${r.handlerName} has reached ${r.where}.'),
           if (r.safe && r.reporterConfirmed == null)
             r.outcome == Outcome.notFound

@@ -127,6 +127,8 @@ class ResponseTimeline extends StatelessWidget {
         r.onTheWayAt != null ? '$who set off at ${clock(r.onTheWayAt!)}' : 'You’ll be notified when they set off',
         r.onTheWayAt != null,
       ),
+      if (r.rescuerCalledAt != null)
+        _StepData('Snake catcher called', '$who called the snake catcher / wildlife team at ${clock(r.rescuerCalledAt!)}', true),
       _StepData(
         r.onSiteAt != null ? 'Reached the spot' : 'Reaching the spot',
         r.onSiteAt != null

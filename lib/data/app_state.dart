@@ -126,6 +126,10 @@ enum Venom { venomous, nonVenomous, unsure }
 /// only: every hostel and building authority uses the same number for now.
 const authorityPhone = '8277992838';
 
+/// Snake catcher / wildlife department the authority calls for big or
+/// venomous snakes. Demo placeholder until the real number is known.
+const rescuerPhone = '8277992838';
+
 enum Role { none, student, authority }
 
 /// The authority console's Open / Resolved switch.
@@ -224,6 +228,9 @@ class Report {
   /// Where the authority searched (tapped from [searchSpots]).
   List<String> searched;
 
+  /// When the authority called the snake catcher / wildlife department.
+  DateTime? rescuerCalledAt;
+
   /// The reporter's answer to "Is the area clear now?" (null: not answered).
   bool? reporterConfirmed;
 
@@ -253,6 +260,7 @@ class Report {
     this.proofPhoto,
     this.resolveNote = '',
     this.searched = const [],
+    this.rescuerCalledAt,
     this.reporterConfirmed,
     this.escalated = false,
   }) : time = time ?? DateTime.now();
@@ -601,8 +609,15 @@ class AppState extends ChangeNotifier {
     r.proofPhoto = null;
     r.resolveNote = '';
     r.searched = const [];
+    r.rescuerCalledAt = null;
     r.reporterConfirmed = byReporter ? false : null;
     r.escalated = r.escalated || byReporter;
+    notifyListeners();
+  }
+
+  /// Recorded when the authority taps "Call rescuer", so students can see help was called.
+  void callRescuer(Report r) {
+    r.rescuerCalledAt = DateTime.now();
     notifyListeners();
   }
 

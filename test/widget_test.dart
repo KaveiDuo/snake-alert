@@ -140,4 +140,12 @@ void main() {
     expect(s.mapReports, contains(r)); // still on the map as a caution
     expect(s.openReports, isNot(contains(r)));
   });
+
+  test('Calling the rescuer is recorded for students to see', () {
+    final s = AppState();
+    final r = s.reports.firstWhere((r) => r.id == 'r2');
+    expect(r.rescuerCalledAt, isNull);
+    s.callRescuer(r);
+    expect(r.rescuerCalledAt, isNotNull);
+  });
 }

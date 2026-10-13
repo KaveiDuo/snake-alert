@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../data/app_state.dart';
 import '../theme.dart';
@@ -332,6 +333,11 @@ void _rulesSheet(BuildContext context) {
               'Say what you found and add a photo from the spot. The reporter is then asked to confirm it’s clear.',
             ),
             rule(
+              Icons.call_rounded,
+              'Call rescuer',
+              'For a big or venomous snake, tap “Call rescuer” to phone the snake catcher / wildlife department. Students see that help was called.',
+            ),
+            rule(
               Icons.timer_off_outlined,
               'Overdue',
               'Reports not reached within ${respondWithin.inMinutes} min, or that the reporter says are still there, are flagged to campus security.',
@@ -393,6 +399,15 @@ class _ReportCardState extends State<_ReportCard> {
       Stage.resolved => ('Reopen report', Icons.replay_rounded, () => s.reopen(r), BtnKind.ghost),
     };
 
+    final mapButton = Material(
+      color: const Color(0xFF262626),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ReportLocationScreen(report: r))),
+        child: const SizedBox(width: 56, height: 50, child: Icon(Icons.location_on_outlined, color: C.sub)),
+      ),
+    );
     return Panel(
       border: r.flagged ? const Color(0xFF5A2424) : (r.safe ? const Color(0xFF22392A) : C.line2),
       padding: const EdgeInsets.all(14),
@@ -461,21 +476,35 @@ class _ReportCardState extends State<_ReportCard> {
           const SizedBox(height: 12),
           _Deadline(r),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(child: Btn(label, kind: kind, icon: icon, height: 50, onTap: onTap)),
-              const SizedBox(width: 9),
-              Material(
-                color: const Color(0xFF262626),
-                borderRadius: BorderRadius.circular(16),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(16),
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ReportLocationScreen(report: r))),
-                  child: const SizedBox(width: 56, height: 50, child: Icon(Icons.location_on_outlined, color: C.sub)),
+          // Resolved: one row (Reopen + map). Open: the next step on its own,
+          // then "Call rescuer" beside the map button.
+          if (r.safe)
+            Row(children: [Expanded(child: Btn(label, kind: kind, icon: icon, height: 50, onTap: onTap)), const SizedBox(width: 9), mapButton])
+          else ...[
+            Btn(label, kind: kind, icon: icon, height: 50, onTap: onTap),
+            const SizedBox(height: 9),
+            Row(
+              children: [
+                Expanded(
+                  child: Btn(
+                    r.rescuerCalledAt == null ? 'Call rescuer' : 'Rescuer called · ${clock(r.rescuerCalledAt!)}',
+                    // Big or venomous snakes: the snake catcher / wildlife department.
+                    kind: r.rescuerCalledAt == null && r.treatAsVenomous ? BtnKind.danger : BtnKind.ghost,
+                    icon: Icons.call_rounded,
+                    height: 50,
+                    onTap: () async {
+                      s.callRescuer(r);
+                      if (!await launchUrl(Uri.parse('tel:$rescuerPhone')) && context.mounted) {
+                        toast(context, 'Could not open the dialler');
+                      }
+                    },
+                  ),
                 ),
-              ),
-            ],
-          ),
+                const SizedBox(width: 9),
+                mapButton,
+              ],
+            ),
+          ],
         ],
       ),
     );
