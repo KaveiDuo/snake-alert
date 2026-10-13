@@ -110,13 +110,20 @@ void main() {
     expect(Scanner.parse('{"is_snake": false, "matches": []}').isSnake, isFalse);
   });
 
-  test('Console tiles filter the list and tapping again shows everything', () {
+  test('Console: Open / Resolved switch and type filters', () {
     final s = AppState();
-    s.toggleFilter(ConsoleFilter.overdue);
-    expect(s.consoleFilter, ConsoleFilter.overdue);
-    s.toggleFilter(ConsoleFilter.open);
-    expect(s.consoleFilter, ConsoleFilter.open);
-    s.toggleFilter(ConsoleFilter.open);
+    List<Report> shown() =>
+        s.hostelReports.where((r) => r.safe == (s.consoleTab == ConsoleTab.resolved)).where(s.consoleFilter.matches).toList();
+    expect(shown().every((r) => !r.safe), isTrue);
+    s.setConsoleFilter(ConsoleFilter.venomous);
+    expect(shown().map((r) => r.id), ['r1']);
+    s.setConsoleFilter(ConsoleFilter.overdue);
+    expect(shown().map((r) => r.id), ['r2']);
+    s.setConsoleTab(ConsoleTab.resolved); // overdue doesn't apply to resolved reports
+    expect(s.consoleFilter, ConsoleFilter.all);
+    expect(shown().map((r) => r.id), ['r4']);
+    s.setConsoleFilter(ConsoleFilter.nonVenomous);
+    s.setConsoleFilter(ConsoleFilter.nonVenomous); // tap again: back to all
     expect(s.consoleFilter, ConsoleFilter.all);
   });
 }

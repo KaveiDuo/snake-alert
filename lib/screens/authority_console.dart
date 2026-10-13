@@ -8,8 +8,8 @@ import '../widgets/response.dart';
 import 'profile.dart';
 import 'sighting_detail.dart';
 
-/// Hostel authority console: only this hostel's reports. Opening it marks new
-/// reports as seen. Each report then moves one step at a time — on the way,
+/// Hostel authority console: only this hostel's reports, split into Open and
+/// Resolved and filterable by type. Opening it marks new reports as seen. Each report then moves one step at a time — on the way,
 /// at the spot (location checked), safe (outcome and photo required) — and
 /// students see every step. Reports not reached within [respondWithin] are
 /// flagged to campus security.
@@ -32,102 +32,116 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
   @override
   Widget build(BuildContext context) {
     final s = AppScope.of(context);
-    final all = s.hostelReports;
-    final shown = switch (s.consoleFilter) {
-      ConsoleFilter.all => all,
-      ConsoleFilter.open => all.where((r) => !r.safe).toList(),
-      ConsoleFilter.overdue => all.where((r) => r.flagged).toList(),
-    };
-    // Flagged first, then open by age, then resolved.
-    shown.sort((a, b) {
-      int rank(Report r) => r.flagged ? 0 : (r.safe ? 2 : 1);
-      final c = rank(a).compareTo(rank(b));
-      return c != 0 ? c : (a.safe ? b.time.compareTo(a.time) : a.time.compareTo(b.time));
-    });
-    final avg = s.avgArrival;
+    final resolvedTab = s.consoleTab == ConsoleTab.resolved;
+    final inTab = s.hostelReports.where((r) => r.safe == resolvedTab).toList();
+    final shown = inTab.where(s.consoleFilter.matches).toList()
+      // Open: flagged first, then oldest first. Resolved: newest first.
+      ..sort((a, b) {
+        if (resolvedTab) return b.time.compareTo(a.time);
+        final c = (a.flagged ? 0 : 1).compareTo(b.flagged ? 0 : 1);
+        return c != 0 ? c : a.time.compareTo(b.time);
+      });
+    final openCount = s.hostelReports.where((r) => !r.safe).length;
+    final filters = [
+      ConsoleFilter.all,
+      if (!resolvedTab && inTab.any((r) => r.flagged)) ConsoleFilter.overdue,
+      ConsoleFilter.venomous,
+      ConsoleFilter.nonVenomous,
+      ConsoleFilter.unsure,
+    ];
     return DarkPage(
       body: LiveClock(
         builder: (context) => Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+              padding: const EdgeInsets.fromLTRB(16, 10, 8, 0),
               child: Row(
                 children: [
-                  GestureDetector(
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AuthorityProfile())),
-                    child: Row(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(13),
-                          child: Image.asset('assets/images/avatar_authority.jpg', width: 44, height: 44, fit: BoxFit.cover),
-                        ),
-                        const SizedBox(width: 12),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(s.authorityHostel, style: ft(19, w: 700)),
-                            Text('${AppState.kamengAuthority} · Hostel authority', style: ft(12, color: C.muted)),
-                          ],
-                        ),
-                      ],
+                  Text('Snake Alert', style: ft(20, w: 600)),
+                  const SizedBox(width: 10),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: C.greenSoft,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: const Color(0xFF2C7A47)),
                     ),
+                    child: Text('AUTHORITY VIEW', style: ft(10.5, w: 700, color: C.greenText, ls: 1)),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    tooltip: 'How Snake Alert works for authorities',
+                    onPressed: () => _rulesSheet(context),
+                    icon: const Icon(Icons.info_outline_rounded, color: C.sub, size: 26),
                   ),
                 ],
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: Row(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 14),
+              child: GestureDetector(
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AuthorityProfile())),
+                child: Row(
+                  children: [
+                    ClipOval(child: Image.asset('assets/images/avatar_authority.jpg', width: 52, height: 52, fit: BoxFit.cover)),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(s.authorityHostel, style: ft(23, w: 700)),
+                          Text('${AppState.kamengAuthority} · Hostel authority', style: ft(13.5, color: C.muted)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: _Segmented(
+                open: openCount,
+                resolved: s.hostelReports.length - openCount,
+                resolvedSelected: resolvedTab,
+                onChanged: s.setConsoleTab,
+              ),
+            ),
+            SizedBox(
+              height: 52,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
                 children: [
-                  _Stat(
-                    '${s.hostelOpen}',
-                    'Open',
-                    s.hostelOpen > 0 ? C.amber : C.green,
-                    accent: C.amber,
-                    selected: s.consoleFilter == ConsoleFilter.open,
-                    onTap: () => s.toggleFilter(ConsoleFilter.open),
-                  ),
-                  const SizedBox(width: 8),
-                  _Stat(
-                    '${s.hostelFlagged}',
-                    'Overdue',
-                    s.hostelFlagged > 0 ? C.redText : C.muted,
-                    accent: C.red,
-                    selected: s.consoleFilter == ConsoleFilter.overdue,
-                    onTap: () => s.toggleFilter(ConsoleFilter.overdue),
-                  ),
-                  const SizedBox(width: 8),
-                  _Stat(avg == null ? '—' : '${avg.inMinutes} min', 'Avg. arrival', C.text),
+                  for (final f in filters)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: _FilterChip(
+                        f,
+                        count: inTab.where(f.matches).length,
+                        selected: s.consoleFilter == f,
+                        onTap: () => s.setConsoleFilter(f),
+                      ),
+                    ),
                 ],
               ),
             ),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                 children: [
-                  if (s.consoleFilter != ConsoleFilter.all)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(2, 0, 0, 10),
-                      child: Text(
-                        s.consoleFilter == ConsoleFilter.open
-                            ? 'Showing open reports only · tap “Open” again to show all'
-                            : 'Showing overdue reports only · tap “Overdue” again to show all',
-                        style: ft(12, color: C.muted),
-                      ),
-                    ),
                   if (shown.isEmpty)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 60),
                       child: Column(
                         children: [
-                          const Icon(Icons.verified_outlined, color: C.green, size: 48),
+                          Icon(resolvedTab ? Icons.inventory_2_outlined : Icons.verified_outlined, color: C.green, size: 48),
                           const SizedBox(height: 12),
-                          Text('All clear', style: ft(20, w: 700)),
+                          Text(resolvedTab ? 'Nothing here yet' : 'All clear', style: ft(20, w: 700)),
                           const SizedBox(height: 4),
                           Text(
-                            s.consoleFilter == ConsoleFilter.overdue
-                                ? 'No overdue reports for ${s.authorityHostel}.'
-                                : 'No open reports for ${s.authorityHostel}.',
+                            '${resolvedTab ? 'No resolved' : 'No open'} ${s.consoleFilter == ConsoleFilter.all ? '' : '${s.consoleFilter.label.toLowerCase()} '}reports for ${s.authorityHostel}.',
+                            textAlign: TextAlign.center,
                             style: ft(13.5, color: C.muted),
                           ),
                         ],
@@ -138,30 +152,6 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
                       duration: const Duration(milliseconds: 250),
                       child: Padding(padding: const EdgeInsets.only(bottom: 12), child: _ReportCard(r)),
                     ),
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF151515),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: C.line),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(Icons.visibility_outlined, size: 18, color: C.muted),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            'Students see every step you take here, with the time. Tap “I’ve reached the spot” when you '
-                            'arrive: your location is checked against the pin. Marking an area safe needs what you found '
-                            'and a photo from the spot, and the reporter is asked to confirm. Reports not reached within '
-                            '${respondWithin.inMinutes} min are flagged to campus security.',
-                            style: ft(12, color: C.muted, height: 1.5),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -172,42 +162,182 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
   }
 }
 
-/// Summary tile at the top of the console. With [onTap] it filters the list
-/// (shown by its [accent] colour and a ✕ while selected).
-class _Stat extends StatelessWidget {
-  final String value, label;
-  final Color color;
-  final Color accent;
-  final bool selected;
-  final VoidCallback? onTap;
-  const _Stat(this.value, this.label, this.color, {this.accent = C.amber, this.selected = false, this.onTap});
+/// Open / Resolved switch with a count badge on each side.
+class _Segmented extends StatelessWidget {
+  final int open, resolved;
+  final bool resolvedSelected;
+  final ValueChanged<ConsoleTab> onChanged;
+  const _Segmented({required this.open, required this.resolved, required this.resolvedSelected, required this.onChanged});
+
+  Widget _side(String label, int count, bool selected, Color badgeBg, Color badgeFg, VoidCallback onTap) => Expanded(
+    child: GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        height: 46,
+        decoration: BoxDecoration(
+          color: selected ? const Color(0xFF2A2A2A) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(label, style: ft(16, w: selected ? 600 : 500, color: selected ? C.text : C.muted)),
+            const SizedBox(width: 8),
+            Container(
+              constraints: const BoxConstraints(minWidth: 22),
+              height: 22,
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: selected ? badgeBg : badgeBg.withValues(alpha: 0.35),
+                borderRadius: BorderRadius.circular(11),
+              ),
+              child: Text('$count', style: ft(12, w: 700, color: selected ? badgeFg : badgeFg.withValues(alpha: 0.6))),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 
   @override
-  Widget build(BuildContext context) => Expanded(
-    child: Material(
-      color: selected ? Color.alphaBlend(accent.withValues(alpha: 0.14), C.card) : C.card,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: selected ? accent : C.line),
-      ),
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(5),
+    decoration: BoxDecoration(
+      color: const Color(0xFF0B0B0B),
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: C.line2),
+    ),
+    child: Row(
+      children: [
+        _side('Open', open, !resolvedSelected, const Color(0xFFE5383B), Colors.white, () => onChanged(ConsoleTab.open)),
+        _side(
+          'Resolved',
+          resolved,
+          resolvedSelected,
+          resolvedSelected ? C.greenSoft : const Color(0xFF2E2E2E),
+          resolvedSelected ? C.greenText : C.sub,
+          () => onChanged(ConsoleTab.resolved),
+        ),
+      ],
+    ),
+  );
+}
+
+/// One report-type filter: All, Overdue, Venomous, Non-venomous, Not sure.
+class _FilterChip extends StatelessWidget {
+  final ConsoleFilter f;
+  final int count;
+  final bool selected;
+  final VoidCallback onTap;
+  const _FilterChip(this.f, {required this.count, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final dot = switch (f) {
+      ConsoleFilter.all => null,
+      ConsoleFilter.overdue => C.red,
+      ConsoleFilter.venomous => pinVenomous,
+      ConsoleFilter.nonVenomous => pinNonVenomous,
+      ConsoleFilter.unsure => pinUnsure,
+    };
+    return Material(
+      color: selected ? const Color(0xFF2A2A2A) : Colors.transparent,
+      shape: StadiumBorder(side: BorderSide(color: selected ? const Color(0xFF555555) : C.line2)),
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
+        customBorder: const StadiumBorder(),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Column(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(value, style: ft(19, w: 700, color: color)),
-              const SizedBox(height: 2),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(label, style: ft(11.5, color: selected ? C.sub : C.muted)),
-                  if (selected) ...[const SizedBox(width: 4), Icon(Icons.close_rounded, size: 12, color: accent)],
-                ],
+              if (f == ConsoleFilter.overdue)
+                const Icon(Icons.priority_high_rounded, size: 14, color: C.redText)
+              else if (dot != null)
+                Container(width: 8, height: 8, decoration: BoxDecoration(color: dot, shape: BoxShape.circle)),
+              if (dot != null) const SizedBox(width: 6),
+              Text(
+                f.label,
+                style: ft(13, w: selected ? 600 : 500, color: f == ConsoleFilter.overdue ? C.redText : (selected ? C.text : C.sub)),
               ),
+              const SizedBox(width: 6),
+              Text('$count', style: ft(12.5, w: 600, color: selected ? C.sub : C.faint)),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The ⓘ button: how the response steps work and what students see.
+void _rulesSheet(BuildContext context) {
+  Widget rule(IconData icon, String title, String body) => Padding(
+    padding: const EdgeInsets.only(bottom: 14),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 20, color: C.green),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: ft(14.5, w: 600)),
+              const SizedBox(height: 2),
+              Text(body, style: ft(12.5, color: C.muted, height: 1.45)),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: C.card,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+    builder: (ctx) => SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(color: const Color(0xFF3A3A3A), borderRadius: BorderRadius.circular(2)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text('How it works', style: ft(20, w: 700)),
+            const SizedBox(height: 4),
+            Text('Students see every step you take here, with the time.', style: ft(13, color: C.muted)),
+            const SizedBox(height: 18),
+            rule(Icons.done_all_rounded, 'Seen', 'Opening this screen tells the reporter you’ve read their report.'),
+            rule(Icons.directions_walk_rounded, 'On the way', 'Tap “I’m on my way” when you or a guard sets off.'),
+            rule(
+              Icons.gps_fixed_rounded,
+              'At the spot',
+              'Tap “I’ve reached the spot” when you arrive. Your location is checked against the pin.',
+            ),
+            rule(
+              Icons.photo_camera_outlined,
+              'Mark area safe',
+              'Say what you found and add a photo from the spot. The reporter is then asked to confirm it’s clear.',
+            ),
+            rule(
+              Icons.timer_off_outlined,
+              'Overdue',
+              'Reports not reached within ${respondWithin.inMinutes} min, or that the reporter says are still there, are flagged to campus security.',
+            ),
+            const SizedBox(height: 4),
+            Btn('Got it', kind: BtnKind.ghost, height: 48, onTap: () => Navigator.pop(ctx)),
+          ],
         ),
       ),
     ),

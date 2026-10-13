@@ -128,7 +128,28 @@ const authorityPhone = '8277992838';
 
 enum Role { none, student, authority }
 
-enum ConsoleFilter { all, open, overdue }
+/// The authority console's Open / Resolved switch.
+enum ConsoleTab { open, resolved }
+
+/// Report-type filter chips in the authority console.
+enum ConsoleFilter {
+  all('All'),
+  overdue('Overdue'),
+  venomous('Venomous'),
+  nonVenomous('Non-venomous'),
+  unsure('Not sure');
+
+  final String label;
+  const ConsoleFilter(this.label);
+
+  bool matches(Report r) => switch (this) {
+    ConsoleFilter.all => true,
+    ConsoleFilter.overdue => r.flagged,
+    ConsoleFilter.venomous => r.venom == Venom.venomous,
+    ConsoleFilter.nonVenomous => r.venom == Venom.nonVenomous,
+    ConsoleFilter.unsure => r.venom == Venom.unsure,
+  };
+}
 
 /// How far the responsible authority has got with a report. Every step is
 /// timestamped and shown to students, so a report can't just be clicked away:
@@ -284,7 +305,8 @@ enum GpsState { off, searching, onCampus, offCampus, denied }
 class AppState extends ChangeNotifier {
   Role role = Role.none;
   bool mapDark = false; // light map first; the moon button switches to dark
-  /// Which reports the authority console lists (the Open / Overdue tiles).
+  /// What the authority console lists: Open or Resolved, and which type.
+  ConsoleTab consoleTab = ConsoleTab.open;
   ConsoleFilter consoleFilter = ConsoleFilter.all;
   final String authorityHostel = 'Kameng Hostel';
   static const kamengAuthority = 'Dr. P. Saikia';
@@ -481,8 +503,15 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Tapping a tile filters by it; tapping it again shows everything.
-  void toggleFilter(ConsoleFilter f) {
+  void setConsoleTab(ConsoleTab t) {
+    consoleTab = t;
+    // "Overdue" only applies to open reports.
+    if (t == ConsoleTab.resolved && consoleFilter == ConsoleFilter.overdue) consoleFilter = ConsoleFilter.all;
+    notifyListeners();
+  }
+
+  /// Tapping a type filters by it; tapping it again shows everything.
+  void setConsoleFilter(ConsoleFilter f) {
     consoleFilter = consoleFilter == f ? ConsoleFilter.all : f;
     notifyListeners();
   }
