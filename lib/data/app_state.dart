@@ -128,6 +128,8 @@ const authorityPhone = '8277992838';
 
 enum Role { none, student, authority }
 
+enum ConsoleFilter { all, open, overdue }
+
 /// How far the responsible authority has got with a report. Every step is
 /// timestamped and shown to students, so a report can't just be clicked away:
 /// "Seen" is recorded when the authority opens their console, "At the spot"
@@ -282,7 +284,8 @@ enum GpsState { off, searching, onCampus, offCampus, denied }
 class AppState extends ChangeNotifier {
   Role role = Role.none;
   bool mapDark = false; // light map first; the moon button switches to dark
-  bool filterOpenOnly = false;
+  /// Which reports the authority console lists (the Open / Overdue tiles).
+  ConsoleFilter consoleFilter = ConsoleFilter.all;
   final String authorityHostel = 'Kameng Hostel';
   static const kamengAuthority = 'Dr. P. Saikia';
   final String studentName = 'Ananya Sharma';
@@ -478,8 +481,9 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void toggleFilter() {
-    filterOpenOnly = !filterOpenOnly;
+  /// Tapping a tile filters by it; tapping it again shows everything.
+  void toggleFilter(ConsoleFilter f) {
+    consoleFilter = consoleFilter == f ? ConsoleFilter.all : f;
     notifyListeners();
   }
 

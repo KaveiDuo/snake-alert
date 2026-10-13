@@ -109,4 +109,14 @@ void main() {
     expect(r.matches[2].speciesId, isNull);
     expect(Scanner.parse('{"is_snake": false, "matches": []}').isSnake, isFalse);
   });
+
+  test('Console tiles filter the list and tapping again shows everything', () {
+    final s = AppState();
+    s.toggleFilter(ConsoleFilter.overdue);
+    expect(s.consoleFilter, ConsoleFilter.overdue);
+    s.toggleFilter(ConsoleFilter.open);
+    expect(s.consoleFilter, ConsoleFilter.open);
+    s.toggleFilter(ConsoleFilter.open);
+    expect(s.consoleFilter, ConsoleFilter.all);
+  });
 }

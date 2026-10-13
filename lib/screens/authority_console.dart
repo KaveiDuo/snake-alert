@@ -33,7 +33,11 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
   Widget build(BuildContext context) {
     final s = AppScope.of(context);
     final all = s.hostelReports;
-    final shown = s.filterOpenOnly ? all.where((r) => !r.safe).toList() : all;
+    final shown = switch (s.consoleFilter) {
+      ConsoleFilter.all => all,
+      ConsoleFilter.open => all.where((r) => !r.safe).toList(),
+      ConsoleFilter.overdue => all.where((r) => r.flagged).toList(),
+    };
     // Flagged first, then open by age, then resolved.
     shown.sort((a, b) {
       int rank(Report r) => r.flagged ? 0 : (r.safe ? 2 : 1);
@@ -79,11 +83,19 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
                     '${s.hostelOpen}',
                     'Open',
                     s.hostelOpen > 0 ? C.amber : C.green,
-                    selected: s.filterOpenOnly,
-                    onTap: s.toggleFilter,
+                    accent: C.amber,
+                    selected: s.consoleFilter == ConsoleFilter.open,
+                    onTap: () => s.toggleFilter(ConsoleFilter.open),
                   ),
                   const SizedBox(width: 8),
-                  _Stat('${s.hostelFlagged}', 'Overdue', s.hostelFlagged > 0 ? C.redText : C.muted),
+                  _Stat(
+                    '${s.hostelFlagged}',
+                    'Overdue',
+                    s.hostelFlagged > 0 ? C.redText : C.muted,
+                    accent: C.red,
+                    selected: s.consoleFilter == ConsoleFilter.overdue,
+                    onTap: () => s.toggleFilter(ConsoleFilter.overdue),
+                  ),
                   const SizedBox(width: 8),
                   _Stat(avg == null ? '—' : '${avg.inMinutes} min', 'Avg. arrival', C.text),
                 ],
@@ -93,10 +105,15 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                 children: [
-                  if (s.filterOpenOnly)
+                  if (s.consoleFilter != ConsoleFilter.all)
                     Padding(
                       padding: const EdgeInsets.fromLTRB(2, 0, 0, 10),
-                      child: Text('Showing open reports only · tap “Open” to show all', style: ft(12, color: C.muted)),
+                      child: Text(
+                        s.consoleFilter == ConsoleFilter.open
+                            ? 'Showing open reports only · tap “Open” again to show all'
+                            : 'Showing overdue reports only · tap “Overdue” again to show all',
+                        style: ft(12, color: C.muted),
+                      ),
                     ),
                   if (shown.isEmpty)
                     Padding(
@@ -107,7 +124,12 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
                           const SizedBox(height: 12),
                           Text('All clear', style: ft(20, w: 700)),
                           const SizedBox(height: 4),
-                          Text('No open reports for ${s.authorityHostel}.', style: ft(13.5, color: C.muted)),
+                          Text(
+                            s.consoleFilter == ConsoleFilter.overdue
+                                ? 'No overdue reports for ${s.authorityHostel}.'
+                                : 'No open reports for ${s.authorityHostel}.',
+                            style: ft(13.5, color: C.muted),
+                          ),
                         ],
                       ),
                     ),
@@ -150,20 +172,23 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
   }
 }
 
+/// Summary tile at the top of the console. With [onTap] it filters the list
+/// (shown by its [accent] colour and a ✕ while selected).
 class _Stat extends StatelessWidget {
   final String value, label;
   final Color color;
+  final Color accent;
   final bool selected;
   final VoidCallback? onTap;
-  const _Stat(this.value, this.label, this.color, {this.selected = false, this.onTap});
+  const _Stat(this.value, this.label, this.color, {this.accent = C.amber, this.selected = false, this.onTap});
 
   @override
   Widget build(BuildContext context) => Expanded(
     child: Material(
-      color: selected ? const Color(0xFF2A1E0B) : C.card,
+      color: selected ? Color.alphaBlend(accent.withValues(alpha: 0.14), C.card) : C.card,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: selected ? C.amber : C.line),
+        side: BorderSide(color: selected ? accent : C.line),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
@@ -174,7 +199,13 @@ class _Stat extends StatelessWidget {
             children: [
               Text(value, style: ft(19, w: 700, color: color)),
               const SizedBox(height: 2),
-              Text(label, style: ft(11.5, color: C.muted)),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(label, style: ft(11.5, color: selected ? C.sub : C.muted)),
+                  if (selected) ...[const SizedBox(width: 4), Icon(Icons.close_rounded, size: 12, color: accent)],
+                ],
+              ),
             ],
           ),
         ),
