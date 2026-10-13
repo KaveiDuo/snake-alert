@@ -4,11 +4,12 @@ import 'package:latlong2/latlong.dart' hide Path;
 
 import '../data/app_state.dart';
 import '../data/kv_buildings.dart';
-import '../data/pitches.dart';
+import '../data/sports_areas.dart';
 import '../data/quarters_buildings.dart';
 import '../data/zones.dart';
 import '../theme.dart';
 import 'common.dart';
+import 'pitch_tiles.dart';
 
 /// Teardrop "location" pin with a white outline and a white centre dot.
 /// The tip of the pin points at the reported spot.
@@ -117,6 +118,23 @@ class _BuildingLabels extends StatelessWidget {
   }
 }
 
+/// Hides the darker outline the tiles draw around light-green sports grounds
+/// by tracing it in the grounds' own colour. Only when zoomed in: further out
+/// the outline is barely visible and the line would cut through the tiles'
+/// campus-name label.
+class _GroundOutlines extends StatelessWidget {
+  final Color color;
+  const _GroundOutlines({required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    if (MapCamera.of(context).zoom < 16.5) return const SizedBox.shrink();
+    return PolygonLayer(
+      polygons: [for (final pts in sportsGroundShapes) Polygon(points: pts, borderColor: color, borderStrokeWidth: 3)],
+    );
+  }
+}
+
 /// Live campus map (OpenStreetMap tiles). Pinch/drag to move,
 /// + / − to zoom, tap a pin to open it, tap anywhere else to pick that spot.
 class CampusMap extends StatefulWidget {
@@ -148,6 +166,12 @@ class CampusMapState extends State<CampusMap> with TickerProviderStateMixin {
   final _map = MapController();
   late final AnimationController _pulse = AnimationController(vsync: this, duration: const Duration(milliseconds: 1600))..repeat();
   AnimationController? _move;
+  final _tiles = PitchRecolorTileProvider();
+
+  /// Colour of the tiles' own light-green sports grounds (#DFFCE2), and what
+  /// it turns into under the dark-mode tile filter, so covered outlines blend
+  /// in with them.
+  Color get _groundFill => widget.dark ? const Color(0xFF001300) : const Color(0xFFDFFCE2);
 
   @override
   void initState() {
@@ -219,21 +243,15 @@ class CampusMapState extends State<CampusMap> with TickerProviderStateMixin {
                   TileLayer(
                     urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                     userAgentPackageName: 'in.iitg.onestop.snake_watch',
+                    tileProvider: _tiles,
                     maxZoom: 19,
                     tileBuilder: widget.dark ? darkModeTileBuilder : null,
                   ),
                   // KV buildings aren't in OpenStreetMap yet, so draw them in the
                   // same style as the map's other buildings.
+                  _GroundOutlines(color: _groundFill),
                   PolygonLayer(
                     polygons: [
-                      // Sports pitches in soft light green instead of the tiles' strong teal.
-                      for (final pts in pitchShapes)
-                        Polygon(
-                          points: pts,
-                          color: widget.dark ? const Color(0xFF1E3326) : const Color(0xFFDFFCE2),
-                          borderColor: widget.dark ? const Color(0xFF2F5A3C) : const Color(0xFFADEBB3),
-                          borderStrokeWidth: 1.2,
-                        ),
                       // Faculty & staff quarters: a little more see-through than KV.
                       for (final pts in quartersBuildingShapes)
                         Polygon(
