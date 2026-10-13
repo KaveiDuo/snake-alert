@@ -151,7 +151,7 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
                   for (final r in shown)
                     AnimatedSize(
                       duration: const Duration(milliseconds: 250),
-                      child: Padding(padding: const EdgeInsets.only(bottom: 12), child: _ReportCard(r)),
+                      child: Padding(padding: const EdgeInsets.only(bottom: 12), child: _ReportCard(r, key: ValueKey(r.id))),
                     ),
                 ],
               ),
@@ -345,14 +345,25 @@ void _rulesSheet(BuildContext context) {
   );
 }
 
-class _ReportCard extends StatelessWidget {
+/// A report in the console. Collapsed it shows only what's needed to act:
+/// what and where, the deadline line and the next-step button. Tapping the
+/// top row (or the chevron) reveals the note, reporter and progress.
+class _ReportCard extends StatefulWidget {
   final Report r;
-  const _ReportCard(this.r);
+  const _ReportCard(this.r, {super.key});
+  @override
+  State<_ReportCard> createState() => _ReportCardState();
+}
 
-  void _open(BuildContext context) => Navigator.push(context, MaterialPageRoute(builder: (_) => SightingDetailScreen(report: r)));
+class _ReportCardState extends State<_ReportCard> {
+  bool _open = false;
+
+  void _details(BuildContext context) =>
+      Navigator.push(context, MaterialPageRoute(builder: (_) => SightingDetailScreen(report: widget.r)));
 
   @override
   Widget build(BuildContext context) {
+    final r = widget.r;
     final s = AppScope.read(context);
     final (String label, IconData icon, VoidCallback onTap, BtnKind kind) = switch (r.stage) {
       Stage.reported || Stage.seen => (
@@ -388,11 +399,12 @@ class _ReportCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          InkWell(
-            onTap: () => _open(context),
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => setState(() => _open = !_open),
             child: Row(
               children: [
-                SnakeThumb(r, size: 60),
+                SnakeThumb(r, size: 56),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -405,17 +417,47 @@ class _ReportCard extends StatelessWidget {
                     ],
                   ),
                 ),
+                AnimatedRotation(
+                  turns: _open ? 0.5 : 0,
+                  duration: const Duration(milliseconds: 200),
+                  child: Container(
+                    width: 32,
+                    height: 32,
+                    decoration: const BoxDecoration(color: Color(0xFF262626), shape: BoxShape.circle),
+                    child: const Icon(Icons.keyboard_arrow_down_rounded, color: C.sub, size: 22),
+                  ),
+                ),
               ],
             ),
           ),
-          if (r.note.isNotEmpty) ...[
-            const SizedBox(height: 11),
-            Text('“${r.note}”', style: ft(13.5, color: const Color(0xFFDCDCDC), height: 1.45)),
-          ],
-          const SizedBox(height: 7),
-          Text('Reported by ${r.reporter} · ${ago(r.time)}', style: ft(12, color: const Color(0xFF7A7A7A))),
-          const SizedBox(height: 14),
-          StageBar(r),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.topCenter,
+            child: !_open
+                ? const SizedBox(width: double.infinity)
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (r.note.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        Text('“${r.note}”', style: ft(13.5, color: const Color(0xFFDCDCDC), height: 1.45)),
+                      ],
+                      const SizedBox(height: 7),
+                      Text('Reported by ${r.reporter} · ${ago(r.time)}', style: ft(12, color: const Color(0xFF7A7A7A))),
+                      const SizedBox(height: 14),
+                      StageBar(r),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton(
+                          onPressed: () => _details(context),
+                          style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 6), minimumSize: Size.zero),
+                          child: Text('View full report  ›', style: ft(13, w: 600, color: C.green)),
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
           const SizedBox(height: 12),
           _Deadline(r),
           const SizedBox(height: 12),
