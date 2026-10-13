@@ -105011,7 +105011,7 @@ return new A.aM(B.mC,A.aN(A.c([A.du(a,B.q,s,20),B.bt,A.bx(A.b5(A.c([A.R(b,s,s,s,
 $S:674}
 A.aP2.prototype={
 $1(a){var s=null,r=this.a
-return A.m1(!0,A.av_(A.b5(A.c([A.ex(A.bm(s,s,B.n,s,s,new A.b8(B.iT,s,s,A.bo(2),s,s,B.P),s,4,s,s,s,s,40),s,s),B.dH,A.R("How it works",s,s,s,s,A.W(20,B.u,s,s,700),s,s),B.cf,A.R("Students see every step you take here, with the time.",s,s,s,s,A.W(13,B.x,s,s,400),s,s),B.ce,r.$3(B.u9,"Seen","Opening this screen tells the reporter you\u2019ve read their report."),r.$3(B.jC,"On the way","Tap \u201cI\u2019m on my way\u201d when you or a guard sets off."),r.$3(B.hx,"At the spot","Tap \u201cI\u2019ve reached the spot\u201d when you arrive. Your location is checked against the pin."),r.$3(B.jy,"Mark area safe","Say what you found and add a photo from the spot. The reporter is then asked to confirm it\u2019s clear."),r.$3(B.jz,"Call rescuer","For a big or venomous snake, tap \u201cCall rescuer\u201d to phone the snake catcher / wildlife department. Students see that help was called."),r.$3(B.u3,"Overdue","Reports not reached within 15 min, or that the reporter says are still there, are flagged to campus security."),B.cf,new A.dA("Got it",new A.aP1(a),B.cW,s,48,s)],t.p),B.B,B.i,B.j),B.TG),B.aj,!0)},
+return A.m1(!0,A.av_(A.b5(A.c([A.ex(A.bm(s,s,B.n,s,s,new A.b8(B.iT,s,s,A.bo(2),s,s,B.P),s,4,s,s,s,s,40),s,s),B.dH,A.R("How it works",s,s,s,s,A.W(20,B.u,s,s,700),s,s),B.cf,A.R("Students see every step you take here, with the time.",s,s,s,s,A.W(13,B.x,s,s,400),s,s),B.ce,r.$3(B.u9,"Seen","Opening this screen tells the reporter you\u2019ve read their report."),r.$3(B.jC,"On the way","Tap \u201cI\u2019m on my way\u201d when you or a guard sets off."),r.$3(B.hx,"At the spot","Tap \u201cI\u2019ve reached the spot\u201d when you arrive. Your location is checked against the pin."),r.$3(B.jy,"Mark area safe","Say what you found and add a photo from the spot. The reporter is then asked to confirm it\u2019s clear."),r.$3(B.jz,"Call rescuer","For a big or venomous snake, tap \u201cCall rescuer\u201d to phone the snake catcher / wildlife department. Students see that help was called."),r.$3(B.u3,"Overdue","Reports not reached within 15 min, or that the reporter says are still there, are flagged to the hostel security guard."),B.cf,new A.dA("Got it",new A.aP1(a),B.cW,s,48,s)],t.p),B.B,B.i,B.j),B.TG),B.aj,!0)},
 $S:282}
 A.aP1.prototype={
 $0(){A.bM(this.a,!1).f7(null)
@@ -105132,11 +105132,11 @@ A.a0e.prototype={
 E(a){var s,r,q,p,o,n,m,l,k,j=null,i=6e7,h="under a minute",g="At the spot since "
 A:{s=this.c
 s=s.fx&&s.Q!==B.R
-if(s){s=new A.cO(B.nx,B.bo,this.c.r+" says the snake is still there \xb7 flagged to campus security")
+if(s){s=new A.cO(B.nx,B.bo,this.c.r+" says the snake is still there \xb7 flagged to the hostel security guard")
 break A}s=this.c
 r=s.gkm()
 if(r){s=B.f.cw(0-(9e8-new A.aO(Date.now(),0,!1).e_(s.w).a),i)
-s=new A.cO(B.u3,B.bo,"Overdue by "+(s<1?h:""+s+" min")+" \xb7 flagged to campus security")
+s=new A.cO(B.u3,B.bo,"Overdue by "+(s<1?h:""+s+" min")+" \xb7 flagged to the hostel security guard")
 break A}r=s.Q
 if(r===B.i8){r=s.CW
 q=r!=null
@@ -105564,7 +105564,7 @@ q=p.length===0?q:p
 q=A.c([r,B.cf,A.R(q+" \xb7 "+A.a9k(a0.w),d,d,d,d,A.W(13,B.x,d,d,400),d,d)],a1)
 if(a0.y){if(!a0.gkm())r=a0.fx&&a0.Q!==B.R
 else r=!0
-r=r?"Campus security alerted":a0.gRe()
+r=r?"Hostel security guard alerted":a0.gRe()
 if(!a0.gkm())p=a0.fx&&a0.Q!==B.R
 else p=!0
 B.b.G(q,A.c([B.aN,A.aN(A.c([new A.v3(a0,d),B.bu,A.bx(A.R(r,d,1,B.aH,d,A.W(12.5,p?B.bo:B.ai,d,d,600),d,d),1)],a1),B.o,B.i,B.j,0)],a1))}B.b.G(s,q)}else s.push(A.R("No active reports on campus",d,d,d,d,A.W(15,B.x,d,d,400),d,d))
@@ -106648,13 +106648,13 @@ if(!m.gkm())s=m.fx&&m.Q!==B.R
 else s=!0
 if(s){s=A.bo(14)
 r=A.eN(B.mf,1)
-q=m.fx?"The reporter says the snake is still there. Campus security has been alerted.":"Nobody has reached the spot within 15 minutes. Campus security has been alerted."
+q=m.fx?"The reporter says the snake is still there. The hostel security guard has been alerted.":"Nobody has reached the spot within 15 minutes. The hostel security guard has been alerted."
 B.b.G(k,A.c([A.bm(o,A.aN(A.c([B.Vf,B.bP,A.bx(A.R(q,o,o,o,o,A.W(13,B.ro,1.4,o,400),o,o),1)],l),B.B,B.i,B.j,0),B.n,o,o,new A.b8(B.h9,o,r,s,o,o,B.P),o,o,o,B.je,o,o,o),B.aZ],l))}k.push(new A.WC(m,o))
 if(m.Q===B.R&&m.r==="Ananya S."){s=A.c([B.as],l)
 r=m.fr
 if(r==null){r=m.cx===B.bh?"Have you seen the snake again?":"Is the area clear now?"
 r=A.R(r,o,o,o,o,A.W(15.5,B.u,o,o,700),o,o)
-q=m.cx===B.bh?"The authority searched but couldn\u2019t find it. If you see it again, tap \u201cSnake still here\u201d: the report reopens and campus security is alerted.":"You reported this snake. Tell us if it\u2019s really gone. If it\u2019s still there, the report reopens and campus security is alerted."
+q=m.cx===B.bh?"The authority searched but couldn\u2019t find it. If you see it again, tap \u201cSnake still here\u201d: the report reopens and the hostel security guard is alerted.":"You reported this snake. Tell us if it\u2019s really gone. If it\u2019s still there, the report reopens and the hostel security guard is alerted."
 q=A.R(q,o,o,o,o,A.W(12.5,B.x,1.4,o,400),o,o)
 p=m.cx===B.bh?"Not seen again":"Yes, it\u2019s clear"
 s.push(A.ej(B.he,A.b5(A.c([r,B.cf,q,B.as,A.aN(A.c([A.bx(new A.dA(p,new A.aKs(this,n,a),B.ck,o,46,o),1),B.bP,A.bx(new A.dA("Snake still here",new A.aKt(this,n,a),B.iC,o,46,o),1)],l),B.o,B.i,B.j,0)],l),B.B,B.i,B.j),B.a0,o,B.bA,20))}else if(r){r=m.cx===B.bh?"You haven\u2019t seen it again":"You confirmed the area is clear"
@@ -106667,7 +106667,7 @@ A.f1(this.c,"Thanks for confirming")},
 $S:0}
 A.aKt.prototype={
 $0(){this.b.a5W(this.a.c,!0)
-A.f1(this.c,"Report reopened \xb7 campus security alerted")},
+A.f1(this.c,"Report reopened \xb7 hostel security guard alerted")},
 $S:0}
 A.aKu.prototype={
 $0(){var s=0,r=A.J(t.H),q=this
