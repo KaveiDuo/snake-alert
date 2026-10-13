@@ -140,29 +140,44 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final ups = _updates(s, r);
     final latest = ups.last;
     final open = _open.contains(r.id);
+    final toggle = ups.length < 2
+        ? null
+        : InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () => setState(() => open ? _open.remove(r.id) : _open.add(r.id)),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(8, 4, 4, 4),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('${ups.length} updates', style: ft(12.5, w: 600, color: C.sub)),
+                  AnimatedRotation(
+                    turns: open ? 0.5 : 0,
+                    duration: const Duration(milliseconds: 200),
+                    child: const Icon(Icons.keyboard_arrow_down_rounded, size: 20, color: C.sub),
+                  ),
+                ],
+              ),
+            ),
+          );
     return Panel(
       padding: EdgeInsets.zero,
       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SightingDetailScreen(report: r))),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 8, 10),
+        padding: const EdgeInsets.fromLTRB(16, 12, 10, 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Top row: status and time on the left, the updates drop-down on the right.
             Row(
               children: [
-                Text('SNAKE ALERT', style: ft(10.5, w: 700, color: C.green, ls: 1)),
+                if (r.covered) StatusChip(r) else Text('SNAKE ALERT', style: ft(10.5, w: 700, color: C.green, ls: 1)),
                 Text('  ·  ${ago(latest.time)}', style: ft(11, color: C.faint)),
-                if (s.isMine(r)) ...[
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(color: const Color(0xFF142033), borderRadius: BorderRadius.circular(6)),
-                    child: Text('YOUR REPORT', style: ft(9.5, w: 700, color: const Color(0xFF8AB4FF), ls: 0.6)),
-                  ),
-                ],
+                const Spacer(),
+                ?toggle,
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -174,8 +189,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     children: [
                       Text(latest.title, style: ft(15, w: 700)),
                       const SizedBox(height: 2),
-                      Text(
-                        '${r.title} · ${r.where}',
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            if (s.isMine(r))
+                              TextSpan(text: 'Your report · ', style: ft(13, w: 600, color: const Color(0xFF8AB4FF))),
+                            TextSpan(text: '${r.title} · ${r.where}'),
+                          ],
+                        ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: ft(13, color: C.muted, height: 1.35),
@@ -185,33 +206,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 ),
               ],
             ),
-            if (ups.length > 1) ...[
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  if (r.covered) StatusChip(r),
-                  const Spacer(),
-                  TextButton(
-                    onPressed: () => setState(() => open ? _open.remove(r.id) : _open.add(r.id)),
-                    style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8), minimumSize: const Size(0, 36)),
-                    child: Row(
-                      children: [
-                        Text('${ups.length} updates', style: ft(12.5, w: 600, color: C.sub)),
-                        AnimatedRotation(
-                          turns: open ? 0.5 : 0,
-                          duration: const Duration(milliseconds: 200),
-                          child: const Icon(Icons.keyboard_arrow_down_rounded, size: 20, color: C.sub),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ] else if (r.covered) ...[
-              const SizedBox(height: 10),
-              StatusChip(r),
-              const SizedBox(height: 4),
-            ],
             AnimatedSize(
               duration: const Duration(milliseconds: 220),
               curve: Curves.easeOutCubic,
@@ -219,7 +213,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               child: !open
                   ? const SizedBox(width: double.infinity)
                   : Padding(
-                      padding: const EdgeInsets.fromLTRB(4, 4, 8, 4),
+                      padding: const EdgeInsets.fromLTRB(4, 10, 8, 0),
                       child: Column(
                         children: [
                           for (final (i, u) in ups.reversed.indexed) _UpdateRow(u, newest: i == 0, last: i == ups.length - 1),
