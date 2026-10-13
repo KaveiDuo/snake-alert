@@ -584,8 +584,10 @@ class _Deadline extends StatelessWidget {
             : 'At the spot since ${clock(r.onSiteAt!)} · ${r.onSiteMetres!.round()} m from the pin, not verified',
       ),
       _ when r.safe => (
-        r.reporterConfirmed == false ? Icons.report_rounded : Icons.check_circle_outline_rounded,
-        C.greenText,
+        r.outcome == Outcome.notFound
+            ? Icons.search_off_rounded
+            : (r.reporterConfirmed == false ? Icons.report_rounded : Icons.check_circle_outline_rounded),
+        r.outcome == Outcome.notFound ? const Color(0xFFFFC46B) : C.greenText,
         '${r.outcome == Outcome.notFound ? 'Closed as not found' : 'Resolved'} in ${mins(r.resolvedAt!.difference(r.time))} · ${switch (r.reporterConfirmed) {
           true => '${r.reporter} confirmed it’s clear',
           false => '${r.reporter} disputed it',

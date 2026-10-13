@@ -111,18 +111,30 @@ void main() {
     expect(Scanner.parse('{"is_snake": false, "matches": []}').isSnake, isFalse);
   });
 
+  test('Demo data has two open and two resolved Kameng reports of each type', () {
+    final s = AppState();
+    for (final v in Venom.values) {
+      final ofType = s.hostelReports.where((r) => r.venom == v);
+      expect(ofType.where((r) => !r.safe).length, 2, reason: '$v open');
+      expect(ofType.where((r) => r.safe).length, 2, reason: '$v resolved');
+    }
+    for (final r in s.hostelReports) {
+      expect(s.locFromMap(r.pos).name, 'Kameng Hostel', reason: '${r.id} pin inside Kameng'); // pins on the premises
+    }
+  });
+
   test('Console: Open / Resolved switch and type filters', () {
     final s = AppState();
     List<Report> shown() =>
         s.hostelReports.where((r) => r.safe == (s.consoleTab == ConsoleTab.resolved)).where(s.consoleFilter.matches).toList();
     expect(shown().every((r) => !r.safe), isTrue);
     s.setConsoleFilter(ConsoleFilter.venomous);
-    expect(shown().map((r) => r.id), ['r1']);
+    expect(shown().map((r) => r.id).toSet(), {'r1', 'r6'});
     s.setConsoleFilter(ConsoleFilter.overdue);
-    expect(shown().map((r) => r.id), ['r2']);
+    expect(shown().map((r) => r.id).toSet(), {'r2', 'r9'});
     s.setConsoleTab(ConsoleTab.resolved); // overdue doesn't apply to resolved reports
     expect(s.consoleFilter, ConsoleFilter.all);
-    expect(shown().map((r) => r.id), ['r4']);
+    expect(shown().map((r) => r.id).toSet(), {'r4', 'r10', 'r11', 'r12', 'r13', 'r14'});
     s.setConsoleFilter(ConsoleFilter.nonVenomous);
     s.setConsoleFilter(ConsoleFilter.nonVenomous); // tap again: back to all
     expect(s.consoleFilter, ConsoleFilter.all);
