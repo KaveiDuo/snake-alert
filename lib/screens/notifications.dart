@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import '../data/app_state.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/response.dart';
 import 'sighting_detail.dart';
 
+/// Notifications, grouped so each snake report is one card: its latest update
+/// is shown, and the earlier updates open from a drop-down.
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
   @override
@@ -13,53 +16,56 @@ class NotificationsScreen extends StatefulWidget {
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
   String _filter = 'All';
+  final _open = <String>{};
+
+  /// Every update a student gets about one report, oldest first. Anyone sees
+  /// the report and how it ended; the reporter also sees each response step.
+  static List<_Update> _updates(AppState s, Report r) {
+    final mine = s.isMine(r);
+    return [
+      _Update(
+        r.time,
+        mine ? 'You reported it' : (r.venom == Venom.venomous ? 'Venomous snake reported' : 'Snake sighting reported'),
+        mine ? 'Sent to the ${r.place} authority.' : 'Avoid the area until it is marked safe.',
+      ),
+      if (mine && r.seenAt != null) _Update(r.seenAt!, 'Your report was seen', '${r.handlerName} has opened it.'),
+      if (mine && r.onTheWayAt != null) _Update(r.onTheWayAt!, 'Authority on the way', '${r.handlerName} is heading there.'),
+      if (mine && r.rescuerCalledAt != null) _Update(r.rescuerCalledAt!, 'Snake catcher called', '${r.handlerName} called the snake catcher.'),
+      if (mine && r.onSiteAt != null) _Update(r.onSiteAt!, 'Authority at the spot', '${r.handlerName} has reached the spot.'),
+      if (r.safe)
+        r.outcome == Outcome.notFound
+            ? _Update(
+                r.resolvedAt!,
+                'Snake not found after search',
+                mine ? 'Tap if you see it again.' : 'It may still be nearby. Stay alert.',
+              )
+            : _Update(
+                r.resolvedAt!,
+                'Area marked safe',
+                mine && r.reporterConfirmed == null ? 'Tap to confirm it’s clear.' : 'Safe to pass.',
+              ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
     final s = AppScope.of(context);
-    final items = <_Item>[
-      for (final r in s.reports)
-        _Item(
-          'SNAKE ALERT',
-          r.time,
-          r.safe
-              ? (r.outcome == Outcome.notFound ? 'Snake not found after search' : 'Area marked safe')
-              : (r.venom == Venom.venomous ? 'Venomous snake reported' : 'Snake sighting reported'),
-          r.safe
-              ? (r.outcome == Outcome.notFound
-                    ? '${r.where} was searched but the snake wasn’t found. Stay alert nearby.'
-                    : '${r.where} has been checked and marked safe. Safe to pass.')
-              : '${r.title} spotted near ${r.where}. Avoid the area until it is marked safe.',
-          report: r,
-        ),
-      // Updates on the student's own reports, one per response step.
-      for (final r in s.reports.where(s.isMine))
-        for (final (at, title, body) in [
-          if (r.seenAt != null) (r.seenAt!, 'Your report was seen', '${r.handlerName} has opened your report on ${r.title}.'),
-          if (r.onTheWayAt != null) (r.onTheWayAt!, 'Authority on the way', '${r.handlerName} is heading to ${r.where}.'),
-          if (r.rescuerCalledAt != null)
-            (r.rescuerCalledAt!, 'Snake catcher called', '${r.handlerName} has called the snake catcher for ${r.where}.'),
-          if (r.onSiteAt != null) (r.onSiteAt!, 'Authority at the spot', '${r.handlerName} has reached ${r.where}.'),
-          if (r.safe && r.reporterConfirmed == null)
-            r.outcome == Outcome.notFound
-                ? (r.resolvedAt!, 'Have you seen the snake again?', 'It wasn’t found at ${r.where}. Tap if it’s still there.')
-                : (r.resolvedAt!, 'Is the area clear now?', '${r.where} was marked safe. Tap to confirm, or tell us if the snake is still there.'),
-        ])
-          _Item('SNAKE ALERT', at, title, body, report: r),
-      _Item(
-        'GATELOG',
+    final cards = <_Card>[
+      for (final r in s.reports) _Card(_updates(s, r).last.time, 'SNAKE ALERT', report: r),
+      _Card(
         DateTime.now().subtract(const Duration(days: 1)),
-        'Gatelog entry approved',
-        "Your 'To City' request for 6 September was approved.",
+        'GATELOG',
+        title: 'Gatelog entry approved',
+        body: "Your 'To City' request for 6 September was approved.",
       ),
-      _Item(
-        'CAB SHARING',
+      _Card(
         DateTime.now().subtract(const Duration(days: 1, hours: 2)),
-        'Someone joined your ride',
-        'Rohit K. joined your 6:30 AM cab to Guwahati Airport.',
+        'CAB SHARING',
+        title: 'Someone joined your ride',
+        body: 'Rohit K. joined your 6:30 AM cab to Guwahati Airport.',
       ),
     ]..sort((a, b) => b.time.compareTo(a.time));
-    final shown = items.where((i) => _filter == 'All' || i.source == _filter.toUpperCase()).toList();
+    final shown = cards.where((c) => _filter == 'All' || c.source == _filter.toUpperCase()).toList();
 
     return DarkPage(
       header: const AppHeader('Notifications'),
@@ -92,29 +98,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
               children: [
-                for (final i in shown)
+                for (final c in shown)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10),
-                    child: Panel(
-                      onTap: i.report == null
-                          ? null
-                          : () => Navigator.push(context, MaterialPageRoute(builder: (_) => SightingDetailScreen(report: i.report!))),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(i.source, style: ft(10.5, w: 700, color: i.report == null ? C.muted : C.green, ls: 1)),
-                              Text('  ·  ${ago(i.time)}', style: ft(11, color: C.faint)),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          Text(i.title, style: ft(15, w: 700)),
-                          const SizedBox(height: 3),
-                          Text(i.body, style: ft(13, color: C.muted, height: 1.4)),
-                        ],
-                      ),
-                    ),
+                    child: c.report == null ? _plain(c) : _reportCard(context, s, c.report!),
                   ),
                 const SizedBox(height: 6),
                 Text(
@@ -129,11 +116,183 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       ),
     );
   }
+
+  Widget _plain(_Card c) => Panel(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(c.source, style: ft(10.5, w: 700, color: C.muted, ls: 1)),
+            Text('  ·  ${ago(c.time)}', style: ft(11, color: C.faint)),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Text(c.title!, style: ft(15, w: 700)),
+        const SizedBox(height: 3),
+        Text(c.body!, style: ft(13, color: C.muted, height: 1.4)),
+      ],
+    ),
+  );
+
+  /// One card per report: the latest update, and the rest behind "n updates".
+  Widget _reportCard(BuildContext context, AppState s, Report r) {
+    final ups = _updates(s, r);
+    final latest = ups.last;
+    final open = _open.contains(r.id);
+    return Panel(
+      padding: EdgeInsets.zero,
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SightingDetailScreen(report: r))),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 8, 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text('SNAKE ALERT', style: ft(10.5, w: 700, color: C.green, ls: 1)),
+                Text('  ·  ${ago(latest.time)}', style: ft(11, color: C.faint)),
+                if (s.isMine(r)) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(color: const Color(0xFF142033), borderRadius: BorderRadius.circular(6)),
+                    child: Text('YOUR REPORT', style: ft(9.5, w: 700, color: const Color(0xFF8AB4FF), ls: 0.6)),
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SnakeThumb(r, size: 44),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(latest.title, style: ft(15, w: 700)),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${r.title} · ${r.where}',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: ft(13, color: C.muted, height: 1.35),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (ups.length > 1) ...[
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  if (r.covered) StatusChip(r),
+                  const Spacer(),
+                  TextButton(
+                    onPressed: () => setState(() => open ? _open.remove(r.id) : _open.add(r.id)),
+                    style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8), minimumSize: const Size(0, 36)),
+                    child: Row(
+                      children: [
+                        Text('${ups.length} updates', style: ft(12.5, w: 600, color: C.sub)),
+                        AnimatedRotation(
+                          turns: open ? 0.5 : 0,
+                          duration: const Duration(milliseconds: 200),
+                          child: const Icon(Icons.keyboard_arrow_down_rounded, size: 20, color: C.sub),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ] else if (r.covered) ...[
+              const SizedBox(height: 10),
+              StatusChip(r),
+              const SizedBox(height: 4),
+            ],
+            AnimatedSize(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              alignment: Alignment.topCenter,
+              child: !open
+                  ? const SizedBox(width: double.infinity)
+                  : Padding(
+                      padding: const EdgeInsets.fromLTRB(4, 4, 8, 4),
+                      child: Column(
+                        children: [
+                          for (final (i, u) in ups.reversed.indexed) _UpdateRow(u, newest: i == 0, last: i == ups.length - 1),
+                        ],
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-class _Item {
-  final String source, title, body;
+class _Update {
   final DateTime time;
+  final String title, body;
+  _Update(this.time, this.title, this.body);
+}
+
+class _Card {
+  final DateTime time;
+  final String source;
   final Report? report;
-  _Item(this.source, this.time, this.title, this.body, {this.report});
+  final String? title, body;
+  _Card(this.time, this.source, {this.report, this.title, this.body});
+}
+
+/// One earlier update in an opened notification: dot, time, title and text.
+class _UpdateRow extends StatelessWidget {
+  final _Update u;
+  final bool newest, last;
+  const _UpdateRow(this.u, {required this.newest, required this.last});
+
+  @override
+  Widget build(BuildContext context) => IntrinsicHeight(
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(
+          width: 12,
+          child: Column(
+            children: [
+              Container(
+                width: 9,
+                height: 9,
+                margin: const EdgeInsets.only(top: 5),
+                decoration: BoxDecoration(color: newest ? C.green : const Color(0xFF555555), shape: BoxShape.circle),
+              ),
+              if (!last) Expanded(child: Container(width: 1.5, color: const Color(0xFF333333))),
+            ],
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(child: Text(u.title, style: ft(13.5, w: 600, color: newest ? C.text : C.sub))),
+                    Text(clock(u.time), style: ft(11.5, color: C.faint)),
+                  ],
+                ),
+                const SizedBox(height: 1),
+                Text(u.body, style: ft(12, color: C.muted, height: 1.35)),
+              ],
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }
