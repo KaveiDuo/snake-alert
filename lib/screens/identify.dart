@@ -18,8 +18,9 @@ class IdentifyResult {
   /// Campus species id, or null when the match isn't one of them.
   final String? speciesId;
   final String? name;
-  final Venom venom;
-  const IdentifyResult(this.photoPath, {this.speciesId, this.name, required this.venom});
+  /// Null when only the photo is attached (the report's answer stays as it is).
+  final Venom? venom;
+  const IdentifyResult(this.photoPath, {this.speciesId, this.name, this.venom});
 }
 
 /// "Identify snake": pick or take a photo, then AI (free Gemini by default)
@@ -287,6 +288,13 @@ class _IdentifyScreenState extends State<IdentifyScreen> with SingleTickerProvid
           ..._matches(r),
         const SizedBox(height: 8),
         Btn('Retake photo', kind: BtnKind.ghost, onTap: _retake),
+        if (widget.forReport && _result != null && _result!.isSnake)
+          Center(
+            child: TextButton(
+              onPressed: () => Navigator.pop(context, IdentifyResult(_photo!)),
+              child: Text('Just attach the photo', style: ft(13, w: 600, color: C.muted)),
+            ),
+          ),
       ],
     );
   }

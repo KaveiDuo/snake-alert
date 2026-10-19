@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../data/app_state.dart';
@@ -15,38 +14,6 @@ import '../widgets/scroll_arrows.dart';
 import 'identify.dart';
 import 'sighting_detail.dart';
 import 'snake_watch.dart';
-
-Future<String?> pickPhoto(BuildContext context) async {
-  final source = await showModalBottomSheet<ImageSource>(
-    context: context,
-    backgroundColor: C.card,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-    builder: (c) => SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 14, 12, 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_camera_outlined, color: C.green),
-              title: Text('Take a photo', style: ft(15)),
-              subtitle: Text('Keep 3 m back — zoom in instead', style: ft(12, color: C.muted)),
-              onTap: () => Navigator.pop(c, ImageSource.camera),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library_outlined, color: C.green),
-              title: Text('Choose from gallery', style: ft(15)),
-              onTap: () => Navigator.pop(c, ImageSource.gallery),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-  if (source == null) return null;
-  final x = await ImagePicker().pickImage(source: source, maxWidth: 1600, imageQuality: 85);
-  return x?.path;
-}
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -180,26 +147,15 @@ class _ReportScreenState extends State<ReportScreen> {
                   if (d.photoPath != null)
                     _PhotoAttached(path: d.photoPath!, matchedId: d.matchedId, matchedName: d.matchedName, onRemove: () => s.setPhoto(null))
                   else
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _SmallAction(Icons.center_focus_strong_outlined, 'Scan to identify', () async {
-                            final res = await Navigator.push<IdentifyResult>(
-                              context,
-                              MaterialPageRoute(builder: (_) => const IdentifyScreen(forReport: true)),
-                            );
-                            if (res != null) s.setPhoto(res.photoPath, matchedId: res.speciesId, matchedName: res.name, venom: res.venom);
-                          }),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _SmallAction(Icons.add_photo_alternate_outlined, 'Add photo', () async {
-                            final p = await pickPhoto(context);
-                            if (p != null) s.setPhoto(p);
-                          }),
-                        ),
-                      ],
-                    ),
+                    // One way in: take or pick a photo, and it's identified automatically.
+                    // The scan result can also attach just the photo.
+                    _PhotoAction(() async {
+                      final res = await Navigator.push<IdentifyResult>(
+                        context,
+                        MaterialPageRoute(builder: (_) => const IdentifyScreen(forReport: true)),
+                      );
+                      if (res != null) s.setPhoto(res.photoPath, matchedId: res.speciesId, matchedName: res.name, venom: res.venom);
+                    }),
                   const SizedBox(height: 14),
                   SizedBox(
                     height: 132,
@@ -405,29 +361,43 @@ class _SummaryRow extends StatelessWidget {
   }
 }
 
-class _SmallAction extends StatelessWidget {
-  final IconData icon;
-  final String label;
+/// "Add a photo": opens the photo screen (take one or pick from the gallery),
+/// which identifies the snake straight away.
+class _PhotoAction extends StatelessWidget {
   final VoidCallback onTap;
-  const _SmallAction(this.icon, this.label, this.onTap);
+  const _PhotoAction(this.onTap);
   @override
   Widget build(BuildContext context) => Material(
     color: C.greenSoft,
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(16),
       side: const BorderSide(color: Color(0xFF245A36)),
     ),
     child: InkWell(
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(16),
       onTap: onTap,
-      child: SizedBox(
-        height: 44,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 18, color: C.green),
-            const SizedBox(width: 8),
-            Text(label, style: ft(13.5, w: 600, color: C.greenText)),
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(color: C.green.withValues(alpha: 0.16), borderRadius: BorderRadius.circular(12)),
+              child: const Icon(Icons.add_a_photo_outlined, size: 20, color: C.green),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Add a photo', style: ft(15, w: 700, color: C.greenText)),
+                  const SizedBox(height: 2),
+                  Text('Camera or gallery · we’ll identify the snake', style: ft(12, color: C.muted)),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded, color: C.greenText),
           ],
         ),
       ),
