@@ -1,9 +1,70 @@
 import 'dart:async';
 
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
+
+/// Starts the camera before the scanner opens, so it shows a live view at once.
+/// The report form calls [prepare] when it reaches "Which snake?"; the scanner
+/// [take]s the ready camera. Unused cameras are released after a minute or when
+/// the form closes. Skipped in the browser, where starting the camera would ask
+/// for permission before the student chose to scan.
+class CameraWarmup {
+  static Future<List<CameraDescription>>? _cams;
+  static CameraController? _ready;
+  static Future<void>? _preparing;
+  static Timer? _expire;
+
+  /// The phone's cameras, looked up once.
+  static Future<List<CameraDescription>> cameras() =>
+      _cams ??= availableCameras().catchError((Object e) {
+        _cams = null; // try again next time
+        throw e;
+      });
+
+  static CameraController _newController(List<CameraDescription> cams) {
+    final back = cams.firstWhere((c) => c.lensDirection == CameraLensDirection.back, orElse: () => cams.first);
+    return CameraController(back, ResolutionPreset.high, enableAudio: false);
+  }
+
+  static Future<void> prepare() {
+    if (kIsWeb || _ready != null) return Future.value();
+    return _preparing ??= () async {
+      try {
+        final cams = await cameras();
+        if (cams.isEmpty) return;
+        final c = _newController(cams);
+        await c.initialize();
+        _ready = c;
+        _expire?.cancel();
+        _expire = Timer(const Duration(minutes: 1), release);
+      } catch (_) {
+        // The scanner will try again (and show any problem) when it opens.
+      } finally {
+        _preparing = null;
+      }
+    }();
+  }
+
+  /// Hands over the warmed-up camera, if there is a working one.
+  static CameraController? take() {
+    final c = _ready;
+    _ready = null;
+    _expire?.cancel();
+    if (c != null && c.value.isInitialized && !c.value.hasError) return c;
+    c?.dispose();
+    return null;
+  }
+
+  static void release() {
+    _expire?.cancel();
+    final c = _ready;
+    _ready = null;
+    c?.dispose();
+  }
+}
 
 /// Full-screen live camera for scanning a snake: a framed viewfinder with the
 /// outside dimmed, a round shutter button, Album (gallery) and Light (torch),
@@ -34,7 +95,24 @@ class _SnakeCameraState extends State<SnakeCamera> with WidgetsBindingObserver, 
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _open();
+    // A warmed-up camera is shown on the very first frame.
+    final warm = CameraWarmup.take();
+    if (warm != null) {
+      _cam = warm;
+      _starting = false;
+      _zoomRange(warm);
+    } else {
+      _open();
+    }
+  }
+
+  Future<void> _zoomRange(CameraController c) async {
+    try {
+      _minZoom = await c.getMinZoomLevel();
+      _maxZoom = (await c.getMaxZoomLevel()).clamp(1, 8).toDouble();
+      _zoom = _minZoom;
+      if (mounted) setState(() {});
+    } catch (_) {}
   }
 
   @override
@@ -65,11 +143,14 @@ class _SnakeCameraState extends State<SnakeCamera> with WidgetsBindingObserver, 
       _problem = null;
     });
     try {
-      final cams = await availableCameras();
-      if (cams.isEmpty) throw CameraException('none', 'No camera found');
-      final back = cams.firstWhere((c) => c.lensDirection == CameraLensDirection.back, orElse: () => cams.first);
-      final c = CameraController(back, ResolutionPreset.high, enableAudio: false);
-      await c.initialize();
+      // Use the camera warmed up by the report form when there is one.
+      var c = CameraWarmup.take();
+      if (c == null) {
+        final cams = await CameraWarmup.cameras();
+        if (cams.isEmpty) throw CameraException('none', 'No camera found');
+        c = CameraWarmup._newController(cams);
+        await c.initialize();
+      }
       try {
         _minZoom = await c.getMinZoomLevel();
         _maxZoom = (await c.getMaxZoomLevel()).clamp(1, 8).toDouble();

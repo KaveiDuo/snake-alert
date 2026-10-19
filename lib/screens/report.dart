@@ -11,6 +11,7 @@ import '../widgets/campus_map.dart';
 import '../widgets/common.dart';
 import '../widgets/response.dart';
 import '../widgets/scroll_arrows.dart';
+import '../widgets/snake_camera.dart';
 import 'identify.dart';
 import 'sighting_detail.dart';
 import 'snake_watch.dart';
@@ -41,6 +42,7 @@ class _ReportScreenState extends State<ReportScreen> {
   void dispose() {
     _finding?.cancel();
     _note.dispose();
+    CameraWarmup.release();
     super.dispose();
   }
 
@@ -128,6 +130,8 @@ class _ReportScreenState extends State<ReportScreen> {
                   _VenomOption(Venom.unsure, 'Not sure', 'We alert everyone as venomous to be safe', pinUnsure),
                 ],
                 if (loc != null && d.venom != null) ...[
+                  // "Which snake?" is showing: get the camera ready for the scanner.
+                  if (d.photoPath == null) _WarmCamera(),
                   _SummaryRow(venom: d.venom!, onChange: () => setState(() => d.venom = null)),
                   const SizedBox(height: 18),
                   Row(
@@ -158,7 +162,13 @@ class _ReportScreenState extends State<ReportScreen> {
                     _PhotoAction(() async {
                       final res = await Navigator.push<IdentifyResult>(
                         context,
-                        MaterialPageRoute(builder: (_) => const IdentifyScreen(forReport: true)),
+                        // Quick fade so the scanner appears straight away.
+                        PageRouteBuilder(
+                          transitionDuration: const Duration(milliseconds: 140),
+                          reverseTransitionDuration: const Duration(milliseconds: 140),
+                          pageBuilder: (_, _, _) => const IdentifyScreen(forReport: true),
+                          transitionsBuilder: (_, a, _, c) => FadeTransition(opacity: a, child: c),
+                        ),
                       );
                       if (res != null) s.setPhoto(res.photoPath, matchedId: res.speciesId, matchedName: res.name, venom: res.venom);
                     }),
@@ -985,4 +995,22 @@ class _ReportedScreenState extends State<ReportedScreen> with TickerProviderStat
       ),
     );
   }
+}
+
+/// Invisible: starts the camera in the background once, so the scanner opens
+/// with a live view straight away (see CameraWarmup).
+class _WarmCamera extends StatefulWidget {
+  @override
+  State<_WarmCamera> createState() => _WarmCameraState();
+}
+
+class _WarmCameraState extends State<_WarmCamera> {
+  @override
+  void initState() {
+    super.initState();
+    CameraWarmup.prepare();
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.shrink();
 }
