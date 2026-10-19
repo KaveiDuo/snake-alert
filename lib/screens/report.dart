@@ -11,6 +11,7 @@ import '../theme.dart';
 import '../widgets/campus_map.dart';
 import '../widgets/common.dart';
 import '../widgets/response.dart';
+import '../widgets/scroll_arrows.dart';
 import 'identify.dart';
 import 'sighting_detail.dart';
 import 'snake_watch.dart';
@@ -202,8 +203,8 @@ class _ReportScreenState extends State<ReportScreen> {
                   const SizedBox(height: 14),
                   SizedBox(
                     height: 132,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
+                    // ‹ › arrows show there are more snakes to either side.
+                    child: ScrollArrows(
                       children: [
                         for (final sp in species.where((x) => d.venom == Venom.unsure || x.venomous == (d.venom == Venom.venomous)))
                           _SpeciesCard(sp: sp, selected: d.speciesId == sp.id, onTap: () => s.setSpecies(sp.id)),
