@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snake_watch/data/app_state.dart';
 import 'package:snake_watch/data/scanner.dart';
 import 'package:snake_watch/main.dart';
@@ -8,10 +9,18 @@ import 'package:snake_watch/screens/notifications.dart';
 import 'package:snake_watch/screens/sighting_detail.dart';
 
 void main() {
-  testWidgets('Sign-in screen shows both sign-in options', (tester) async {
+  testWidgets('Sign-in: Student / Hostel authority switch changes the one button', (tester) async {
+    SharedPreferences.setMockInitialValues({});
     await tester.pumpWidget(SnakeWatchApp(state: AppState()));
+    await tester.pumpAndSettle();
+    expect(find.text('Student'), findsOneWidget);
+    expect(find.text('Hostel authority'), findsOneWidget);
     expect(find.text('Sign in with Outlook'), findsOneWidget);
-    expect(find.text('Hostel authority sign-in'), findsOneWidget);
+    await tester.tap(find.text('Hostel authority'));
+    await tester.pumpAndSettle();
+    expect(find.text('Sign in with phone number'), findsOneWidget);
+    expect(find.text('Sign in with Outlook'), findsNothing);
+    expect((await SharedPreferences.getInstance()).getBool('sign_in_as_authority'), isTrue); // remembered
   });
 
   test('Marking safe takes the full response: on the way, at the spot, then outcome and photo', () {
