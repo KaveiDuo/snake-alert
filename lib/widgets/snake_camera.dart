@@ -1,8 +1,12 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:image/image.dart' as img;
 
 import '../theme.dart';
 
@@ -88,6 +92,9 @@ class _SnakeCameraState extends State<SnakeCamera> with WidgetsBindingObserver, 
   String? _problem;
   bool _starting = true, _torch = false, _torchAvailable = true, _busy = false;
   double _zoom = 1, _minZoom = 1, _maxZoom = 1, _pinchStart = 1;
+  // Where the frame is on screen, to cut the photo down to it.
+  Rect _frame = Rect.zero;
+  Size _screen = Size.zero;
   late final AnimationController _line = AnimationController(vsync: this, duration: const Duration(milliseconds: 2200))
     ..repeat(reverse: true);
 
@@ -194,7 +201,12 @@ class _SnakeCameraState extends State<SnakeCamera> with WidgetsBindingObserver, 
           await c.setFlashMode(FlashMode.off);
         } catch (_) {}
       }
-      widget.onCaptured(x);
+      // Keep only what was inside the frame, as the student saw it.
+      XFile photo = x;
+      try {
+        photo = await cropToFrame(x, _frame, _screen);
+      } catch (_) {}
+      widget.onCaptured(photo);
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Couldn’t take the photo. Try again.')));
@@ -243,6 +255,9 @@ class _SnakeCameraState extends State<SnakeCamera> with WidgetsBindingObserver, 
             width: side,
             height: side * 1.05,
           );
+          _frame = frame;
+          _screen = box.biggest;
+          final view = ready ? _viewSize(c, box.biggest) : box.biggest;
           return Stack(
             fit: StackFit.expand,
             children: [
@@ -254,11 +269,7 @@ class _SnakeCameraState extends State<SnakeCamera> with WidgetsBindingObserver, 
                   child: ClipRect(
                     child: FittedBox(
                       fit: BoxFit.cover,
-                      child: SizedBox(
-                        width: c.value.previewSize?.height ?? box.maxWidth,
-                        height: c.value.previewSize?.width ?? box.maxHeight,
-                        child: CameraPreview(c),
-                      ),
+                      child: SizedBox(width: view.width, height: view.height, child: CameraPreview(c)),
                     ),
                   ),
                 )
@@ -401,6 +412,56 @@ class _SnakeCameraState extends State<SnakeCamera> with WidgetsBindingObserver, 
       ),
     );
   }
+}
+
+/// The camera picture's shape as it appears upright on screen. Phones report
+/// the sensor size sideways (the app is portrait only); browsers report the
+/// video as it is.
+Size _viewSize(CameraController c, Size fallback) {
+  final p = c.value.previewSize;
+  if (p == null || p.isEmpty) return fallback;
+  return kIsWeb ? p : Size(p.height, p.width);
+}
+
+/// Cuts a photo down to the part that was inside the scanner frame. The live
+/// view shows the picture scaled to cover the screen (centred), so the frame
+/// maps straight onto the photo. Also scales it to at most 1024 px, which is
+/// plenty for the scanner and uploads fast.
+Future<XFile> cropToFrame(XFile photo, Rect frame, Size screen) async {
+  if (frame.isEmpty || screen.isEmpty) return photo;
+  final codec = await ui.instantiateImageCodec(await photo.readAsBytes());
+  final pic = (await codec.getNextFrame()).image;
+  final w = pic.width.toDouble(), h = pic.height.toDouble();
+  final s = math.max(screen.width / w, screen.height / h);
+  final dx = (screen.width - w * s) / 2, dy = (screen.height - h * s) / 2;
+  final src = Rect.fromLTRB(
+    (frame.left - dx) / s,
+    (frame.top - dy) / s,
+    (frame.right - dx) / s,
+    (frame.bottom - dy) / s,
+  ).intersect(Offset.zero & Size(w, h));
+  if (src.width < 16 || src.height < 16) {
+    pic.dispose();
+    return photo;
+  }
+  final k = math.min(1.0, 1024 / math.max(src.width, src.height));
+  final ow = (src.width * k).round(), oh = (src.height * k).round();
+  final rec = ui.PictureRecorder();
+  Canvas(rec).drawImageRect(
+    pic,
+    src,
+    Rect.fromLTWH(0, 0, ow.toDouble(), oh.toDouble()),
+    Paint()..filterQuality = FilterQuality.high,
+  );
+  final out = await rec.endRecording().toImage(ow, oh);
+  final rgba = await out.toByteData(format: ui.ImageByteFormat.rawRgba);
+  pic.dispose();
+  out.dispose();
+  final jpg = img.encodeJpg(img.Image.fromBytes(width: ow, height: oh, bytes: rgba!.buffer, numChannels: 4), quality: 80);
+  if (kIsWeb) return XFile.fromData(jpg, mimeType: 'image/jpeg', name: 'snake.jpg');
+  final f = File('${photo.path}.frame.jpg');
+  await f.writeAsBytes(jpg);
+  return XFile(f.path, mimeType: 'image/jpeg');
 }
 
 /// Dims outside the frame and draws rounded green corner brackets.
