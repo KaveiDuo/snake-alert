@@ -172,7 +172,10 @@ class _ReportScreenState extends State<ReportScreen> {
                       );
                       if (res != null) s.setPhoto(res.photoPath, matchedId: res.speciesId, matchedName: res.name, venom: res.venom);
                     }),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 18),
+                  // "Or" while the scanner button is the other option above.
+                  Text(d.photoPath == null ? 'Or choose the snake' : 'Choose the snake', style: ft(13.5, w: 600, color: C.sub)),
+                  const SizedBox(height: 10),
                   SizedBox(
                     height: 132,
                     // ‹ › arrows show there are more snakes to either side.
