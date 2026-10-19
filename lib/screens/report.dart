@@ -958,6 +958,7 @@ class _ReportedScreenState extends State<ReportedScreen> with TickerProviderStat
                   const SizedBox(height: 12),
                   Btn(
                     'Call the authority now',
+                    kind: BtnKind.danger,
                     icon: Icons.call_rounded,
                     height: 50,
                     onTap: () async {

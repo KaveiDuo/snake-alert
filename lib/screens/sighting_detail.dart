@@ -239,6 +239,7 @@ class _Response extends StatelessWidget {
           const SizedBox(height: 12),
           Btn(
             'Call the authority now',
+            kind: BtnKind.danger,
             icon: Icons.call_rounded,
             height: 48,
             onTap: () async {
