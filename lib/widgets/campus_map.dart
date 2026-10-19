@@ -118,6 +118,48 @@ class _BuildingLabels extends StatelessWidget {
   }
 }
 
+/// Red hospital badge just above the tiles' "IITG Hospital" label. The tiles
+/// only draw their own hospital symbol when zoomed out (tile zoom 15), so this
+/// shows from there on in.
+class _HospitalIcon extends StatelessWidget {
+  const _HospitalIcon();
+
+  static final LatLng _at = () {
+    final o = campusZones.firstWhere((z) => z.name == 'IITG Hospital').outlines.first;
+    return LatLng(
+      o.map((p) => p.latitude).reduce((a, b) => a + b) / o.length,
+      o.map((p) => p.longitude).reduce((a, b) => a + b) / o.length,
+    );
+  }();
+
+  @override
+  Widget build(BuildContext context) {
+    if (MapCamera.of(context).zoom < 15.5) return const SizedBox.shrink();
+    return MarkerLayer(
+      markers: [
+        Marker(
+          point: _at,
+          width: 26,
+          height: 26,
+          // Sit above the label, which the tiles centre on the building.
+          alignment: const Alignment(0, -2.2),
+          child: IgnorePointer(
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFE5383B),
+                borderRadius: BorderRadius.circular(7),
+                border: Border.all(color: Colors.white, width: 2),
+                boxShadow: const [BoxShadow(color: Color(0x33000000), blurRadius: 3, offset: Offset(0, 1))],
+              ),
+              child: const Icon(Icons.add_rounded, color: Colors.white, size: 20),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 /// Hides the darker outline the tiles draw around light-green sports grounds
 /// by tracing it in the grounds' own colour. Only when zoomed in: further out
 /// the outline is barely visible and the line would cut through the tiles'
@@ -276,6 +318,7 @@ class CampusMapState extends State<CampusMap> with TickerProviderStateMixin {
                     ],
                   ),
                   _BuildingLabels(dark: widget.dark),
+                  const _HospitalIcon(),
                   MarkerLayer(
                     markers: [
                       Marker(point: s.you, width: 44, height: 44, child: _you(s.gps)),
