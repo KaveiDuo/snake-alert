@@ -115,45 +115,96 @@ Rules:
   static Future<ScanResult> identify(Uint8List image, String apiKey) =>
       apiKey.startsWith('sk-ant-') ? _claude(image, apiKey) : _gemini(image, apiKey);
 
+  static const _geminiBase = 'https://generativelanguage.googleapis.com/v1beta/models';
+
+  /// One shared connection, so the warm-up below and the scan reuse it.
+  static final _client = http.Client();
+
+  /// If the first Flash-Lite answer hasn't arrived by then, a second identical
+  /// request is sent and whichever answers first wins. Flash-Lite usually takes
+  /// about 2 s but now and then one request takes 5–10 s.
+  static const hedgeAfter = Duration(milliseconds: 2500);
+
+  /// Opens the connection to Google (and, in the browser, its CORS check)
+  /// while the student is still picking a photo, so the scan starts faster.
+  static Future<void> warmUp() async {
+    final key = await activeKey();
+    if (key == null || key.startsWith('sk-ant-')) return;
+    try {
+      await _client
+          .get(Uri.parse('$_geminiBase/${geminiModels.keys.first}'), headers: {'x-goog-api-key': key})
+          .timeout(const Duration(seconds: 8));
+    } catch (_) {}
+  }
+
+  /// One Gemini request. Null when it timed out or the network failed.
+  static Future<http.Response?> _post(String model, String body, String apiKey) async {
+    try {
+      return await _client
+          .post(
+            Uri.parse('$_geminiBase/$model:generateContent'),
+            headers: {'content-type': 'application/json', 'x-goog-api-key': apiKey},
+            body: body,
+          )
+          .timeout(perModelTimeout);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Flash-Lite with a backup request after [hedgeAfter]: the first OK answer
+  /// wins. Returns the last answer (or null) if neither succeeded.
+  static Future<http.Response?> _hedged(String model, String body, String apiKey) {
+    final done = Completer<http.Response?>();
+    var pending = 2;
+    http.Response? last;
+    void finish(http.Response? r) {
+      if (done.isCompleted) return;
+      if (r != null) last = r;
+      if (r != null && r.statusCode == 200) {
+        done.complete(r);
+      } else if (--pending == 0) {
+        done.complete(last);
+      }
+    }
+
+    _post(model, body, apiKey).then(finish);
+    Future<void>.delayed(hedgeAfter, () {
+      if (done.isCompleted) return;
+      _post(model, body, apiKey).then(finish);
+    });
+    return done.future;
+  }
+
   static Future<ScanResult> _gemini(Uint8List image, String apiKey) async {
     final imagePart = {
       'inline_data': {'mime_type': _mediaType(image), 'data': base64Encode(image)},
     };
-    http.Response? res;
-    var timedOut = false;
-    for (final MapEntry(key: model, value: thinking) in geminiModels.entries) {
-      final body = jsonEncode({
-        'contents': [
-          {
-            'parts': [imagePart, {'text': _prompt}],
-          },
-        ],
-        'generationConfig': {
-          'response_mime_type': 'application/json',
-          'temperature': 0.2,
-          'thinkingConfig': {'thinkingLevel': thinking},
+    String bodyFor(String thinking) => jsonEncode({
+      'contents': [
+        {
+          'parts': [imagePart, {'text': _prompt}],
         },
-      });
-      try {
-        res = await http
-            .post(
-              Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent'),
-              headers: {'content-type': 'application/json', 'x-goog-api-key': apiKey},
-              body: body,
-            )
-            .timeout(perModelTimeout);
-      } on TimeoutException {
-        timedOut = true;
-        continue; // too slow: try the next model
-      } catch (_) {
-        throw const ScanException('Couldn’t reach the scanner. Check your internet connection.');
-      }
+      ],
+      'generationConfig': {
+        'response_mime_type': 'application/json',
+        'temperature': 0.2,
+        'thinkingConfig': {'thinkingLevel': thinking},
+      },
+    });
+
+    // Fast model first (with a backup request), then the bigger ones in turn.
+    http.Response? res;
+    var i = 0;
+    for (final MapEntry(key: model, value: thinking) in geminiModels.entries) {
+      res = i++ == 0 ? await _hedged(model, bodyFor(thinking), apiKey) : await _post(model, bodyFor(thinking), apiKey);
+      if (res == null) continue; // too slow or no connection: try the next model
       // Busy, out of today's free quota or model not available: try the next one.
       if (res.statusCode == 429 || res.statusCode == 404 || res.statusCode == 503) continue;
       break;
     }
-    if (res == null && timedOut) throw const ScanException('The scanner is slow right now. Try again in a moment.');
-    final r = res!;
+    if (res == null) throw const ScanException('Couldn’t reach the scanner. Check your internet connection and try again.');
+    final r = res;
     if (r.statusCode == 429) throw const ScanException('The free scanner has reached its limit for now. Try again later.');
     if (r.statusCode == 400 && r.body.contains('API_KEY_INVALID') || r.statusCode == 401 || r.statusCode == 403) {
       throw const ScanException('The scanner key isn’t valid. Check it in Profile → Snake scanner key.');

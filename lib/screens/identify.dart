@@ -46,6 +46,12 @@ class _IdentifyScreenState extends State<IdentifyScreen> with SingleTickerProvid
   late final AnimationController _scan = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200));
 
   @override
+  void initState() {
+    super.initState();
+    Scanner.warmUp(); // connect to the scanner while a photo is being picked
+  }
+
+  @override
   void dispose() {
     _scan.dispose();
     super.dispose();
