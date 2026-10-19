@@ -50,20 +50,31 @@ class _IdentifyScreenState extends State<IdentifyScreen> with SingleTickerProvid
     Scanner.warmUp(); // connect to the scanner while a photo is being picked
   }
 
+  bool _slow = false, _handedOff = false;
+  Timer? _slowTimer;
+
   @override
   void dispose() {
+    _slowTimer?.cancel();
     _scan.dispose();
     super.dispose();
   }
 
   Future<void> _start(String photo, Future<Uint8List> Function() load, String demoId) async {
+    final app = AppScope.read(context); // kept: the scan may finish after this screen closes
     setState(() {
       _photo = photo;
       _demoId = demoId;
       _scanning = true;
+      _slow = false;
       _result = null;
       _error = null;
       _pick = 0;
+    });
+    // If the AI is slow, offer to go back to the report and keep scanning there.
+    _slowTimer?.cancel();
+    _slowTimer = Timer(const Duration(seconds: 5), () {
+      if (mounted && _scanning) setState(() => _slow = true);
     });
     _scan.repeat(reverse: true, period: const Duration(milliseconds: 900));
     // Real scans show their result as soon as it arrives; the demo keeps a
@@ -84,6 +95,12 @@ class _IdentifyScreenState extends State<IdentifyScreen> with SingleTickerProvid
       } catch (_) {
         error = 'Something went wrong while scanning. Try again.';
       }
+    }
+    _slowTimer?.cancel();
+    if (_handedOff) {
+      // The student already went back to the report: fill the result in there.
+      app.finishBackgroundScan(photo, result != null && result.isSnake && result.matches.isNotEmpty ? result.matches.first : null);
+      return;
     }
     if (!mounted) return;
     _scan.stop();
@@ -183,13 +200,32 @@ class _IdentifyScreenState extends State<IdentifyScreen> with SingleTickerProvid
             ),
           ),
           Positioned(
-            left: 0,
-            right: 0,
-            bottom: 22,
-            child: Text(
-              'Matching against campus species…',
-              textAlign: TextAlign.center,
-              style: ft(13.5, w: 600, color: Colors.white).copyWith(shadows: const [Shadow(blurRadius: 8)]),
+            left: 16,
+            right: 16,
+            bottom: 18,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  _slow ? 'The AI is busy right now — still identifying…' : 'Identifying the snake…',
+                  textAlign: TextAlign.center,
+                  style: ft(13.5, w: 600, color: Colors.white).copyWith(shadows: const [Shadow(blurRadius: 8)]),
+                ),
+                // Don't make the student wait: report now, the result fills in later.
+                if (_slow && widget.forReport) ...[
+                  const SizedBox(height: 12),
+                  Btn(
+                    'Report now · keep identifying',
+                    icon: Icons.bolt_rounded,
+                    height: 48,
+                    onTap: () {
+                      _handedOff = true;
+                      AppScope.read(context).startBackgroundScan(_photo!);
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
+              ],
             ),
           ),
         ],

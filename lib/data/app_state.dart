@@ -9,6 +9,7 @@ import 'package:latlong2/latlong.dart';
 import 'campus_boundary.dart';
 import 'open_areas.dart';
 import 'places.dart';
+import 'scanner.dart' show ScanMatch;
 import 'species.dart';
 import 'zones.dart';
 
@@ -201,8 +202,9 @@ class Loc {
 
 class Report {
   final String id;
-  final String? speciesId;
-  final Venom venom;
+  // Filled in later when a background scan finishes after the report was sent.
+  String? speciesId;
+  Venom venom;
   final String place;
   final String spot;
   final String note;
@@ -213,7 +215,7 @@ class Report {
   final String? photoPath;
 
   /// Species named by the scanner when it isn't one of the campus species.
-  final String? speciesName;
+  String? speciesName;
 
   // Response by the responsible authority (see [Stage]).
   Stage stage;
@@ -327,6 +329,9 @@ class Draft {
 
   /// Name the scanner gave, when it isn't one of the campus species.
   String? matchedName;
+
+  /// The photo is still being identified in the background.
+  bool scanning = false;
   bool exactSpotSet = false;
   String note = '';
 }
@@ -847,7 +852,55 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// The student chose "Report now" while the scan was slow: the photo is
+  /// attached and the scan keeps running (see [finishBackgroundScan]).
+  void startBackgroundScan(String path) {
+    draft.photoPath = path;
+    draft.matchedId = draft.matchedName = null;
+    draft.scanning = true;
+    notifyListeners();
+  }
+
+  /// A background scan finished. Fills in the snake on the report being written,
+  /// or on the report already sent with this photo. It never contradicts the
+  /// student: the venom answer only changes if they hadn't picked one or chose
+  /// "Not sure", and a species they picked themselves is kept.
+  void finishBackgroundScan(String path, ScanMatch? top) {
+    Venom? venomOf(ScanMatch m) => m.venomous == null ? null : (m.venomous! ? Venom.venomous : Venom.nonVenomous);
+    if (draft.photoPath == path && draft.scanning) {
+      draft.scanning = false;
+      if (top != null && draft.speciesId == null) {
+        final v = venomOf(top);
+        final fits = draft.venom == null || draft.venom == Venom.unsure || v == null || draft.venom == v;
+        if (fits) {
+          draft.matchedId = top.speciesId;
+          draft.matchedName = top.speciesId == null ? top.name : null;
+          draft.speciesId = top.speciesId;
+          if (v != null && (draft.venom == null || draft.venom == Venom.unsure)) draft.venom = v;
+        }
+      }
+      notifyListeners();
+      return;
+    }
+    if (top == null) return;
+    for (final r in reports) {
+      if (r.photoPath != path) continue;
+      if (r.speciesId == null && r.speciesName == null) {
+        final v = venomOf(top);
+        final fits = r.venom == Venom.unsure || v == null || r.venom == v;
+        if (fits) {
+          r.speciesId = top.speciesId;
+          r.speciesName = top.speciesId == null ? top.name : null;
+          if (v != null && r.venom == Venom.unsure) r.venom = v;
+        }
+      }
+      notifyListeners();
+      return;
+    }
+  }
+
   void setPhoto(String? path, {String? matchedId, String? matchedName, Venom? venom}) {
+    draft.scanning = false;
     draft.photoPath = path;
     draft.matchedId = matchedId;
     draft.matchedName = matchedId == null ? matchedName : null;
@@ -876,6 +929,8 @@ class AppState extends ChangeNotifier {
       speciesName: draft.speciesId == null ? draft.matchedName : null,
     );
     reports.insert(0, r);
+    // A scan still running now belongs to the sent report (see finishBackgroundScan).
+    draft.scanning = false;
     notifyListeners();
     if (r.covered && role == Role.student) _demoResponse(r);
     return r;

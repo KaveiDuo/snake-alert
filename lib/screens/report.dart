@@ -145,7 +145,13 @@ class _ReportScreenState extends State<ReportScreen> {
                   Text('Helps the authority prepare. Skip it if you are not sure.', style: ft(13, color: C.muted)),
                   const SizedBox(height: 14),
                   if (d.photoPath != null)
-                    _PhotoAttached(path: d.photoPath!, matchedId: d.matchedId, matchedName: d.matchedName, onRemove: () => s.setPhoto(null))
+                    _PhotoAttached(
+                      path: d.photoPath!,
+                      matchedId: d.matchedId,
+                      matchedName: d.matchedName,
+                      scanning: d.scanning,
+                      onRemove: () => s.setPhoto(null),
+                    )
                   else
                     // One way in: the scanner (take or pick a photo, identified automatically).
                     // The scan result can also attach just the photo.
@@ -409,8 +415,9 @@ class _PhotoAttached extends StatelessWidget {
   final String path;
   final String? matchedId;
   final String? matchedName;
+  final bool scanning;
   final VoidCallback onRemove;
-  const _PhotoAttached({required this.path, required this.matchedId, this.matchedName, required this.onRemove});
+  const _PhotoAttached({required this.path, required this.matchedId, this.matchedName, this.scanning = false, required this.onRemove});
   @override
   Widget build(BuildContext context) {
     return Panel(
@@ -430,6 +437,14 @@ class _PhotoAttached extends StatelessWidget {
                 Text('Photo attached', style: ft(14.5, w: 600)),
                 if (matchedId != null) Text('Matched ${speciesById(matchedId!).name}', style: ft(12.5, color: C.green)),
                 if (matchedId == null && matchedName != null) Text('Matched $matchedName', style: ft(12.5, color: C.green)),
+                if (scanning)
+                  Row(
+                    children: [
+                      const SizedBox(width: 11, height: 11, child: CircularProgressIndicator(strokeWidth: 1.6, color: C.amber)),
+                      const SizedBox(width: 6),
+                      Expanded(child: Text('Identifying… you can report now', style: ft(12.5, color: C.amber))),
+                    ],
+                  ),
               ],
             ),
           ),

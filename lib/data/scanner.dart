@@ -52,8 +52,11 @@ class Scanner {
   /// in testing; the bigger models are slower and often overloaded.
   static const geminiModels = {'gemini-3.5-flash-lite': 'minimal', 'gemini-3.6-flash': 'minimal', 'gemini-3.8-flash': 'low'};
 
-  /// How long to wait for one model before trying the next.
+  /// How long to wait for one model before trying the next. Flash-Lite gets
+  /// longer: when Google's free tier is overloaded it still answers, just
+  /// slowly (25–30 s seen), while the bigger models are usually refused.
   static const perModelTimeout = Duration(seconds: 12);
+  static const firstModelTimeout = Duration(seconds: 35);
 
   static const _builtInReversed = String.fromEnvironment('SCANNER_KEY_R');
   static String? get builtInKey => _builtInReversed.isEmpty ? null : _builtInReversed.split('').reversed.join();
@@ -138,7 +141,7 @@ Rules: up to 3 matches, most likely first; confidences add up to at most 100. "v
             headers: {'content-type': 'application/json', 'x-goog-api-key': apiKey},
             body: body,
           )
-          .timeout(perModelTimeout);
+          .timeout(model == geminiModels.keys.first ? firstModelTimeout : perModelTimeout);
     } catch (_) {
       return null;
     }

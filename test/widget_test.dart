@@ -215,4 +215,39 @@ void main() {
     expect(r.title, 'Saw-scaled Viper');
     expect(r.venom, Venom.venomous);
   });
+
+  test('Background scan fills in the report but never contradicts the student', () {
+    const krait = ScanMatch(speciesId: 'banded_krait', name: 'Banded Krait', venomous: true, confidence: 80);
+    const wolf = ScanMatch(speciesId: 'wolf', name: 'Common Wolf Snake', venomous: false, confidence: 80);
+    final kameng = const LatLng(26.19043, 91.70156);
+
+    // Still writing the report, venom not chosen yet: filled in.
+    final s = AppState();
+    s.startDraft(at: s.locFromMap(kameng));
+    s.startBackgroundScan('a.jpg');
+    expect(s.draft.scanning, isTrue);
+    s.finishBackgroundScan('a.jpg', krait);
+    expect(s.draft.scanning, isFalse);
+    expect(s.draft.speciesId, 'banded_krait');
+    expect(s.draft.venom, Venom.venomous);
+
+    // Student said venomous, scan says a harmless snake: their answer stands.
+    final s2 = AppState();
+    s2.startDraft(at: s2.locFromMap(kameng));
+    s2.setVenom(Venom.venomous);
+    s2.startBackgroundScan('b.jpg');
+    s2.finishBackgroundScan('b.jpg', wolf);
+    expect(s2.draft.venom, Venom.venomous);
+    expect(s2.draft.speciesId, isNull);
+
+    // Report already sent as "Not sure": updated when the scan finishes.
+    final s3 = AppState();
+    s3.startDraft(at: s3.locFromMap(kameng));
+    s3.setVenom(Venom.unsure);
+    s3.startBackgroundScan('c.jpg');
+    final r = s3.submit();
+    s3.finishBackgroundScan('c.jpg', const ScanMatch(name: 'Saw-scaled Viper', venomous: true, confidence: 70));
+    expect(r.title, 'Saw-scaled Viper');
+    expect(r.venom, Venom.venomous);
+  });
 }
