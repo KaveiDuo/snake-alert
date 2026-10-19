@@ -90,12 +90,6 @@ class _SignInScreenState extends State<SignInScreen> {
             const SizedBox(height: 24),
             Text('Welcome to the\nall new Onestop', textAlign: TextAlign.center, style: geist(38, height: 1, ls: -1.5)),
             const Spacer(),
-            Text(
-              'All the features you use every day, now thoughtfully redesigned.',
-              textAlign: TextAlign.center,
-              style: geist(16, color: C.onestopInk.withValues(alpha: 0.8), ls: -0.76),
-            ),
-            const SizedBox(height: 22),
             _RoleSwitch(authority: _authority, onChanged: _pick),
             const SizedBox(height: 12),
             _OnestopButton(
