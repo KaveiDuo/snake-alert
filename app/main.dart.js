@@ -106466,7 +106466,7 @@ return null},
 $S:0}
 A.VQ.prototype={
 D(a){var s=new A.aqd()
-return A.aY(A.c([s.$3(B.V9,"Snake scanner key",new A.aqe(a)),s.$3(B.ug,"About Us",new A.aqf(a)),s.$3(B.V6,"Bug/Feature Request",new A.aqg(a)),s.$3(B.u4,"Switch to Light Mode",new A.aqh(a)),s.$4$color(B.Vt,"Log Out",new A.aqi(a),B.QB),B.c2,A.V2(A.ih("assets/images/swc.png",null,30,null),0.85)],t.p),B.o,B.i,B.j)}}
+return A.aY(A.c([s.$3(B.V9,"Snake scanner key",new A.aqe(a)),s.$3(B.ug,"About Us",new A.aqf(a)),s.$3(B.V5,"Bug/Feature Request",new A.aqg(a)),s.$3(B.u4,"Switch to Light Mode",new A.aqh(a)),s.$4$color(B.Vt,"Log Out",new A.aqi(a),B.QB),B.c2,A.V2(A.ih("assets/images/swc.png",null,30,null),0.85)],t.p),B.o,B.i,B.j)}}
 A.aqd.prototype={
 $4$color(a,b,c,d){var s=null,r=A.bh(16),q=A.bh(16)
 return new A.aG(B.hy,A.dm(!1,B.E,!0,s,A.fa(!1,q,!0,A.ca(A.aI(A.c([A.dv(a,d.j(0,B.t)?B.a6:d,s,20),B.cg,A.O(b,s,s,s,s,A.V(16,d,s,s,400),s,s)],t.p),B.o,s,B.bZ,B.j,0),50,s),s,!0,s,s,s,s,s,s,s,s,s,c,s,s,s,s,s,s,s),B.l,B.a2,0,s,s,new A.ce(r,B.iM),s,s,B.as),s)},
@@ -106663,7 +106663,7 @@ default:s=q}r=s.a
 return A.e6(q,A.aI(A.c([A.bc(q,q,B.l,q,q,new A.aZ(s.b,q,q,q,q,q,B.ag),q,10,q,q,q,q,10),B.b2,A.bq(A.O(r,q,q,q,q,A.V(15,B.t,q,q,600),q,q),1),A.iA(A.O("Change",q,q,q,q,A.V(14,B.r,q,q,600),q,q),this.d,q)],t.p),B.o,q,B.i,B.j,0),B.a2,q,B.TX,20)}}
 A.a3u.prototype={
 D(a){var s=null,r=A.bh(16),q=t.p
-return A.dm(!1,B.E,!0,s,A.fa(!1,A.bh(16),!0,new A.aG(B.TC,A.aI(A.c([A.bc(s,B.VI,B.l,s,s,new A.aZ(B.r.cA(0.16),s,s,A.bh(12),s,s,B.O),s,40,s,s,s,s,40),B.b2,A.bq(A.aY(A.c([A.O("Add a photo",s,s,s,s,A.V(15,B.bj,s,s,700),s,s),B.de,A.O("Camera or gallery \xb7 we\u2019ll identify the snake",s,s,s,s,A.V(12,B.v,s,s,400),s,s)],q),B.A,B.i,B.j),1),B.VY],q),B.o,s,B.i,B.j,0),s),s,!0,s,s,s,s,s,s,s,s,s,this.c,s,s,s,s,s,s,s),B.l,B.c8,0,s,s,new A.ce(r,B.qy),s,s,B.as)}}
+return A.dm(!1,B.E,!0,s,A.fa(!1,A.bh(16),!0,new A.aG(B.TC,A.aI(A.c([A.bc(s,B.VI,B.l,s,s,new A.aZ(B.r.cA(0.16),s,s,A.bh(12),s,s,B.O),s,40,s,s,s,s,40),B.b2,A.bq(A.aY(A.c([A.O("Scan to identify",s,s,s,s,A.V(15,B.bj,s,s,700),s,s),B.de,A.O("Take a photo or pick from gallery",s,s,s,s,A.V(12,B.v,s,s,400),s,s)],q),B.A,B.i,B.j),1),B.VY],q),B.o,s,B.i,B.j,0),s),s,!0,s,s,s,s,s,s,s,s,s,this.c,s,s,s,s,s,s,s),B.l,B.c8,0,s,s,new A.ce(r,B.qy),s,s,B.as)}}
 A.a3v.prototype={
 D(a){var s=this,r=null,q=A.i6(A.bh(10),A.ca(A.BO(s.c,B.bE),52,52)),p=t.p,o=A.c([A.O("Photo attached",r,r,r,r,A.V(14.5,B.t,r,r,600),r,r)],p),n=s.d,m=n==null
 if(!m)o.push(A.O("Matched "+A.h6(n).b,r,r,r,r,A.V(12.5,B.r,r,r,400),r,r))
@@ -115885,7 +115885,7 @@ B.V1=new A.aL(57706,"MaterialIcons",!1)
 B.u1=new A.aL(58332,"MaterialIcons",!1)
 B.V3=new A.aL(58372,"MaterialIcons",!1)
 B.jN=new A.aL(61050,"MaterialIcons",!1)
-B.V6=new A.aL(61188,"MaterialIcons",!1)
+B.V5=new A.aL(61188,"MaterialIcons",!1)
 B.nu=new A.aL(61210,"MaterialIcons",!1)
 B.V7=new A.aL(61343,"MaterialIcons",!1)
 B.V9=new A.aL(61409,"MaterialIcons",!1)
@@ -115943,8 +115943,8 @@ B.VF=new A.cm(B.ua,16,B.v,null,null)
 B.uj=new A.aL(983153,"MaterialIcons",!1)
 B.VG=new A.cm(B.uj,15,B.eQ,null,null)
 B.VH=new A.cm(B.nA,18,B.b_,null,null)
-B.V5=new A.aL(60985,"MaterialIcons",!1)
-B.VI=new A.cm(B.V5,20,B.r,null,null)
+B.V6=new A.aL(61242,"MaterialIcons",!1)
+B.VI=new A.cm(B.V6,20,B.r,null,null)
 B.uh=new A.aL(63531,"MaterialIcons",!1)
 B.VJ=new A.cm(B.uh,22,B.a6,null,null)
 B.VK=new A.cm(B.f9,16,B.d0,null,null)
