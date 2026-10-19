@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -45,8 +46,14 @@ class Scanner {
   static const _prefsKey = 'scanner_api_key';
   static const claudeModel = 'claude-sonnet-5';
 
-  /// Free-tier Gemini models, tried in order when one is busy or out of quota.
-  static const geminiModels = ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash-lite'];
+  /// Free-tier Gemini models, tried in order when one is busy, out of quota or
+  /// too slow, each with the least "thinking" it allows (thinking adds delay).
+  /// Flash-Lite answers in about 2 s and named all the sample snakes correctly
+  /// in testing; the bigger models are slower and often overloaded.
+  static const geminiModels = {'gemini-3.5-flash-lite': 'minimal', 'gemini-3.6-flash': 'minimal', 'gemini-3.8-flash': 'low'};
+
+  /// How long to wait for one model before trying the next.
+  static const perModelTimeout = Duration(seconds: 12);
 
   static const _builtInReversed = String.fromEnvironment('SCANNER_KEY_R');
   static String? get builtInKey => _builtInReversed.isEmpty ? null : _builtInReversed.split('').reversed.join();
@@ -109,21 +116,24 @@ Rules:
       apiKey.startsWith('sk-ant-') ? _claude(image, apiKey) : _gemini(image, apiKey);
 
   static Future<ScanResult> _gemini(Uint8List image, String apiKey) async {
-    final body = jsonEncode({
-      'contents': [
-        {
-          'parts': [
-            {
-              'inline_data': {'mime_type': _mediaType(image), 'data': base64Encode(image)},
-            },
-            {'text': _prompt},
-          ],
-        },
-      ],
-      'generationConfig': {'response_mime_type': 'application/json', 'temperature': 0.2},
-    });
+    final imagePart = {
+      'inline_data': {'mime_type': _mediaType(image), 'data': base64Encode(image)},
+    };
     http.Response? res;
-    for (final model in geminiModels) {
+    var timedOut = false;
+    for (final MapEntry(key: model, value: thinking) in geminiModels.entries) {
+      final body = jsonEncode({
+        'contents': [
+          {
+            'parts': [imagePart, {'text': _prompt}],
+          },
+        ],
+        'generationConfig': {
+          'response_mime_type': 'application/json',
+          'temperature': 0.2,
+          'thinkingConfig': {'thinkingLevel': thinking},
+        },
+      });
       try {
         res = await http
             .post(
@@ -131,7 +141,10 @@ Rules:
               headers: {'content-type': 'application/json', 'x-goog-api-key': apiKey},
               body: body,
             )
-            .timeout(const Duration(seconds: 60));
+            .timeout(perModelTimeout);
+      } on TimeoutException {
+        timedOut = true;
+        continue; // too slow: try the next model
       } catch (_) {
         throw const ScanException('Couldn’t reach the scanner. Check your internet connection.');
       }
@@ -139,6 +152,7 @@ Rules:
       if (res.statusCode == 429 || res.statusCode == 404 || res.statusCode == 503) continue;
       break;
     }
+    if (res == null && timedOut) throw const ScanException('The scanner is slow right now. Try again in a moment.');
     final r = res!;
     if (r.statusCode == 429) throw const ScanException('The free scanner has reached its limit for now. Try again later.');
     if (r.statusCode == 400 && r.body.contains('API_KEY_INVALID') || r.statusCode == 401 || r.statusCode == 403) {

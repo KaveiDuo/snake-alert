@@ -61,14 +61,15 @@ class _IdentifyScreenState extends State<IdentifyScreen> with SingleTickerProvid
       _pick = 0;
     });
     _scan.repeat(reverse: true, period: const Duration(milliseconds: 900));
-    final minWait = Future<void>.delayed(const Duration(milliseconds: 1600));
+    // Real scans show their result as soon as it arrives; the demo keeps a
+    // short scan so the animation is visible.
     ScanResult? result;
     String? error;
     final key = await Scanner.activeKey();
     _demo = key == null;
     if (key == null) {
       result = _demoResult(demoId);
-      await Future<void>.delayed(const Duration(milliseconds: 600));
+      await Future<void>.delayed(const Duration(milliseconds: 1200));
     } else {
       try {
         _bytes ??= await load();
@@ -79,7 +80,6 @@ class _IdentifyScreenState extends State<IdentifyScreen> with SingleTickerProvid
         error = 'Something went wrong while scanning. Try again.';
       }
     }
-    await minWait;
     if (!mounted) return;
     _scan.stop();
     setState(() {
@@ -96,7 +96,8 @@ class _IdentifyScreenState extends State<IdentifyScreen> with SingleTickerProvid
   }
 
   Future<void> _pickImage(ImageSource src) async {
-    final x = await ImagePicker().pickImage(source: src, maxWidth: 1600, imageQuality: 85);
+    // 1024 px is plenty to identify a snake and uploads much faster on mobile data.
+    final x = await ImagePicker().pickImage(source: src, maxWidth: 1024, maxHeight: 1024, imageQuality: 75);
     if (x == null) return;
     _bytes = null;
     _start(x.path, x.readAsBytes, 'banded_krait');
