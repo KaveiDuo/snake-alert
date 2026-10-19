@@ -111334,7 +111334,7 @@ l=A.N("Which snake?",g,g,g,g,A.X(20,B.t,g,g,700),g,g)
 k=A.bi(8)
 m.push(A.aK(A.c([l,B.bW,A.b9(g,A.N("optional",g,g,g,g,A.X(11,B.x,g,g,400),g,g),B.l,g,g,new A.aZ(B.b1,g,g,k,g,g,B.L),g,g,g,B.VS,g,g,g)],r),B.n,g,B.i,B.j,0))
 m.push(B.cH)
-m.push(A.N("Helps the authority prepare. Skip it if you are not sure.",g,g,g,g,A.X(13,B.x,g,g,400),g,g))
+m.push(A.N("Helps the authority prepare.",g,g,g,g,A.X(13,B.x,g,g,400),g,g))
 m.push(B.b7)
 l=e.d
 if(l!=null)m.push(new A.a5j(l,e.e,e.f,e.r,new A.aNB(f),g))
