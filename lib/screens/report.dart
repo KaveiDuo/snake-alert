@@ -155,9 +155,9 @@ class _ReportScreenState extends State<ReportScreen> {
                   const SizedBox(height: 6),
                   Text('Choose the closest match. You can change it later.', style: ft(13, color: C.muted)),
                   const SizedBox(height: 14),
-                  _VenomOption(Venom.venomous, 'Venomous', 'Cobra, krait, viper or similar', const Color(0xFFFF453A)),
-                  _VenomOption(Venom.nonVenomous, 'Non‑venomous', 'Rat snake, keelback, wolf snake…', C.green),
-                  _VenomOption(Venom.unsure, 'Not sure', 'We alert everyone as venomous to be safe', C.amber),
+                  _VenomOption(Venom.venomous, 'Venomous', 'Cobra, krait, viper or similar', pinVenomous),
+                  _VenomOption(Venom.nonVenomous, 'Non‑venomous', 'Rat snake, keelback, wolf snake…', pinNonVenomous),
+                  _VenomOption(Venom.unsure, 'Not sure', 'We alert everyone as venomous to be safe', pinUnsure),
                 ],
                 if (loc != null && d.venom != null) ...[
                   _SummaryRow(venom: d.venom!, onChange: () => setState(() => d.venom = null)),
@@ -379,9 +379,9 @@ class _SummaryRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (label, color) = switch (venom) {
-      Venom.venomous => ('Venomous', const Color(0xFFFF453A)),
-      Venom.nonVenomous => ('Non-venomous', C.green),
-      Venom.unsure => ('Not sure', C.amber),
+      Venom.venomous => ('Venomous', pinVenomous),
+      Venom.nonVenomous => ('Non-venomous', pinNonVenomous),
+      Venom.unsure => ('Not sure', pinUnsure),
     };
     return Panel(
       padding: const EdgeInsets.fromLTRB(16, 6, 8, 6),
