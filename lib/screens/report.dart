@@ -148,6 +148,19 @@ class _ReportScreenState extends State<ReportScreen> {
                   const SizedBox(height: 6),
                   Text('Helps the authority prepare.', style: ft(13, color: C.muted)),
                   const SizedBox(height: 14),
+                  // Pick the snake first; the scanner is there for when they aren't sure.
+                  SizedBox(
+                    height: 132,
+                    // ‹ › arrows show there are more snakes to either side.
+                    child: ScrollArrows(
+                      children: [
+                        for (final sp in species.where((x) => d.venom == Venom.unsure || x.venomous == (d.venom == Venom.venomous)))
+                          _SpeciesCard(sp: sp, selected: d.speciesId == sp.id, onTap: () => s.setSpecies(sp.id)),
+                        _CouldntTell(selected: d.speciesId == null, onTap: () => s.setSpecies(null)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
                   if (d.photoPath != null)
                     _PhotoAttached(
                       path: d.photoPath!,
@@ -172,21 +185,6 @@ class _ReportScreenState extends State<ReportScreen> {
                       );
                       if (res != null) s.setPhoto(res.photoPath, matchedId: res.speciesId, matchedName: res.name, venom: res.venom);
                     }),
-                  const SizedBox(height: 18),
-                  // "Or" while the scanner button is the other option above.
-                  Text(d.photoPath == null ? 'Or choose the snake' : 'Choose the snake', style: ft(13.5, w: 600, color: C.sub)),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    height: 132,
-                    // ‹ › arrows show there are more snakes to either side.
-                    child: ScrollArrows(
-                      children: [
-                        for (final sp in species.where((x) => d.venom == Venom.unsure || x.venomous == (d.venom == Venom.venomous)))
-                          _SpeciesCard(sp: sp, selected: d.speciesId == sp.id, onTap: () => s.setSpecies(sp.id)),
-                        _CouldntTell(selected: d.speciesId == null, onTap: () => s.setSpecies(null)),
-                      ],
-                    ),
-                  ),
                   const SizedBox(height: 16),
                   TextField(
                     controller: _note,
@@ -412,7 +410,7 @@ class _PhotoAction extends StatelessWidget {
                 children: [
                   Text('Scan to identify', style: ft(15, w: 700, color: C.greenText)),
                   const SizedBox(height: 2),
-                  Text('Take a photo or pick from gallery', style: ft(12, color: C.muted)),
+                  Text('Not sure? Take a photo or pick from gallery', style: ft(12, color: C.muted)),
                 ],
               ),
             ),
