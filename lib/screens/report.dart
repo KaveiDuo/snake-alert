@@ -147,7 +147,7 @@ class _ReportScreenState extends State<ReportScreen> {
                   if (d.photoPath != null)
                     _PhotoAttached(path: d.photoPath!, matchedId: d.matchedId, matchedName: d.matchedName, onRemove: () => s.setPhoto(null))
                   else
-                    // One way in: take or pick a photo, and it's identified automatically.
+                    // One way in: the scanner (take or pick a photo, identified automatically).
                     // The scan result can also attach just the photo.
                     _PhotoAction(() async {
                       final res = await Navigator.push<IdentifyResult>(
@@ -361,8 +361,8 @@ class _SummaryRow extends StatelessWidget {
   }
 }
 
-/// "Add a photo": opens the photo screen (take one or pick from the gallery),
-/// which identifies the snake straight away.
+/// "Scan to identify": opens the scanner, where the student takes a photo or
+/// picks one from the gallery and the snake is identified straight away.
 class _PhotoAction extends StatelessWidget {
   final VoidCallback onTap;
   const _PhotoAction(this.onTap);
@@ -384,16 +384,16 @@ class _PhotoAction extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(color: C.green.withValues(alpha: 0.16), borderRadius: BorderRadius.circular(12)),
-              child: const Icon(Icons.add_a_photo_outlined, size: 20, color: C.green),
+              child: const Icon(Icons.center_focus_strong_outlined, size: 20, color: C.green),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Add a photo', style: ft(15, w: 700, color: C.greenText)),
+                  Text('Scan to identify', style: ft(15, w: 700, color: C.greenText)),
                   const SizedBox(height: 2),
-                  Text('Camera or gallery · we’ll identify the snake', style: ft(12, color: C.muted)),
+                  Text('Take a photo or pick from gallery', style: ft(12, color: C.muted)),
                 ],
               ),
             ),
