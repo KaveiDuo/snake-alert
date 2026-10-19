@@ -308,7 +308,8 @@ class _IdentifyScreenState extends State<IdentifyScreen> with SingleTickerProvid
                   const SizedBox(height: 6),
                   Text(top.name, style: ft(17, w: 700)),
                   if (top.latin != null) Text(top.latin!, style: ft(12, color: C.muted).copyWith(fontStyle: FontStyle.italic)),
-                  if (top.sp == null) Text('Not one of the campus species', style: ft(12, color: C.amber)),
+                  // Any species is a valid answer; just note when it's new for campus.
+                  if (top.sp == null) Text('Not recorded on campus before', style: ft(12, color: C.muted)),
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -477,12 +478,9 @@ class _IdentifyScreenState extends State<IdentifyScreen> with SingleTickerProvid
     child: SizedBox(
       width: size,
       height: size,
-      child: m.sp != null
-          ? Image.asset(m.sp!.photo, fit: BoxFit.cover)
-          : Container(
-              color: const Color(0xFF2A2A2A),
-              child: Icon(Icons.help_outline_rounded, color: C.muted, size: size * 0.45),
-            ),
+      // Campus species show their reference photo; any other species shows the
+      // student's own photo.
+      child: m.sp != null ? Image.asset(m.sp!.photo, fit: BoxFit.cover) : photoOf(_photo!),
     ),
   );
 }

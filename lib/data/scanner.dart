@@ -90,26 +90,18 @@ class Scanner {
 
   static String get _prompt {
     final list = species.map((s) => '${s.id} | ${s.name} | ${s.latin} | ${s.venomous ? 'venomous' : 'non-venomous'}').join('\n');
+    // Species first: the AI names whatever snake it sees; the campus list only
+    // links the answer to a campus species when it is that exact species.
     return '''
-You identify snakes in photos for a snake-safety app on the IIT Guwahati campus in Assam, India.
+Identify the snake in this photo as precisely as you can: its exact species, whatever it is. Judge only from what you see; do not force a match.
 
-These are the species recorded on or around campus (id | common name | scientific name | venom):
+Context: the photo was taken on the IIT Guwahati campus in Assam, India. These species have been recorded there (id | name | scientific name | venom). If — and only if — the snake is one of these exact species, give its id; otherwise use null:
 $list
 
-Look at the photo and reply with ONLY a JSON object, no other text:
-{
-  "is_snake": true or false,
-  "matches": [
-    {"id": "<id from the list, or null if it is not one of them>", "name": "<common name>", "latin": "<scientific name>", "venomous": true, false or null if unknown, "confidence": <0-100>}
-  ],
-  "note": "<one short sentence on the features you used, or why you can't tell>"
-}
+Reply with ONLY this JSON:
+{"is_snake": true|false, "matches": [{"id": "<campus id or null>", "name": "<common name>", "latin": "<scientific name>", "venomous": true|false|null, "confidence": <0-100>}], "note": "<one short sentence on the features you used>"}
 
-Rules:
-- Give up to 3 matches, most likely first. Confidences are percentages and together must not exceed 100.
-- Prefer the campus species, but if the snake is clearly something else found in Northeast India, give it with "id": null.
-- If the photo is unclear, keep confidences low and say so in the note.
-- If there is no snake in the photo, set "is_snake" to false and "matches" to [].''';
+Rules: up to 3 matches, most likely first; confidences add up to at most 100. "venomous" means dangerous to people (true for cobras, kraits, vipers, pit vipers and other medically significant species). If unsure about venom, use null. If the photo is unclear, keep confidences low and say so in the note. No snake: "is_snake": false and "matches": [].''';
   }
 
   static Future<ScanResult> identify(Uint8List image, String apiKey) =>

@@ -206,4 +206,13 @@ void main() {
       expect(tip, isNotEmpty);
     }
   });
+
+  test('A scanned snake that is not a campus species keeps its name in the report', () {
+    final s = AppState();
+    s.startDraft(at: s.locFromMap(const LatLng(26.19043, 91.70156)));
+    s.setPhoto('photo.jpg', matchedName: 'Saw-scaled Viper', venom: Venom.venomous);
+    final r = s.submit();
+    expect(r.title, 'Saw-scaled Viper');
+    expect(r.venom, Venom.venomous);
+  });
 }

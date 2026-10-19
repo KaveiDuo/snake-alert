@@ -212,6 +212,9 @@ class Report {
   final bool covered;
   final String? photoPath;
 
+  /// Species named by the scanner when it isn't one of the campus species.
+  final String? speciesName;
+
   // Response by the responsible authority (see [Stage]).
   Stage stage;
   DateTime? seenAt, onTheWayAt, onSiteAt, resolvedAt;
@@ -249,6 +252,7 @@ class Report {
     this.reporter = 'Ananya S.',
     DateTime? time,
     this.photoPath,
+    this.speciesName,
     this.stage = Stage.reported,
     this.seenAt,
     this.onTheWayAt,
@@ -293,7 +297,7 @@ class Report {
   };
 
   Species? get sp => speciesId == null ? null : speciesById(speciesId!);
-  String get title => sp?.name ?? (venom == Venom.nonVenomous ? 'Non-venomous snake' : 'Unidentified snake');
+  String get title => sp?.name ?? speciesName ?? (venom == Venom.nonVenomous ? 'Non-venomous snake' : 'Unidentified snake');
   String get where => spot.isEmpty ? place : '$place · $spot';
   bool get treatAsVenomous => venom != Venom.nonVenomous;
 }
@@ -869,6 +873,7 @@ class AppState extends ChangeNotifier {
       pos: loc.pos,
       covered: loc.covered,
       photoPath: draft.photoPath,
+      speciesName: draft.speciesId == null ? draft.matchedName : null,
     );
     reports.insert(0, r);
     notifyListeners();

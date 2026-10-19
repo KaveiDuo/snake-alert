@@ -458,7 +458,7 @@ class _PhotoAttached extends StatelessWidget {
               children: [
                 Text('Photo attached', style: ft(14.5, w: 600)),
                 if (matchedId != null) Text('Matched ${speciesById(matchedId!).name}', style: ft(12.5, color: C.green)),
-                if (matchedId == null && matchedName != null) Text('Scanner: $matchedName (not a campus species)', style: ft(12.5, color: C.amber)),
+                if (matchedId == null && matchedName != null) Text('Matched $matchedName', style: ft(12.5, color: C.green)),
               ],
             ),
           ),
