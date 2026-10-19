@@ -146,7 +146,7 @@ class _ReportScreenState extends State<ReportScreen> {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  Text('Helps the authority prepare. Skip it if you are not sure.', style: ft(13, color: C.muted)),
+                  Text('Helps the authority prepare.', style: ft(13, color: C.muted)),
                   const SizedBox(height: 14),
                   if (d.photoPath != null)
                     _PhotoAttached(
