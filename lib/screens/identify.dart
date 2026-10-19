@@ -186,7 +186,7 @@ class _IdentifyScreenState extends State<IdentifyScreen> with SingleTickerProvid
       ),
       const SizedBox(height: 14),
       Text(
-        'Pick a clear photo of the whole snake for the best match. Keep 3 m back — zoom in instead.',
+        'For the best match, get the head and the body pattern in the photo, in good light. Keep 3 m back — zoom in instead.',
         style: ft(12.5, color: C.muted, height: 1.5),
       ),
       const SizedBox(height: 10),
@@ -318,13 +318,15 @@ class _IdentifyScreenState extends State<IdentifyScreen> with SingleTickerProvid
                           child: LinearProgressIndicator(
                             value: top.confidence / 100,
                             minHeight: 5,
-                            color: C.green,
+                            color: _certainty(top.confidence).$2,
                             backgroundColor: const Color(0xFF2A2A2A),
                           ),
                         ),
                       ),
                       const SizedBox(width: 10),
-                      Text('${top.confidence}%', style: ft(13, w: 700, color: C.green)),
+                      // The AI's own percentages aren't reliable (it was 90–95% sure of
+                      // some wrong answers in testing), so show plain words instead.
+                      Text(_certainty(top.confidence).$1, style: ft(12.5, w: 700, color: _certainty(top.confidence).$2)),
                     ],
                   ),
                 ],
@@ -333,6 +335,62 @@ class _IdentifyScreenState extends State<IdentifyScreen> with SingleTickerProvid
           ],
         ),
       ),
+      if (_lookAlike(top) case (final Species danger, final String tip)) ...[
+        const SizedBox(height: 10),
+        Panel(
+          border: const Color(0xFF5A2424),
+          color: const Color(0xFF1E1212),
+          padding: const EdgeInsets.all(12),
+          onTap: () => setState(() {
+            // Put the venomous look-alike first so "Use this in my report" picks it.
+            final i = r.matches.indexWhere((m) => m.speciesId == danger.id);
+            if (i >= 0) {
+              _pick = i;
+            } else {
+              r.matches.insert(0, ScanMatch(speciesId: danger.id, name: danger.name, latin: danger.latin, venomous: true, confidence: 0));
+              _pick = 0;
+            }
+          }),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: SizedBox(width: 48, height: 48, child: Image.asset(danger.photo, fit: BoxFit.cover)),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          const TextSpan(text: 'Often confused with '),
+                          TextSpan(text: danger.name, style: ft(13.5, w: 700, color: C.redText)),
+                          const TextSpan(text: ' (venomous)'),
+                        ],
+                      ),
+                      style: ft(13.5, w: 600),
+                    ),
+                    const SizedBox(height: 3),
+                    Text('$tip If unsure, treat it as venomous.', style: ft(12, color: const Color(0xFFD9A8A6), height: 1.4)),
+                    const SizedBox(height: 4),
+                    Text('Tap if it looks like this one', style: ft(11.5, w: 600, color: C.redText)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+      if (top.confidence < 65) ...[
+        const SizedBox(height: 10),
+        Text(
+          'The scanner isn’t sure. A clearer photo of the head and body pattern helps, or report it as “Not sure”.',
+          style: ft(12.5, color: const Color(0xFFFFC46B), height: 1.4),
+        ),
+      ],
       const SizedBox(height: 10),
       if (r.note != null && r.note!.isNotEmpty) ...[
         Text(r.note!, style: ft(12.5, color: C.sub, height: 1.4)),
@@ -370,7 +428,7 @@ class _IdentifyScreenState extends State<IdentifyScreen> with SingleTickerProvid
                       ],
                     ),
                   ),
-                  Text('${o.confidence}%', style: ft(13, color: C.muted)),
+                  const Icon(Icons.chevron_right_rounded, color: C.muted),
                 ],
               ),
             ),
@@ -391,6 +449,21 @@ class _IdentifyScreenState extends State<IdentifyScreen> with SingleTickerProvid
           ),
         ),
     ];
+  }
+
+  /// Plain-language certainty for the AI's confidence.
+  static (String, Color) _certainty(int c) => c >= 85
+      ? ('Likely match', C.green)
+      : c >= 65
+      ? ('Possible match', const Color(0xFFFFC46B))
+      : ('Not sure', const Color(0xFFFF8A8E));
+
+  /// The venomous look-alike to warn about, when the match is a harmless snake
+  /// that is often confused with one (and it isn't already the chosen match).
+  static (Species, String)? _lookAlike(ScanMatch m) {
+    if (m.venomous != false || m.speciesId == null) return null;
+    final la = venomousLookAlikes[m.speciesId];
+    return la == null ? null : (speciesById(la.$1), la.$2);
   }
 
   Widget _venomTag(bool? venomous) => switch (venomous) {

@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snake_watch/data/app_state.dart';
 import 'package:snake_watch/data/scanner.dart';
+import 'package:snake_watch/data/species.dart';
 import 'package:snake_watch/main.dart';
 import 'package:snake_watch/screens/notifications.dart';
 import 'package:snake_watch/screens/sighting_detail.dart';
@@ -196,5 +197,13 @@ void main() {
     expect(find.textContaining('Lake-side Path'), findsOneWidget);
     expect(find.textContaining('Cricket Ground'), findsOneWidget);
     expect(find.textContaining('back gate'), findsNothing); // Kameng reports hidden
+  });
+
+  test('Every look-alike warning pairs a harmless snake with a venomous one', () {
+    for (final MapEntry(key: harmless, value: (danger, tip)) in venomousLookAlikes.entries) {
+      expect(speciesById(harmless).venomous, isFalse, reason: harmless);
+      expect(speciesById(danger).venomous, isTrue, reason: danger);
+      expect(tip, isNotEmpty);
+    }
   });
 }

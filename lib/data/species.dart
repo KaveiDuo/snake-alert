@@ -187,6 +187,25 @@ const species = <Species>[
 
 Species speciesById(String id) => species.firstWhere((s) => s.id == id);
 
+/// Non-venomous campus snakes that are often mistaken for a venomous one, with
+/// the venomous look-alike and how to tell them apart. The scanner shows this
+/// whenever it names the harmless one, because a photo can fool it too.
+const venomousLookAlikes = <String, (String, String)>{
+  'wolf': ('banded_krait', 'Kraits have a raised ridge along the back and broad, even bands; wolf snakes have a flat head and thin pale bands.'),
+  'kukri': ('banded_krait', 'Kraits have a raised ridge along the back and broad, even bands; kukri snakes are small with thin pale bands.'),
+  'trinket': ('banded_krait', 'Kraits have a raised ridge along the back and broad, even black-and-yellow bands.'),
+  'rat': ('cobra', 'Only cobras spread a hood; rat snakes have big eyes and dark bars on the lips.'),
+  'korros': ('cobra', 'Only cobras spread a hood; rat snakes have big eyes and dark bars on the lips.'),
+  'keelback': ('red_necked', 'A red or orange neck means Red-necked Keelback, which is venomous.'),
+  'buff': ('red_necked', 'A red or orange neck means Red-necked Keelback, which is venomous.'),
+  'rainbow': ('red_necked', 'A red or orange neck means Red-necked Keelback, which is venomous.'),
+  'mock_viper': ('salazar', 'True pit vipers have a heat pit between the eye and nostril and a very triangular head.'),
+  'vine': ('gumprecht', 'Green pit vipers are thick-bodied with a triangular head; vine snakes are very thin with a pointed snout.'),
+  'green_cat': ('gumprecht', 'Green pit vipers are thick-bodied with a triangular head and a heat pit between the eye and nostril.'),
+  'bronzeback': ('lesser_black_krait', 'Kraits are glossy and dark with a raised ridge along the back; bronzebacks are slim with a pale side stripe.'),
+  'blind': ('lesser_black_krait', 'Blind snakes are tiny and worm-like; even young kraits are longer with a distinct head.'),
+};
+
 const photoCredits =
     'Photos from Wikimedia Commons. Banded Krait — Lawrence Hylton, CC BY 4.0 · Greater Black Krait — lovelymon lamin, CC0 · '
     'Lesser Black Krait — Sp.herp, CC BY-SA 3.0 · Gumprecht\'s Green Pit Viper — Rushen, CC BY-SA 2.0 · Salazar\'s Pit Viper — '
