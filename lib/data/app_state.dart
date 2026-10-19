@@ -176,7 +176,7 @@ enum Outcome {
 /// Places the authority can tap to say where they searched.
 const searchSpots = ['Drains', 'Bushes & grass', 'Under vehicles', 'Stairs & steps', 'Inside the building', 'Walls & holes', 'Garbage area'];
 
-/// After "Not found", the pin stays on the map as a caution for this long.
+/// After "Not found", students are told to stay alert near the spot for this long.
 const cautionFor = Duration(hours: 24);
 
 /// Time the authority has to reach the spot before the report counts as
@@ -267,8 +267,8 @@ class Report {
 
   bool get safe => stage == Stage.resolved;
 
-  /// Closed as "not found" recently: the snake may still be nearby, so the pin
-  /// stays as a caution and students are told to stay alert.
+  /// Closed as "not found" recently: the snake may still be nearby, so
+  /// students are told to stay alert (the pin itself is removed from the map).
   bool get caution => safe && outcome == Outcome.notFound && DateTime.now().difference(resolvedAt!) < cautionFor;
 
   /// Time spent at the spot before closing, recorded automatically.
@@ -641,7 +641,7 @@ class AppState extends ChangeNotifier {
       searched: const ['Bushes & grass', 'Walls & holes'],
       reporterConfirmed: true,
     ),
-    // Not sure · resolved as not found: still shows as a caution pin
+    // Not sure · resolved as not found (students told to stay alert)
     Report(
       id: 'r13',
       venom: Venom.unsure,
@@ -691,8 +691,6 @@ class AppState extends ChangeNotifier {
   // ---------- campus ----------
   List<Report> get openReports => reports.where((r) => !r.safe).toList();
 
-  /// Pins on the map: open reports plus recent "not found" cautions.
-  List<Report> get mapReports => reports.where((r) => !r.safe || r.caution).toList();
   int get activeCount => openReports.length;
   Report? get latestOpen {
     final o = openReports..sort((a, b) => b.time.compareTo(a.time));

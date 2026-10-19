@@ -800,7 +800,7 @@ Future<void> _resolveSheet(BuildContext context, Report r) async {
                 if (notFound) ...[
                   const SizedBox(height: 10),
                   Text(
-                    'The pin stays on the map for 24 hours as a caution, and students are told to stay alert.',
+                    'The pin is removed, but students are told the snake may still be nearby and to stay alert for 24 hours.',
                     style: ft(12.5, color: const Color(0xFFFFC46B), height: 1.4),
                   ),
                 ],

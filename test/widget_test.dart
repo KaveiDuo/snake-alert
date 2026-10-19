@@ -143,7 +143,7 @@ void main() {
     expect(s.consoleFilter, ConsoleFilter.all);
   });
 
-  test('"Not found" needs where they searched and keeps a caution pin', () {
+  test('"Not found" needs where they searched and tells students to stay alert', () {
     final s = AppState();
     final r = s.reports.firstWhere((r) => r.id == 'r1');
     s.arrive(r);
@@ -152,8 +152,7 @@ void main() {
     expect(r.safe, isTrue);
     expect(r.caution, isTrue);
     expect(r.proofPhoto, isNull);
-    expect(s.mapReports, contains(r)); // still on the map as a caution
-    expect(s.openReports, isNot(contains(r)));
+    expect(s.openReports, isNot(contains(r))); // removed from the map
   });
 
   test('Calling the rescuer is recorded for students to see', () {

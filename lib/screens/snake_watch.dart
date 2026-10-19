@@ -45,7 +45,7 @@ class _SnakeWatchScreenState extends State<SnakeWatchScreen> {
                     child: CampusMap(
                       dark: s.mapDark,
                       // Areas marked safe drop off the students' map.
-                      reports: s.mapReports,
+                      reports: s.openReports,
                       onToggleTheme: s.toggleMap,
                       onTapReport: (r) => Navigator.push(context, MaterialPageRoute(builder: (_) => SightingDetailScreen(report: r))),
                       onTapMap: (p) => setState(() => _picked = s.locFromMap(p)),
