@@ -10,6 +10,7 @@ import '../data/scanner.dart';
 import '../data/species.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/snake_camera.dart';
 
 class IdentifyResult {
   final String photoPath;
@@ -129,86 +130,35 @@ class _IdentifyScreenState extends State<IdentifyScreen> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
-    final title = _photo == null ? 'Scan a snake' : 'Identify snake';
+    // First the live camera; after a photo, the scan and its result.
+    if (_photo == null) {
+      return SnakeCamera(
+        onCaptured: (x) {
+          _bytes = null;
+          _start(x.path, x.readAsBytes, 'banded_krait');
+        },
+        onAlbum: () => _pickImage(ImageSource.gallery),
+        onClose: () => Navigator.pop(context),
+        footer: FutureBuilder<String?>(
+          future: Scanner.activeKey(),
+          builder: (context, snap) => snap.connectionState == ConnectionState.done && snap.data == null
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Text(
+                    'Demo mode: add a scanner key in Profile → Snake scanner key to identify photos for real.',
+                    textAlign: TextAlign.center,
+                    style: ft(11.5, color: C.amber),
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
+      );
+    }
     return DarkPage(
-      header: AppHeader(title, backIcon: Icons.close_rounded),
-      body: _photo == null ? _chooser() : (_scanning ? _scanner() : _resultView()),
+      header: AppHeader('Identify snake', backIcon: Icons.close_rounded),
+      body: _scanning ? _scanner() : _resultView(),
     );
   }
-
-  /// First screen: a scan frame, the two ways to get a photo, and three tips.
-  Widget _chooser() => LayoutBuilder(
-    builder: (context, box) => SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: box.maxHeight - 28),
-        child: IntrinsicHeight(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Scan frame: what the photo should look like.
-              AspectRatio(
-                aspectRatio: 1.15,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF141414),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: C.line),
-                  ),
-                  child: Stack(
-                    children: [
-                      const Positioned.fill(child: Padding(padding: EdgeInsets.all(22), child: _ScanCorners())),
-                      Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 64,
-                              height: 64,
-                              decoration: BoxDecoration(color: C.greenSoft, shape: BoxShape.circle),
-                              child: const Icon(Icons.center_focus_strong_outlined, color: C.green, size: 30),
-                            ),
-                            const SizedBox(height: 14),
-                            Text('Photograph the snake', style: ft(17, w: 700)),
-                            const SizedBox(height: 4),
-                            Text('We’ll tell you what it is in a few seconds', style: ft(13, color: C.muted)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Btn('Take a photo', icon: Icons.photo_camera_outlined, onTap: () => _pickImage(ImageSource.camera)),
-              const SizedBox(height: 10),
-              Btn('Choose from gallery', kind: BtnKind.ghost, icon: Icons.photo_library_outlined, onTap: () => _pickImage(ImageSource.gallery)),
-              const SizedBox(height: 22),
-              Text('FOR THE BEST RESULT', style: ft(11.5, w: 700, color: C.muted, ls: 1.2)),
-              const SizedBox(height: 10),
-              const _Tip(Icons.social_distance_outlined, 'Stay 3 m back and zoom in'),
-              const _Tip(Icons.crop_free_rounded, 'Get the head and body pattern in the frame'),
-              const _Tip(Icons.wb_sunny_outlined, 'Good light, hold steady, no blur'),
-              const Spacer(),
-              const SizedBox(height: 12),
-              FutureBuilder<String?>(
-                future: Scanner.activeKey(),
-                builder: (context, snap) => snap.connectionState != ConnectionState.done
-                    ? const SizedBox.shrink()
-                    : Text(
-                        snap.data == null
-                            ? 'Demo mode: add a scanner key in Profile → Snake scanner key to identify photos for real.'
-                            : 'Identified by AI · keep your distance whatever the result',
-                        textAlign: TextAlign.center,
-                        style: ft(12, color: snap.data == null ? C.amber : C.faint, height: 1.4),
-                      ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
 
   Widget _scanner() => Padding(
     padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
@@ -496,58 +446,4 @@ class _IdentifyScreenState extends State<IdentifyScreen> with SingleTickerProvid
       child: m.sp != null ? Image.asset(m.sp!.photo, fit: BoxFit.cover) : photoOf(_photo!),
     ),
   );
-}
-
-/// One tip line on the scan screen.
-class _Tip extends StatelessWidget {
-  final IconData icon;
-  final String text;
-  const _Tip(this.icon, this.text);
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 10),
-    child: Row(
-      children: [
-        Container(
-          width: 34,
-          height: 34,
-          decoration: BoxDecoration(color: const Color(0xFF1E1E1E), borderRadius: BorderRadius.circular(10)),
-          child: Icon(icon, size: 18, color: C.greenText),
-        ),
-        const SizedBox(width: 12),
-        Expanded(child: Text(text, style: ft(13.5, color: C.sub))),
-      ],
-    ),
-  );
-}
-
-/// Green corner brackets of a camera viewfinder.
-class _ScanCorners extends StatelessWidget {
-  const _ScanCorners();
-  @override
-  Widget build(BuildContext context) => CustomPaint(painter: _CornersPainter());
-}
-
-class _CornersPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final p = Paint()
-      ..color = C.green
-      ..strokeWidth = 3.5
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-    const l = 26.0, r = 14.0;
-    final w = size.width, h = size.height;
-    for (final (x, y, dx, dy) in [(0.0, 0.0, 1.0, 1.0), (w, 0.0, -1.0, 1.0), (0.0, h, 1.0, -1.0), (w, h, -1.0, -1.0)]) {
-      final path = Path()
-        ..moveTo(x, y + dy * (l + r))
-        ..lineTo(x, y + dy * r)
-        ..quadraticBezierTo(x, y, x + dx * r, y)
-        ..lineTo(x + dx * (l + r), y);
-      canvas.drawPath(path, p);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
