@@ -161,28 +161,28 @@ class _HospitalIcon extends StatelessWidget {
   }
 }
 
-/// Washes out the map beyond the IIT Guwahati campus so only the campus keeps
-/// its colours, with a thin line along the campus edge. The campus is the
-/// OpenStreetMap boundary plus the Faculty Higher Secondary School, which lies
-/// just outside it. Drawn under the app's own buildings and pins.
-class _OutsideCampusMask extends StatelessWidget {
+/// The campus outline: the OpenStreetMap boundary plus the Faculty Higher
+/// Secondary School just outside it. Beyond it the tiles are washed out
+/// (except roads, paths and tracks, see PitchRecolorTileProvider); this draws
+/// a thin line along the edge.
+class _CampusEdge extends StatelessWidget {
   final bool dark;
-  const _OutsideCampusMask({required this.dark});
+  const _CampusEdge({required this.dark});
 
-  // Far beyond anything the camera can show (it stays centred on campus).
-  static const _world = [LatLng(26.40, 91.45), LatLng(26.40, 91.95), LatLng(25.98, 91.95), LatLng(25.98, 91.45)];
-  static final _school = campusZones.firstWhere((z) => z.name == 'Faculty Higher Secondary School').outlines.first;
+  static final List<List<LatLng>> campus = [
+    campusBoundary,
+    campusZones.firstWhere((z) => z.name == 'Faculty Higher Secondary School').outlines.first,
+  ];
 
   @override
   Widget build(BuildContext context) => PolygonLayer(
     polygons: [
-      Polygon(
-        points: _world,
-        holePointsList: [campusBoundary, _school],
-        color: dark ? const Color(0xD90B0B0B) : const Color(0xD9EEEEEE),
-        borderColor: dark ? const Color(0xFF3A3A3A) : const Color(0xFFB9B9B9),
-        borderStrokeWidth: 1.5,
-      ),
+      for (final ring in campus)
+        Polygon(
+          points: ring,
+          borderColor: dark ? const Color(0xFF3A3A3A) : const Color(0xFFB9B9B9),
+          borderStrokeWidth: 1.5,
+        ),
     ],
   );
 }
@@ -239,7 +239,7 @@ class CampusMapState extends State<CampusMap> with TickerProviderStateMixin {
   final _map = MapController();
   late final AnimationController _pulse = AnimationController(vsync: this, duration: const Duration(milliseconds: 1600))..repeat();
   AnimationController? _move;
-  final _tiles = PitchRecolorTileProvider();
+  final _tiles = PitchRecolorTileProvider(campus: _CampusEdge.campus);
 
   /// Colour of the tiles' own light-green sports grounds (#DFFCE2), and what
   /// it turns into under the dark-mode tile filter, so covered outlines blend
@@ -320,8 +320,8 @@ class CampusMapState extends State<CampusMap> with TickerProviderStateMixin {
                     maxZoom: 19,
                     tileBuilder: widget.dark ? darkModeTileBuilder : null,
                   ),
-                  // Everything beyond the IIT Guwahati campus is washed out.
-                  _OutsideCampusMask(dark: widget.dark),
+                  // Line along the campus edge (beyond it the tiles are washed out).
+                  _CampusEdge(dark: widget.dark),
                   // KV buildings aren't in OpenStreetMap yet, so draw them in the
                   // same style as the map's other buildings.
                   _GroundOutlines(color: _groundFill),
