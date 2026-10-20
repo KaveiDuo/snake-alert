@@ -94,10 +94,15 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.phone_rounded, color: Colors.white, size: 40),
+                        const Icon(Icons.phone_rounded, color: Colors.white, size: 32),
+                        const SizedBox(height: 2),
+                        Text('SOS', style: ft(26, w: 800, color: Colors.white, height: 1.1)),
                         const SizedBox(height: 6),
-                        Text('SOS', style: ft(26, w: 800, color: Colors.white)),
-                        Text('hold to call', style: ft(12, color: Colors.white.withValues(alpha: 0.8))),
+                        // Who it calls, inside the button so there's one thing to look at.
+                        Text('IITG Hospital · 24×7', style: ft(11.5, w: 600, color: Colors.white.withValues(alpha: 0.9))),
+                        Text('82779 92838', style: ft(14, w: 700, color: Colors.white, ls: 0.3)),
+                        const SizedBox(height: 4),
+                        Text('hold to call', style: ft(11, color: Colors.white.withValues(alpha: 0.75))),
                       ],
                     ),
                   ),
@@ -109,8 +114,6 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
       ),
       const SizedBox(height: 36),
       _Info(Icons.location_on_outlined, last?.where ?? 'Kameng Hostel', 'Location shared automatically'),
-      const SizedBox(height: 10),
-      _Info(Icons.local_hospital_outlined, 'IITG Hospital · 82779 92838', '24×7 emergency line'),
     ],
   );
 
