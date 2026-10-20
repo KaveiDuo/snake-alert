@@ -40,7 +40,7 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
       body: SafeArea(
         child: Column(
           children: [
-            AppHeader('Emergency SOS', backIcon: Icons.close_rounded, centerTitle: true),
+            AppHeader(_calling ? 'Emergency SOS' : '', backIcon: Icons.close_rounded, centerTitle: true),
             Expanded(
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 350),
@@ -61,6 +61,9 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Title sits with the button, not up in the bar.
+          Text('Emergency SOS', textAlign: TextAlign.center, style: ft(24, w: 700)),
+          const SizedBox(height: 28),
           GestureDetector(
             onTapDown: (_) => _hold.forward(),
             onTapUp: (_) => _hold.isCompleted ? null : _hold.reverse(),
@@ -110,7 +113,7 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
               ),
             ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 44),
           Text(
             'Hold the button to call. Your location and the latest snake report go to the hospital and campus security at the same time.',
             textAlign: TextAlign.center,
