@@ -24,6 +24,22 @@ void main() {
     expect((await SharedPreferences.getInstance()).getBool('sign_in_as_authority'), isTrue); // remembered
   });
 
+  testWidgets('On the way: "At the spot" fills in by itself when the authority gets there', (tester) async {
+    final s = AppState()..role = Role.authority;
+    final r = s.hostelReports.firstWhere((r) => r.stage == Stage.seen);
+    s.setOnTheWay(r);
+    expect(r.distanceLeft, greaterThan(onSiteRadiusMetres)); // still walking
+    final start = r.distanceLeft!;
+    await tester.pump(const Duration(seconds: 3));
+    expect(r.distanceLeft, lessThan(start)); // getting closer
+    await tester.pump(const Duration(seconds: 20));
+    expect(r.stage, Stage.onSite); // no tap on Reached needed
+    expect(r.arrivedAuto, isTrue);
+    expect(r.locationVerified, isTrue);
+    expect(r.distanceLeft, isNull);
+    s.dispose();
+  });
+
   test('Marking safe takes the full response: on the way, at the spot, then outcome and photo', () {
     final s = AppState();
     final r = s.hostelReports.firstWhere((r) => r.stage == Stage.seen);

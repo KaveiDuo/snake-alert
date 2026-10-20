@@ -242,6 +242,12 @@ class Report {
   /// Escalated to the hostel security guard because the reporter said the snake is still there.
   bool escalated;
 
+  /// While on the way: how far the authority still is from the pin (live).
+  double? distanceLeft;
+
+  /// "At the spot" was filled in by the phone's location, not by a tap.
+  bool arrivedAuto = false;
+
   Report({
     required this.id,
     required this.venom,
@@ -397,13 +403,77 @@ class AppState extends ChangeNotifier {
       you = demoYou;
       gps = GpsState.offCampus;
     }
+    // On campus, the authority's real position decides when they've arrived.
+    if (gps == GpsState.onCampus && role == Role.authority) {
+      for (final r in hostelReports.where((r) => r.stage == Stage.onTheWay)) {
+        _checkArrival(r, metresFromYou(r.pos));
+      }
+    }
     notifyListeners();
   }
 
   @override
   void dispose() {
     _gpsSub?.cancel();
+    for (final t in _walks.values) {
+      t.cancel();
+    }
     super.dispose();
+  }
+
+  // ---------- Arrival detection ----------
+  /// While the authority is on the way, their distance to the pin is followed
+  /// and "At the spot" fills in by itself once they're within
+  /// [onSiteRadiusMetres], like a delivery app. On campus this uses the phone's
+  /// GPS; elsewhere (the demo) the walk there is simulated.
+  static bool simulateWalk = true;
+  final _walks = <String, Timer>{};
+
+  /// Starts following every report the authority is on the way to.
+  void followApproaches() {
+    for (final r in reports.where((r) => r.stage == Stage.onTheWay)) {
+      if (!_walks.containsKey(r.id)) _followApproach(r);
+    }
+  }
+
+  void _followApproach(Report r) {
+    _walks.remove(r.id)?.cancel();
+    // Only the authority's own phone counts; a student's demo shows a simulated walk.
+    if (gps == GpsState.onCampus && role == Role.authority) {
+      _checkArrival(r, metresFromYou(r.pos)); // later fixes arrive through _onPosition
+      return;
+    }
+    if (!simulateWalk) return;
+    var left = max(metresFromYou(r.pos), 420.0);
+    r.distanceLeft = left;
+    _walks[r.id] = Timer.periodic(const Duration(milliseconds: 1300), (t) {
+      if (r.stage != Stage.onTheWay) {
+        t.cancel();
+        _walks.remove(r.id);
+        return;
+      }
+      left = left * 0.72 - 12;
+      if (left <= 35) {
+        _autoArrive(r, 18 + Random().nextInt(25).toDouble());
+      } else {
+        r.distanceLeft = left;
+        notifyListeners();
+      }
+    });
+  }
+
+  void _checkArrival(Report r, double metres) {
+    if (metres <= onSiteRadiusMetres) {
+      _autoArrive(r, metres);
+    } else {
+      r.distanceLeft = metres;
+    }
+  }
+
+  void _autoArrive(Report r, double metres) {
+    _walks.remove(r.id)?.cancel();
+    if (r.stage != Stage.onTheWay) return;
+    arrive(r, metres: metres, auto: true);
   }
 
   /// Location used for "Use my current location".
@@ -767,16 +837,21 @@ class AppState extends ChangeNotifier {
     r.seenAt ??= now;
     r.onTheWayAt = now;
     r.stage = Stage.onTheWay;
+    _followApproach(r);
     notifyListeners();
   }
 
   /// Marks arrival and records how far the authority's phone is from the pin.
-  void arrive(Report r) {
+  /// [auto]: detected from their location rather than tapped.
+  void arrive(Report r, {double? metres, bool auto = false}) {
+    _walks.remove(r.id)?.cancel();
     final now = DateTime.now();
     r.seenAt ??= now;
     r.onTheWayAt ??= now;
     r.onSiteAt = now;
-    r.onSiteMetres = metresFromYou(r.pos);
+    r.onSiteMetres = metres ?? metresFromYou(r.pos);
+    r.arrivedAuto = auto;
+    r.distanceLeft = null;
     r.stage = Stage.onSite;
     notifyListeners();
   }
@@ -804,7 +879,9 @@ class AppState extends ChangeNotifier {
     if (r.safe) safeThisWeek--;
     r.stage = Stage.seen;
     r.onTheWayAt = r.onSiteAt = r.resolvedAt = null;
-    r.onSiteMetres = null;
+    r.onSiteMetres = r.distanceLeft = null;
+    r.arrivedAuto = false;
+    _walks.remove(r.id)?.cancel();
     r.outcome = null;
     r.proofPhoto = null;
     r.resolveNote = '';

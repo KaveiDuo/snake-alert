@@ -53,7 +53,10 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
     super.initState();
     // The authority has now seen every report in their list.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) AppScope.read(context).markSeen(AppScope.read(context).hostelReports);
+      if (!mounted) return;
+      final s = AppScope.read(context);
+      s.markSeen(s.hostelReports);
+      s.followApproaches(); // "At the spot" fills in when they get there
     });
   }
 
@@ -600,11 +603,16 @@ class _Deadline extends StatelessWidget {
         C.redText,
         'Overdue by ${mins(-r.dueIn)} · flagged to the hostel security guard',
       ),
+      _ when r.stage == Stage.onTheWay && r.distanceLeft != null => (
+        Icons.near_me_rounded,
+        const Color(0xFF8AB4FF),
+        '${r.distanceLeft!.round()} m away · arrival is detected automatically',
+      ),
       _ when r.stage == Stage.onSite => (
         r.locationVerified ? Icons.gps_fixed_rounded : Icons.gps_not_fixed_rounded,
         r.locationVerified ? C.greenText : const Color(0xFFFFC46B),
         r.locationVerified
-            ? 'At the spot since ${clock(r.onSiteAt!)} · location verified'
+            ? 'At the spot since ${clock(r.onSiteAt!)} · ${r.arrivedAuto ? 'detected from your location' : 'location verified'}'
             : 'At the spot since ${clock(r.onSiteAt!)} · ${r.onSiteMetres!.round()} m from the pin, not verified',
       ),
       _ when r.safe => (

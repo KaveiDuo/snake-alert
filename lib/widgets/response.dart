@@ -41,7 +41,13 @@ class StatusChip extends StatelessWidget {
         : switch (r.stage) {
             Stage.reported => (Icons.mark_email_unread_outlined, 'NOT OPENED', _amberText, const Color(0xFF2A1E0B)),
             Stage.seen => (Icons.done_all_rounded, 'SEEN', _amberText, const Color(0xFF2A1E0B)),
-            Stage.onTheWay => (Icons.directions_walk_rounded, 'ON THE WAY', const Color(0xFF8AB4FF), const Color(0xFF142033)),
+            // Live distance while walking there, like a delivery app.
+            Stage.onTheWay => (
+              Icons.directions_walk_rounded,
+              r.distanceLeft == null ? 'ON THE WAY' : 'ON THE WAY · ${r.distanceLeft!.round()} M',
+              const Color(0xFF8AB4FF),
+              const Color(0xFF142033),
+            ),
             Stage.onSite => (Icons.place_rounded, 'AT THE SPOT', const Color(0xFF8AB4FF), const Color(0xFF142033)),
             Stage.resolved when r.outcome == Outcome.notFound => (Icons.search_off_rounded, 'NOT FOUND', _amberText, const Color(0xFF2A1E0B)),
             Stage.resolved => (Icons.verified_rounded, 'SAFE', C.greenText, C.greenSoft),
@@ -124,7 +130,9 @@ class ResponseTimeline extends StatelessWidget {
       ),
       _StepData(
         r.onTheWayAt != null ? 'On the way' : 'Not on the way yet',
-        r.onTheWayAt != null ? '$who set off at ${clock(r.onTheWayAt!)}' : 'You’ll be notified when they set off',
+        r.onTheWayAt != null
+            ? '$who set off at ${clock(r.onTheWayAt!)}${r.onSiteAt == null && r.distanceLeft != null ? ' · ${r.distanceLeft!.round()} m away' : ''}'
+            : 'You’ll be notified when they set off',
         r.onTheWayAt != null,
       ),
       if (r.rescuerCalledAt != null)
@@ -132,7 +140,7 @@ class ResponseTimeline extends StatelessWidget {
       _StepData(
         r.onSiteAt != null ? 'Reached the spot' : 'Reaching the spot',
         r.onSiteAt != null
-            ? '${clock(r.onSiteAt!)} · ${r.locationVerified ? 'location verified, ${r.onSiteMetres!.round()} m from the pin' : 'location not verified (${r.onSiteMetres!.round()} m away)'}'
+            ? '${clock(r.onSiteAt!)} · ${r.locationVerified ? '${r.arrivedAuto ? 'detected automatically' : 'location verified'}, ${r.onSiteMetres!.round()} m from the pin' : 'location not verified (${r.onSiteMetres!.round()} m away)'}'
             : (r.overdue
                   ? 'Overdue: should have arrived by ${clock(r.time.add(respondWithin))}'
                   : 'Due by ${clock(r.time.add(respondWithin))} · ${mins(r.dueIn)} left'),
