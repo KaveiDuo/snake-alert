@@ -1,0 +1,11 @@
+// Copied over build/web/flutter_service_worker.js when deploying. Browsers that
+// still run the old caching worker fetch this file, which clears the caches,
+// removes itself and reloads open pages so they get the latest app.
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', (event) => {
+  event.waitUntil((async () => {
+    for (const key of await caches.keys()) await caches.delete(key);
+    await self.registration.unregister();
+    for (const client of await self.clients.matchAll({ type: 'window' })) client.navigate(client.url);
+  })());
+});

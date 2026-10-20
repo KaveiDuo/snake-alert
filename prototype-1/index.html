@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Snake Alert · Prototype 1</title>
+<meta name="description" content="Report snake sightings on campus and see nearby reports. A demo of the Snake Alert feature for IIT Guwahati's Onestop app.">
+<meta property="og:title" content="Snake Alert · Prototype 1">
+<meta property="og:description" content="Open in your browser or download the Android app.">
+<meta property="og:image" content="../icon.png">
+<meta name="theme-color" content="#148440">
+<link rel="icon" href="../icon.png">
+<link rel="apple-touch-icon" href="../icon.png">
+<style>
+  :root { --green:#148440; --mint:#dcefe4; --ink:#1d1f1d; --muted:#4a5a50; --card:#ffffff; --line:#cfe3d6; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color:var(--ink);
+         background: linear-gradient(180deg, var(--green) 0%, #6fae80 38%, var(--mint) 100%) fixed; min-height:100vh; }
+  main { max-width:460px; margin:0 auto; padding:48px 16px 40px; }
+  .hero { text-align:center; color:#0f1a13; }
+  .hero img { width:84px; height:84px; border-radius:22px; box-shadow:0 8px 24px rgba(0,0,0,.18); }
+  h1 { font-size:34px; line-height:1.05; letter-spacing:-1px; margin:22px 0 10px; font-weight:600; }
+  .lead { font-size:16px; line-height:1.5; color:#16301f; margin:0 auto 26px; max-width:360px; }
+  .btn { display:flex; align-items:center; justify-content:center; gap:10px; width:100%; min-height:54px; border-radius:16px;
+         font-size:16.5px; font-weight:650; text-decoration:none; margin-bottom:12px; }
+  .primary { background:var(--green); color:#fff; box-shadow:0 6px 16px rgba(20,132,64,.35); }
+  .secondary { background:#fff; color:var(--ink); }
+  .btn small { font-weight:500; opacity:.7; font-size:13px; }
+  .card { background:rgba(255,255,255,.88); border:1px solid var(--line); border-radius:18px; padding:18px 18px 8px; margin-top:22px; }
+  .card h2 { font-size:15px; margin:0 0 10px; }
+  .card ol { margin:0 0 12px; padding-left:20px; line-height:1.55; font-size:14.5px; color:#26352c; }
+  .badge { display:inline-block; margin:-2px 0 12px; padding:5px 12px; border-radius:20px; background:rgba(255,255,255,.75); font-size:13px; font-weight:650; letter-spacing:.4px; color:#145c31; }
+  .note { font-size:12.5px; color:var(--muted); text-align:center; line-height:1.5; margin-top:22px; }
+  svg { flex:none; }
+</style>
+</head>
+<body>
+<main>
+  <section class="hero">
+    <img src="../icon.png" alt="Onestop app icon">
+    <h1>Snake Alert</h1>
+    <p class="badge">Prototype 1</p>
+    <p class="lead">Report a snake sighting on the campus map, see reports near you, and know when an area has been marked safe.</p>
+  </section>
+
+  <a class="btn primary" href="app/">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    Open the app
+  </a>
+  <a class="btn secondary" href="https://github.com/KaveiDuo/snake-watch/releases/download/prototype-1/SnakeAlert_Prototype_1.apk">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M6 11l6 6 6-6M5 21h14"/></svg>
+    Download for Android <small>· APK, 62 MB</small>
+  </a>
+
+  <div class="card">
+    <h2>Install on Android</h2>
+    <ol>
+      <li>Tap <b>Download for Android</b>, then open the downloaded file.</li>
+      <li>If asked, tap <b>Settings</b> and turn on <b>Allow from this source</b>.</li>
+      <li>Tap <b>Install</b>. If Play Protect warns you, choose <b>Install anyway</b>.</li>
+    </ol>
+    <h2>Use it without installing</h2>
+    <ol>
+      <li>Tap <b>Open the app</b>. It works in the browser on Android and iPhone.</li>
+      <li>To keep it on your home screen: browser menu → <b>Add to Home screen</b> (Safari: Share → <b>Add to Home Screen</b>).</li>
+    </ol>
+  </div>
+
+  <p class="note">The first prototype of Snake Alert, kept unchanged for presentations. Example data only — reports stay on your device and reset when the app restarts.<br><a href="../">See the latest version →</a><br>Map © OpenStreetMap contributors · Snake photos: Wikimedia Commons.</p>
+</main>
+</body>
+</html>
