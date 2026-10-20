@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+  <!-- motion lines: it left by itself -->
+  <path d="M1.5 9 H4.5"/>
+  <path d="M1 12 H3.5"/>
+  <path d="M1.5 15 H4.5"/>
+  <!-- snake slithering off -->
+  <path d="M7 12 C8.6 8.8 10.2 8.8 11.8 12 S15 15.2 16.6 12 S18.8 9.6 20 11"/>
+  <circle cx="21.2" cy="11.6" r="1.4" fill="#000" stroke="none"/>
+</svg>
