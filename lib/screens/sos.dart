@@ -62,8 +62,8 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
         mainAxisSize: MainAxisSize.min,
         children: [
           // Title sits with the button, not up in the bar.
-          Text('Emergency SOS', textAlign: TextAlign.center, style: ft(24, w: 700)),
-          const SizedBox(height: 60),
+          Text('EMERGENCY SOS', textAlign: TextAlign.center, style: ft(24, w: 800, ls: 1.5)),
+          const SizedBox(height: 100),
           GestureDetector(
             onTapDown: (_) => _hold.forward(),
             onTapUp: (_) => _hold.isCompleted ? null : _hold.reverse(),
@@ -113,13 +113,16 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
               ),
             ),
           ),
-          const SizedBox(height: 44),
-          Text(
-            'Hold the button to call. Your location and the latest snake report go to the hospital and campus security at the same time.',
-            textAlign: TextAlign.center,
-            style: ft(13.5, color: C.muted, height: 1.5),
+          const SizedBox(height: 72),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 290),
+            child: Text(
+              'Hold to call. Your location is shared with the hospital and campus security.',
+              textAlign: TextAlign.center,
+              style: ft(13.5, color: C.muted, height: 1.5),
+            ),
           ),
-          const SizedBox(height: 72), // keeps the button just below the middle
+          const SizedBox(height: 104), // keeps the button just below the middle
         ],
       ),
     ),
