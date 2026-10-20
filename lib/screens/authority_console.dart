@@ -80,20 +80,12 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
       body: LiveClock(
         builder: (context) => Column(
           children: [
-            // Hostel and who is on duty, with the rules (ⓘ); the profile is in the bottom bar.
+            // Whose reports these are, with the rules (ⓘ); name and role are in the Profile tab.
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 8, 14),
+              padding: const EdgeInsets.fromLTRB(16, 8, 8, 10),
               child: Row(
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(s.authorityHostel, style: ft(23, w: 700)),
-                        Text('${AppState.kamengAuthority} · Hostel authority', style: ft(13.5, color: C.muted)),
-                      ],
-                    ),
-                  ),
+                  Expanded(child: Text(s.authorityHostel, style: ft(23, w: 700))),
                   IconButton(
                     tooltip: 'How Snake Alert works for authorities',
                     onPressed: () => _rulesSheet(context),
