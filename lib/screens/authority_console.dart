@@ -146,7 +146,10 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
                   for (final r in shown)
                     AnimatedSize(
                       duration: const Duration(milliseconds: 250),
-                      child: Padding(padding: const EdgeInsets.only(bottom: 12), child: _ReportCard(r, key: ValueKey(r.id))),
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _ReportCard(r, key: ValueKey(r.id)),
+                      ),
                     ),
                 ],
               ),
@@ -179,7 +182,10 @@ class _Segmented extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(label, style: ft(14.5, w: selected ? 600 : 500, color: selected ? C.text : C.muted)),
+            Text(
+              label,
+              style: ft(14.5, w: selected ? 600 : 500, color: selected ? C.text : C.muted),
+            ),
             const SizedBox(width: 7),
             Container(
               constraints: const BoxConstraints(minWidth: 19),
@@ -253,11 +259,19 @@ class _FilterChip extends StatelessWidget {
               if (f == ConsoleFilter.overdue)
                 const Icon(Icons.priority_high_rounded, size: 14, color: C.redText)
               else if (dot != null)
-                Container(width: 8, height: 8, decoration: BoxDecoration(color: dot, shape: BoxShape.circle)),
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
+                ),
               if (dot != null) const SizedBox(width: 6),
               Text(
                 f.label,
-                style: ft(13, w: selected ? 600 : 500, color: f == ConsoleFilter.overdue ? C.redText : (selected ? C.text : C.sub)),
+                style: ft(
+                  13,
+                  w: selected ? 600 : 500,
+                  color: f == ConsoleFilter.overdue ? C.redText : (selected ? C.text : C.sub),
+                ),
               ),
               const SizedBox(width: 6),
               Text('$count', style: ft(12.5, w: 600, color: selected ? C.sub : C.faint)),
@@ -345,9 +359,9 @@ void _rulesSheet(BuildContext context) {
   );
 }
 
-/// A report in the console. Collapsed it shows only what's needed to act:
-/// what and where, the deadline line and the next-step button. Tapping the
-/// top row (or the chevron) reveals the note, reporter and progress.
+/// A report in the console. Collapsed it shows only what and where, with the
+/// status chips (overdue / escalated stay visible). Tapping the top row (or the
+/// chevron) reveals the note, reporter, progress, deadline and the action buttons.
 class _ReportCard extends StatefulWidget {
   final Report r;
   const _ReportCard(this.r, {super.key});
@@ -454,53 +468,61 @@ class _ReportCardState extends State<_ReportCard> {
                           child: Text('View full report  ›', style: ft(13, w: 600, color: C.green)),
                         ),
                       ),
+                      const SizedBox(height: 12),
+                      _Deadline(r),
+                      const SizedBox(height: 12),
+                      // One row: call the snake catcher, the next step, the map.
+                      Row(
+                        children: [
+                          if (!r.safe) ...[
+                            Expanded(
+                              flex: 5,
+                              child: _Pill(
+                                called ? 'Called' : 'Call rescuer',
+                                called ? Icons.phone_callback_rounded : Icons.call_rounded,
+                                // The snake catcher / wildlife department, for big or dangerous snakes.
+                                // Red until called; grey once it has been done.
+                                bg: called ? const Color(0xFF262626) : const Color(0xFFE5484D),
+                                fg: called ? C.sub : Colors.white,
+                                onTap: () async {
+                                  s.callRescuer(r);
+                                  if (!await launchUrl(Uri.parse('tel:$rescuerPhone')) && context.mounted) {
+                                    toast(context, 'Could not open the dialler');
+                                  }
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          Expanded(
+                            flex: 5,
+                            child: r.safe
+                                ? _Pill(label, icon, bg: const Color(0xFF262626), fg: C.sub, onTap: onTap)
+                                : _Pill(
+                                    label,
+                                    icon,
+                                    bg: const Color(0xFF173A24),
+                                    fg: C.greenText,
+                                    border: const Color(0xFF245A36),
+                                    onTap: onTap,
+                                  ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            flex: 3,
+                            child: _Pill(
+                              'Map',
+                              Icons.location_on_outlined,
+                              bg: const Color(0xFF262626),
+                              fg: C.text,
+                              onTap: () =>
+                                  Navigator.push(context, MaterialPageRoute(builder: (_) => ReportLocationScreen(report: r))),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
-          ),
-          const SizedBox(height: 12),
-          _Deadline(r),
-          const SizedBox(height: 12),
-          // One row: call the snake catcher, the next step, the map.
-          Row(
-            children: [
-              if (!r.safe) ...[
-                Expanded(
-                  flex: 5,
-                  child: _Pill(
-                    called ? 'Called' : 'Call rescuer',
-                    called ? Icons.phone_callback_rounded : Icons.call_rounded,
-                    // The snake catcher / wildlife department, for big or dangerous snakes.
-                    // Red until called; grey once it has been done.
-                    bg: called ? const Color(0xFF262626) : const Color(0xFFE5484D),
-                    fg: called ? C.sub : Colors.white,
-                    onTap: () async {
-                      s.callRescuer(r);
-                      if (!await launchUrl(Uri.parse('tel:$rescuerPhone')) && context.mounted) {
-                        toast(context, 'Could not open the dialler');
-                      }
-                    },
-                  ),
-                ),
-                const SizedBox(width: 8),
-              ],
-              Expanded(
-                flex: 5,
-                child: r.safe
-                    ? _Pill(label, icon, bg: const Color(0xFF262626), fg: C.sub, onTap: onTap)
-                    : _Pill(label, icon, bg: const Color(0xFF173A24), fg: C.greenText, border: const Color(0xFF245A36), onTap: onTap),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                flex: 3,
-                child: _Pill(
-                  'Map',
-                  Icons.location_on_outlined,
-                  bg: const Color(0xFF262626),
-                  fg: C.text,
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ReportLocationScreen(report: r))),
-                ),
-              ),
-            ],
           ),
         ],
       ),
@@ -543,7 +565,12 @@ class _Pill extends StatelessWidget {
               Icon(icon, size: 18, color: fg),
               const SizedBox(width: 6),
               Flexible(
-                child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: ft(14, w: 600, color: fg)),
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: ft(14, w: 600, color: fg),
+                ),
               ),
             ],
           ),
@@ -597,7 +624,9 @@ class _Deadline extends StatelessWidget {
       children: [
         Icon(icon, size: 16, color: color),
         const SizedBox(width: 7),
-        Expanded(child: Text(text, style: ft(12.5, w: 600, color: color, height: 1.35))),
+        Expanded(
+          child: Text(text, style: ft(12.5, w: 600, color: color, height: 1.35)),
+        ),
       ],
     );
   }
@@ -654,8 +683,7 @@ Future<void> _resolveSheet(BuildContext context, Report r) async {
                   crossAxisSpacing: 10,
                   childAspectRatio: 1.45,
                   children: [
-                    for (final o in Outcome.values)
-                      _OutcomeTile(o, selected: outcome == o, onTap: () => set(() => outcome = o)),
+                    for (final o in Outcome.values) _OutcomeTile(o, selected: outcome == o, onTap: () => set(() => outcome = o)),
                   ],
                 ),
                 const SizedBox(height: 18),
@@ -699,7 +727,9 @@ Future<void> _resolveSheet(BuildContext context, Report r) async {
                         child: SizedBox(width: 64, height: 64, child: photoOf(photo!)),
                       ),
                       const SizedBox(width: 12),
-                      Expanded(child: Text('Photo added', style: ft(14, w: 600, color: C.greenText))),
+                      Expanded(
+                        child: Text('Photo added', style: ft(14, w: 600, color: C.greenText)),
+                      ),
                       TextButton(
                         onPressed: () => set(() => photo = null),
                         child: Text('Remove', style: ft(13, w: 600, color: C.sub)),
@@ -812,7 +842,10 @@ Future<void> _resolveSheet(BuildContext context, Report r) async {
                           AppScope.read(context).resolve(
                             r,
                             outcome: outcome!,
-                            searched: [for (final spot in searchSpots) if (checked.contains(spot)) spot],
+                            searched: [
+                              for (final spot in searchSpots)
+                                if (checked.contains(spot)) spot,
+                            ],
                             proofPhoto: photo,
                             note: note.text,
                           );
@@ -876,7 +909,12 @@ class _OutcomeTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(o.short, style: ft(14.5, w: 700)),
-                  Text(help, style: ft(11.5, color: C.muted), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(
+                    help,
+                    style: ft(11.5, color: C.muted),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ],
               ),
             ],
