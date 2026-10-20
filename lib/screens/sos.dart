@@ -42,7 +42,7 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
           children: [
             AppHeader('Emergency SOS', backIcon: Icons.close_rounded),
             Expanded(
-              child: AnimatedSwitcher(duration: const Duration(milliseconds: 350), child: _calling ? _callingView(last) : _holdView(last)),
+              child: AnimatedSwitcher(duration: const Duration(milliseconds: 350), child: _calling ? _callingView(last) : _holdView()),
             ),
           ],
         ),
@@ -50,7 +50,7 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
     );
   }
 
-  Widget _holdView(Report? last) => ListView(
+  Widget _holdView() => ListView(
     key: const ValueKey('hold'),
     padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
     children: [
@@ -112,8 +112,6 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
           ),
         ),
       ),
-      const SizedBox(height: 36),
-      _Info(Icons.location_on_outlined, last?.where ?? 'Kameng Hostel', 'Location shared automatically'),
     ],
   );
 
@@ -186,31 +184,5 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
         },
       ),
     ],
-  );
-}
-
-class _Info extends StatelessWidget {
-  final IconData icon;
-  final String title, sub;
-  const _Info(this.icon, this.title, this.sub);
-  @override
-  Widget build(BuildContext context) => Panel(
-    color: const Color(0xFF1E1212),
-    border: const Color(0xFF3A1D1B),
-    child: Row(
-      children: [
-        Icon(icon, color: C.redText, size: 20),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: ft(14, w: 600)),
-              Text(sub, style: ft(12, color: C.muted)),
-            ],
-          ),
-        ),
-      ],
-    ),
   );
 }
