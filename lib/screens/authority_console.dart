@@ -10,6 +10,31 @@ import 'profile.dart';
 import 'report_location.dart';
 import 'sighting_detail.dart';
 
+/// The authority's app: Reports (the console) and Profile, switched with the
+/// bottom bar like the student app.
+class AuthorityShell extends StatefulWidget {
+  const AuthorityShell({super.key});
+  @override
+  State<AuthorityShell> createState() => _AuthorityShellState();
+}
+
+class _AuthorityShellState extends State<AuthorityShell> {
+  int _tab = 0;
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: C.bg,
+    body: IndexedStack(index: _tab, children: const [AuthorityConsole(), AuthorityProfile()]),
+    bottomNavigationBar: AppTabBar(
+      index: _tab,
+      onTap: (i) => setState(() => _tab = i),
+      items: const [
+        (Icons.assignment_outlined, Icons.assignment_rounded, 'Reports'),
+        (Icons.person_outline_rounded, Icons.person_rounded, 'Profile'),
+      ],
+    ),
+  );
+}
+
 /// Hostel authority console: only this hostel's reports, split into Open and
 /// Resolved and filterable by type. Opening it marks new reports as seen. Each report then moves one step at a time — on the way,
 /// at the spot (location checked), safe (outcome and photo required) — and
@@ -81,21 +106,14 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 14),
-              child: GestureDetector(
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AuthorityProfile())),
-                child: Row(
+              // Hostel and who is on duty; the profile is in the bottom bar.
+              child: SizedBox(
+                width: double.infinity,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ClipOval(child: Image.asset('assets/images/avatar_authority.jpg', width: 52, height: 52, fit: BoxFit.cover)),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(s.authorityHostel, style: ft(23, w: 700)),
-                          Text('${AppState.kamengAuthority} · Hostel authority', style: ft(13.5, color: C.muted)),
-                        ],
-                      ),
-                    ),
+                    Text(s.authorityHostel, style: ft(23, w: 700)),
+                    Text('${AppState.kamengAuthority} · Hostel authority', style: ft(13.5, color: C.muted)),
                   ],
                 ),
               ),
@@ -913,10 +931,12 @@ class AuthorityProfile extends StatelessWidget {
       ),
     );
     return DarkPage(
-      header: const AppHeader('Profile'),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 30),
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 30),
         children: [
+          // A tab, so no back button.
+          Text('Profile', style: ft(24, w: 700)),
+          const SizedBox(height: 16),
           IdCard(
             avatar: ClipOval(child: Image.asset('assets/images/avatar_authority.jpg', width: 88, height: 88, fit: BoxFit.cover)),
             name: AppState.kamengAuthority,

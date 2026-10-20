@@ -181,7 +181,7 @@ class _AuthorityCodeScreenState extends State<AuthorityCodeScreen> {
     Navigator.of(context).pushAndRemoveUntil(
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 400),
-        pageBuilder: (_, _, _) => const AuthorityConsole(),
+        pageBuilder: (_, _, _) => const AuthorityShell(),
         transitionsBuilder: (_, a, _, c) => FadeTransition(opacity: a, child: c),
       ),
       (_) => false,

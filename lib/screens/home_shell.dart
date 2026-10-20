@@ -44,7 +44,11 @@ class _GlowingSosState extends State<_GlowingSos> with SingleTickerProviderState
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             boxShadow: [
-              BoxShadow(color: C.red.withValues(alpha: 0.5 + 0.3 * t), blurRadius: 18 + 16 * t, spreadRadius: 2 + 6 * t),
+              BoxShadow(
+                color: C.red.withValues(alpha: 0.5 + 0.3 * t),
+                blurRadius: 18 + 16 * t,
+                spreadRadius: 2 + 6 * t,
+              ),
             ],
           ),
           child: child,
@@ -73,45 +77,15 @@ class _HomeShellState extends State<HomeShell> {
       floatingActionButton: _tab == 0
           ? _GlowingSos(onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SosScreen())))
           : null,
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFF161616),
-          border: Border(top: BorderSide(color: Color(0xFF232323))),
-        ),
-        padding: EdgeInsets.fromLTRB(12, 8, 12, 8 + MediaQuery.of(context).padding.bottom),
-        child: Row(
-          children: [
-            for (final (i, icon, activeIcon, label) in [
-              (0, Icons.home_outlined, Icons.home_rounded, 'Home'),
-              (1, Icons.restaurant_outlined, Icons.restaurant, 'Food'),
-              (2, Icons.directions_bus_outlined, Icons.directions_bus, 'Travel'),
-              (3, Icons.person_outline_rounded, Icons.person_rounded, 'Profile'),
-            ])
-              Expanded(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () => setState(() => _tab = i),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                    padding: const EdgeInsets.symmetric(vertical: 7),
-                    decoration: BoxDecoration(color: _tab == i ? C.greenSoft : Colors.transparent, borderRadius: BorderRadius.circular(16)),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(_tab == i ? activeIcon : icon, size: 22, color: _tab == i ? C.green : C.sub),
-                        const SizedBox(height: 3),
-                        Text(
-                          label,
-                          style: ft(11, w: _tab == i ? 600 : 400, color: _tab == i ? C.green : C.sub),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
+      bottomNavigationBar: AppTabBar(
+        index: _tab,
+        onTap: (i) => setState(() => _tab = i),
+        items: const [
+          (Icons.home_outlined, Icons.home_rounded, 'Home'),
+          (Icons.restaurant_outlined, Icons.restaurant, 'Food'),
+          (Icons.directions_bus_outlined, Icons.directions_bus, 'Travel'),
+          (Icons.person_outline_rounded, Icons.person_rounded, 'Profile'),
+        ],
       ),
     );
   }
@@ -297,7 +271,13 @@ class _HomeTab extends StatelessWidget {
                         const SizedBox(height: 10),
                         Text('DINNER · ENDS 9:30 PM', style: ft(10.5, color: C.muted, ls: 0.6)),
                         const SizedBox(height: 8),
-                        for (final item in ['1. Veg Kofta / Egg curry', '2. Alo pata gobi matar', '3. Chana Dal fry', '4. Rice', '5. Roti'])
+                        for (final item in [
+                          '1. Veg Kofta / Egg curry',
+                          '2. Alo pata gobi matar',
+                          '3. Chana Dal fry',
+                          '4. Rice',
+                          '5. Roti',
+                        ])
                           Padding(
                             padding: const EdgeInsets.only(bottom: 5),
                             child: Text(item, style: ft(13.5, color: C.sub)),
@@ -423,10 +403,7 @@ class _HomeTab extends StatelessWidget {
                 child: Row(
                   children: [
                     Expanded(child: Text(label, style: ft(15.5, w: 600))),
-                    Transform.rotate(
-                      angle: -0.785,
-                      child: const Icon(Icons.arrow_forward_rounded, color: C.muted, size: 16),
-                    ),
+                    Transform.rotate(angle: -0.785, child: const Icon(Icons.arrow_forward_rounded, color: C.muted, size: 16)),
                   ],
                 ),
               ),

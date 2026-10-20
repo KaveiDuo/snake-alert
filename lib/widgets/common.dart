@@ -115,10 +115,19 @@ class AppHeader extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            Align(alignment: Alignment.centerLeft, child: RoundButton(backIcon, onTap: onBack ?? () => Navigator.maybePop(context))),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: RoundButton(backIcon, onTap: onBack ?? () => Navigator.maybePop(context)),
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 56),
-              child: Text(title, style: ft(20, w: 700), maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+              child: Text(
+                title,
+                style: ft(20, w: 700),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
             ),
             if (trailing != null) Align(alignment: Alignment.centerRight, child: trailing),
           ],
@@ -326,4 +335,52 @@ void toast(BuildContext context, String msg) {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
     );
+}
+
+/// Bottom tab bar used by the student app and the authority view.
+class AppTabBar extends StatelessWidget {
+  final List<(IconData icon, IconData activeIcon, String label)> items;
+  final int index;
+  final ValueChanged<int> onTap;
+  const AppTabBar({super.key, required this.items, required this.index, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) => Container(
+    decoration: const BoxDecoration(
+      color: Color(0xFF161616),
+      border: Border(top: BorderSide(color: Color(0xFF232323))),
+    ),
+    padding: EdgeInsets.fromLTRB(12, 8, 12, 8 + MediaQuery.of(context).padding.bottom),
+    child: Row(
+      children: [
+        for (final (i, (icon, activeIcon, label)) in items.indexed)
+          Expanded(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => onTap(i),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                padding: const EdgeInsets.symmetric(vertical: 7),
+                decoration: BoxDecoration(
+                  color: index == i ? C.greenSoft : Colors.transparent,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(index == i ? activeIcon : icon, size: 22, color: index == i ? C.green : C.sub),
+                    const SizedBox(height: 3),
+                    Text(
+                      label,
+                      style: ft(11, w: index == i ? 600 : 400, color: index == i ? C.green : C.sub),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+      ],
+    ),
+  );
 }
