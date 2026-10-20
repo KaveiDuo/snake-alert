@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -639,8 +640,6 @@ Future<void> _resolveSheet(BuildContext context, Report r) async {
   Outcome? outcome;
   final checked = <String>{};
   String? photo;
-  var writing = false;
-  final note = TextEditingController();
   await showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -653,7 +652,7 @@ Future<void> _resolveSheet(BuildContext context, Report r) async {
           if (x != null) set(() => photo = x.path);
         }
 
-        // Camera, gallery, or (demo) a sample photo.
+        // A photo taken at the spot is the proof, so camera only (plus a sample for the demo).
         Future<void> addPhoto() async {
           final choice = await showModalBottomSheet<int>(
             context: ctx,
@@ -667,7 +666,6 @@ Future<void> _resolveSheet(BuildContext context, Report r) async {
                   children: [
                     for (final (i, icon, label) in [
                       (0, Icons.photo_camera_outlined, 'Take a photo'),
-                      (1, Icons.photo_library_outlined, 'Choose from gallery'),
                       (2, Icons.image_outlined, 'Use a sample photo (demo)'),
                     ])
                       ListTile(
@@ -683,15 +681,13 @@ Future<void> _resolveSheet(BuildContext context, Report r) async {
           switch (choice) {
             case 0:
               await pick(ImageSource.camera);
-            case 1:
-              await pick(ImageSource.gallery);
             case 2:
               set(() => photo = r.sp?.photo ?? 'assets/snakes/wolf.jpg');
           }
         }
 
         final notFound = outcome == Outcome.notFound;
-        final ready = outcome != null && (!notFound || checked.isNotEmpty);
+        final ready = outcome != null && (!notFound || checked.isNotEmpty) && photo != null;
         final onSite = DateTime.now().difference(r.onSiteAt ?? DateTime.now());
         const amber = Color(0xFFFFC46B);
         return Padding(
@@ -797,55 +793,18 @@ Future<void> _resolveSheet(BuildContext context, Report r) async {
                         ),
                 ),
                 const SizedBox(height: 14),
-                // Extras, both optional: a photo and a short note.
-                Text('Add if you like', style: ft(12.5, w: 600, color: C.muted)),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: photo == null
-                          ? _ExtraButton(Icons.add_a_photo_outlined, 'Photo', onTap: addPhoto)
-                          : _ExtraButton(
-                              Icons.check_circle_rounded,
-                              'Photo added',
-                              done: true,
-                              thumb: photo,
-                              onTap: () => set(() => photo = null),
-                            ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _ExtraButton(
-                        writing ? Icons.check_circle_rounded : Icons.edit_note_rounded,
-                        'Note',
-                        done: writing,
-                        onTap: () => set(() => writing = !writing),
-                      ),
-                    ),
-                  ],
-                ),
-                if (writing)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: TextField(
-                      controller: note,
-                      maxLines: 2,
-                      autofocus: true,
-                      style: ft(14),
-                      decoration: InputDecoration(
-                        hintText: 'Write a note for students',
-                        hintStyle: ft(14, color: C.muted),
-                        filled: true,
-                        fillColor: C.card2,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
-                      ),
-                    ),
-                  ),
+                // Required: a photo from the spot shows the authority was there.
+                Text('Photo of the spot', style: ft(15, w: 700)),
+                const SizedBox(height: 2),
+                Text('Required · shows students you were there', style: ft(12.5, color: photo == null ? amber : C.muted)),
+                const SizedBox(height: 10),
+                _PhotoProof(photo: photo, onAdd: addPhoto),
                 const SizedBox(height: 18),
                 Btn(
                   switch (outcome) {
                     null => 'Choose what happened',
                     Outcome.notFound when checked.isEmpty => 'Tap where you checked',
+                    _ when photo == null => 'Add a photo to finish',
                     Outcome.notFound => 'Close as not found',
                     _ => 'Mark area safe',
                   },
@@ -860,7 +819,6 @@ Future<void> _resolveSheet(BuildContext context, Report r) async {
                                 if (checked.contains(spot)) spot,
                             ],
                             proofPhoto: photo,
-                            note: note.text,
                           );
                           Navigator.pop(ctx);
                           toast(
@@ -891,11 +849,13 @@ class _OutcomeTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (IconData icon, Color color, String help) = switch (o) {
-      Outcome.chased => (Icons.forest_outlined, C.green, 'Into the forest, away from people'),
-      Outcome.rescuer => (Icons.health_and_safety_outlined, C.green, 'A snake rescuer took it'),
-      Outcome.leftArea => (Icons.directions_run_rounded, C.green, 'Left on its own'),
-      Outcome.notFound => (Icons.search_off_rounded, const Color(0xFFFFC46B), 'Searched, couldn’t find it'),
+    Widget svg(String name, Color c) =>
+        SvgPicture.asset('assets/icons/$name.svg', width: 27, height: 27, colorFilter: ColorFilter.mode(c, BlendMode.srcIn));
+    final (Widget Function(Color) icon, Color color, String help) = switch (o) {
+      Outcome.chased => ((c) => svg('chased_away', c), C.green, 'Into the forest, away from people'),
+      Outcome.rescuer => ((c) => Icon(Icons.health_and_safety_outlined, size: 22, color: c), C.green, 'A snake rescuer took it'),
+      Outcome.leftArea => ((c) => svg('went_away', c), C.green, 'Left on its own'),
+      Outcome.notFound => ((c) => Icon(Icons.search_off_rounded, size: 22, color: c), const Color(0xFFFFC46B), 'Searched, couldn’t find it'),
     };
     return Material(
       color: selected ? Color.alphaBlend(color.withValues(alpha: 0.12), C.card2) : C.card2,
@@ -914,7 +874,7 @@ class _OutcomeTile extends StatelessWidget {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(color: color.withValues(alpha: 0.14), shape: BoxShape.circle),
-                child: Icon(icon, size: 22, color: color),
+                child: Center(child: icon(color)),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -945,42 +905,61 @@ class _OutcomeTile extends StatelessWidget {
   }
 }
 
-/// Small optional extra (photo / note) on the resolve sheet.
-class _ExtraButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool done;
-  final String? thumb;
-  final VoidCallback onTap;
-  const _ExtraButton(this.icon, this.label, {required this.onTap, this.done = false, this.thumb});
+/// The required photo on the resolve sheet: a big "take a photo" target, then
+/// the photo itself with Retake.
+class _PhotoProof extends StatelessWidget {
+  final String? photo;
+  final VoidCallback onAdd;
+  const _PhotoProof({required this.photo, required this.onAdd});
 
   @override
-  Widget build(BuildContext context) => Material(
-    color: done ? C.greenSoft : C.card2,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(14),
-      side: BorderSide(color: done ? const Color(0xFF245A36) : C.line2),
-    ),
-    child: InkWell(
-      borderRadius: BorderRadius.circular(14),
-      onTap: onTap,
-      child: SizedBox(
-        height: 46,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (thumb != null)
-              ClipRRect(borderRadius: BorderRadius.circular(6), child: SizedBox(width: 26, height: 26, child: photoOf(thumb!)))
-            else
-              Icon(icon, size: 20, color: done ? C.greenText : C.sub),
-            const SizedBox(width: 8),
-            Text(label, style: ft(14, w: 600, color: done ? C.greenText : C.text)),
-            if (thumb != null) ...[const SizedBox(width: 6), const Icon(Icons.close_rounded, size: 16, color: C.sub)],
-          ],
+  Widget build(BuildContext context) {
+    if (photo == null) {
+      return Material(
+        color: C.card2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFF5A4520), width: 1.5),
         ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onAdd,
+          child: SizedBox(
+            height: 64,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.photo_camera_rounded, size: 24, color: Color(0xFFFFC46B)),
+                const SizedBox(width: 10),
+                Text('Take a photo', style: ft(15.5, w: 700, color: const Color(0xFFFFC46B))),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: C.greenSoft,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFF245A36)),
       ),
-    ),
-  );
+      child: Row(
+        children: [
+          ClipRRect(borderRadius: BorderRadius.circular(10), child: SizedBox(width: 56, height: 56, child: photoOf(photo!))),
+          const SizedBox(width: 12),
+          const Icon(Icons.check_circle_rounded, size: 18, color: C.greenText),
+          const SizedBox(width: 6),
+          Expanded(child: Text('Photo added', style: ft(14.5, w: 600, color: C.greenText))),
+          TextButton(
+            onPressed: onAdd,
+            child: Text('Retake', style: ft(13.5, w: 600, color: C.sub)),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class AuthorityProfile extends StatelessWidget {
