@@ -171,26 +171,26 @@ class _Segmented extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        height: 46,
+        height: 34,
         decoration: BoxDecoration(
           color: selected ? const Color(0xFF2A2A2A) : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(label, style: ft(16, w: selected ? 600 : 500, color: selected ? C.text : C.muted)),
-            const SizedBox(width: 8),
+            Text(label, style: ft(14.5, w: selected ? 600 : 500, color: selected ? C.text : C.muted)),
+            const SizedBox(width: 7),
             Container(
-              constraints: const BoxConstraints(minWidth: 22),
-              height: 22,
-              padding: const EdgeInsets.symmetric(horizontal: 6),
+              constraints: const BoxConstraints(minWidth: 19),
+              height: 19,
+              padding: const EdgeInsets.symmetric(horizontal: 5),
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: selected ? badgeBg : badgeBg.withValues(alpha: 0.35),
-                borderRadius: BorderRadius.circular(11),
+                borderRadius: BorderRadius.circular(10),
               ),
-              child: Text('$count', style: ft(12, w: 700, color: selected ? badgeFg : badgeFg.withValues(alpha: 0.6))),
+              child: Text('$count', style: ft(11, w: 700, color: selected ? badgeFg : badgeFg.withValues(alpha: 0.6))),
             ),
           ],
         ),
@@ -200,10 +200,10 @@ class _Segmented extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(5),
+    padding: const EdgeInsets.all(3),
     decoration: BoxDecoration(
       color: const Color(0xFF0B0B0B),
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(13),
       border: Border.all(color: C.line2),
     ),
     child: Row(
