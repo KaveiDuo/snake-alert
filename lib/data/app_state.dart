@@ -406,6 +406,7 @@ class AppState extends ChangeNotifier {
     // On campus, the authority's real position decides when they've arrived.
     if (gps == GpsState.onCampus && role == Role.authority) {
       for (final r in hostelReports.where((r) => r.stage == Stage.onTheWay)) {
+        _walks.remove(r.id)?.cancel(); // real position replaces the demo walk
         _checkArrival(r, metresFromYou(r.pos));
       }
     }
@@ -837,6 +838,7 @@ class AppState extends ChangeNotifier {
     r.seenAt ??= now;
     r.onTheWayAt = now;
     r.stage = Stage.onTheWay;
+    if (role == Role.authority) startGps(); // follow the authority's real position
     _followApproach(r);
     notifyListeners();
   }
