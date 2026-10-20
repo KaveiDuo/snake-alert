@@ -3,7 +3,7 @@
 A standalone demo of the **Snake Alert** add-on for IIT Guwahati's Onestop app: report snake sightings on a campus map, see nearby reports, and let the hostel authority mark areas safe.
 
 - **Open it in your browser:** https://kaveiduo.github.io/snake-watch/
-- **Android app (APK):** https://github.com/KaveiDuo/snake-watch/releases/latest/download/SnakeWatch.apk
+- **Android app (APK):** https://github.com/KaveiDuo/snake-watch/releases/latest/download/SnakeAlert.apk
 
 This is a design demo built from the Figma prototype. It uses example data only: reports stay on your own device and reset when the app restarts, and there is no real sign-in.
 

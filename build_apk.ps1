@@ -1,4 +1,4 @@
-# Builds the Snake Watch APK on this PC.
+# Builds the Snake Alert APK on this PC.
 # Java can't use the default Temp folder here (the Windows user folder has a space in its name),
 # so the build uses a local .tmp folder instead.
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -16,5 +16,5 @@ if (Test-Path $keyFile) {
     $chars = $key.ToCharArray(); [array]::Reverse($chars); $keyR = -join $chars
 }
 flutter build apk --release "--dart-define=SCANNER_KEY_R=$keyR"
-Copy-Item "$here\build\app\outputs\flutter-apk\app-release.apk" "$here\SnakeWatch.apk" -Force
-Write-Host "APK ready: $here\SnakeWatch.apk"
+Copy-Item "$here\build\app\outputs\flutter-apk\app-release.apk" "$here\SnakeAlert.apk" -Force
+Write-Host "APK ready: $here\SnakeAlert.apk"

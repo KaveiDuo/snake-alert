@@ -49,7 +49,7 @@ app.*.map.json
 
 # local build helpers
 .tmp/
-SnakeWatch.apk
+SnakeAlert.apk
 
 
 # free Gemini key for the snake scanner (added at build time, never committed)
