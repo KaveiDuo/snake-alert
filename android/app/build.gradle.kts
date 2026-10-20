@@ -16,7 +16,10 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "in.iitg.onestop.snake_watch"
+        // A side-by-side copy (e.g. "Snake Alert 01") gets its own ID and name so it
+        // installs next to the main app instead of updating it. Set by build_apk.ps1.
+        applicationId = "in.iitg.onestop.snake_watch" + (System.getenv("APP_ID_SUFFIX") ?: "")
+        manifestPlaceholders["appLabel"] = System.getenv("APP_LABEL") ?: "Snake Alert"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
