@@ -13,7 +13,7 @@ class SosScreen extends StatefulWidget {
   State<SosScreen> createState() => _SosScreenState();
 }
 
-class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMixin {
+class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
   static const hospital = '8277992838';
   late final AnimationController _hold = AnimationController(vsync: this, duration: const Duration(milliseconds: 1500))
     ..addStatusListener((st) {
@@ -21,8 +21,13 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
     });
   bool _calling = false;
 
+  // Slow "breathing" glow that invites a press; it settles while the button is held.
+  late final AnimationController _breath = AnimationController(vsync: this, duration: const Duration(milliseconds: 1600))
+    ..repeat(reverse: true);
+
   @override
   void dispose() {
+    _breath.dispose();
     _hold.dispose();
     super.dispose();
   }
@@ -55,11 +60,10 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
 
   Widget _holdView() => Padding(
     key: const ValueKey('hold'),
-    padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
+    padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
     child: Column(
       children: [
         // Title near the top; the button and its explanation sit in the middle.
-        const SizedBox(height: 18),
         Text('EMERGENCY SOS', textAlign: TextAlign.center, style: ft(24, w: 800, ls: 1.5)),
         Expanded(
           child: Center(
@@ -71,48 +75,55 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
                   onTapUp: (_) => _hold.isCompleted ? null : _hold.reverse(),
                   onTapCancel: () => _hold.isCompleted ? null : _hold.reverse(),
                   child: AnimatedBuilder(
-                    animation: _hold,
-                    builder: (_, _) => SizedBox(
-                      width: 220,
-                      height: 220,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          SizedBox(
-                            width: 220,
-                            height: 220,
-                            child: CircularProgressIndicator(
-                              value: _hold.value,
-                              strokeWidth: 5,
-                              color: Colors.white,
-                              backgroundColor: const Color(0x33FF453A),
+                    animation: Listenable.merge([_hold, _breath]),
+                    builder: (_, _) {
+                      final b = Curves.easeInOut.transform(_breath.value) * (1 - _hold.value);
+                      return SizedBox(
+                        width: 220,
+                        height: 220,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            SizedBox(
+                              width: 220,
+                              height: 220,
+                              child: CircularProgressIndicator(
+                                value: _hold.value,
+                                strokeWidth: 5,
+                                color: Colors.white,
+                                backgroundColor: const Color(0x33FF453A),
+                              ),
                             ),
-                          ),
-                          Container(
-                            width: 180 - 10 * _hold.value,
-                            height: 180 - 10 * _hold.value,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: const Color(0xFFE5382D),
-                              boxShadow: [BoxShadow(color: C.red.withValues(alpha: 0.45), blurRadius: 40, spreadRadius: 4)],
+                            Container(
+                              width: 180 - 10 * _hold.value + 8 * b,
+                              height: 180 - 10 * _hold.value + 8 * b,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: const Color(0xFFE5382D),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: C.red.withValues(alpha: 0.35 + 0.3 * b),
+                                    blurRadius: 30 + 34 * b,
+                                    spreadRadius: 2 + 8 * b,
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  // Who it calls (the title already says SOS).
+                                  const Icon(Icons.phone_rounded, color: Colors.white, size: 36),
+                                  const SizedBox(height: 8),
+                                  Text('IITG Hospital', style: ft(19, w: 800, color: Colors.white, height: 1.1)),
+                                  const SizedBox(height: 3),
+                                  Text('82779 92838', style: ft(14.5, w: 600, color: Colors.white, ls: 0.3)),
+                                ],
+                              ),
                             ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                // Who it calls (the title already says SOS).
-                                const Icon(Icons.phone_rounded, color: Colors.white, size: 36),
-                                const SizedBox(height: 8),
-                                Text('IITG Hospital', style: ft(19, w: 800, color: Colors.white, height: 1.1)),
-                                const SizedBox(height: 3),
-                                Text('82779 92838', style: ft(14.5, w: 600, color: Colors.white, ls: 0.3)),
-                                const SizedBox(height: 6),
-                                Text('24×7 · hold to call', style: ft(11, color: Colors.white.withValues(alpha: 0.78))),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(height: 72),
