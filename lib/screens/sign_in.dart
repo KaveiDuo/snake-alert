@@ -325,7 +325,7 @@ class _AuthenticatingScreenState extends State<AuthenticatingScreen> with Ticker
               side: const BorderSide(color: C.onestopGreen),
               onTap: _go,
               child: Center(
-                child: Text('Reinitialize', style: mont(16, color: C.onestopGreen)),
+                child: Text('Try again', style: mont(16, color: C.onestopGreen)),
               ),
             ),
             const SizedBox(height: 15),
