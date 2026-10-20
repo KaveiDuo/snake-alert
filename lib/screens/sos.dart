@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../data/app_state.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
 
-/// Emergency SOS: hold the button for 1.5 s to "call". The demo shows the
-/// calling screen; "Call now" opens the phone dialler with the hospital number.
+/// Emergency SOS: hold the button for 1.5 s and the phone dialler opens with
+/// the hospital number.
 class SosScreen extends StatefulWidget {
   const SosScreen({super.key});
   @override
@@ -17,9 +16,11 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
   static const hospital = '8277992838';
   late final AnimationController _hold = AnimationController(vsync: this, duration: const Duration(milliseconds: 1500))
     ..addStatusListener((st) {
-      if (st == AnimationStatus.completed) setState(() => _calling = true);
+      if (st == AnimationStatus.completed) {
+        _dial();
+        _hold.reset();
+      }
     });
-  bool _calling = false;
 
   // Slow "breathing" glow that invites a press; it settles while the button is held.
   late final AnimationController _breath = AnimationController(vsync: this, duration: const Duration(milliseconds: 1600))
@@ -38,20 +39,13 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final s = AppScope.of(context);
-    final last = s.latestOpen;
     return Scaffold(
       backgroundColor: const Color(0xFF140A0A),
       body: SafeArea(
         child: Column(
           children: [
-            AppHeader(_calling ? 'Emergency SOS' : '', backIcon: Icons.close_rounded, centerTitle: true),
-            Expanded(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 350),
-                child: _calling ? _callingView(last) : _holdView(),
-              ),
-            ),
+            AppHeader('', backIcon: Icons.close_rounded, centerTitle: true),
+            Expanded(child: _holdView()),
           ],
         ),
       ),
@@ -142,76 +136,5 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
         ),
       ],
     ),
-  );
-
-  Widget _callingView(Report? last) => ListView(
-    key: const ValueKey('call'),
-    padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-    children: [
-      Center(
-        child: Container(
-          width: 110,
-          height: 110,
-          decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFE5382D)),
-          child: const Icon(Icons.phone_in_talk_rounded, color: Colors.white, size: 46),
-        ),
-      ),
-      const SizedBox(height: 18),
-      Text('Calling IITG Hospital', textAlign: TextAlign.center, style: ft(22, w: 700)),
-      const SizedBox(height: 4),
-      Text(
-        'Emergency line · connecting…',
-        textAlign: TextAlign.center,
-        style: ft(13, color: C.muted),
-      ),
-      const SizedBox(height: 22),
-      for (final t in [
-        'Hospital alerted with your location',
-        'Security control room alerted',
-        if (last != null) 'Last report attached: ${last.title}, ${last.place}',
-      ])
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Panel(
-            color: const Color(0xFF1E1212),
-            border: const Color(0xFF3A1D1B),
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                const Icon(Icons.check_rounded, color: C.green, size: 18),
-                const SizedBox(width: 10),
-                Expanded(child: Text(t, style: ft(13.5))),
-              ],
-            ),
-          ),
-        ),
-      const SizedBox(height: 8),
-      Panel(
-        color: const Color(0xFF1E1212),
-        border: const Color(0xFF3A1D1B),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('WHILE YOU WAIT', style: ft(11, w: 700, color: C.amber, ls: 1)),
-            const SizedBox(height: 8),
-            Text(
-              'Keep the person still and calm · Remove rings and tight clothing · Keep the bitten limb below heart level · Do not cut, suck, or apply a tourniquet',
-              style: ft(13, color: C.sub, height: 1.55),
-            ),
-          ],
-        ),
-      ),
-      const SizedBox(height: 18),
-      Btn('Call now (opens dialler)', kind: BtnKind.danger, icon: Icons.phone_rounded, onTap: _dial),
-      const SizedBox(height: 10),
-      Btn(
-        'End call',
-        kind: BtnKind.ghost,
-        onTap: () {
-          _hold.reset();
-          setState(() => _calling = false);
-        },
-      ),
-    ],
   );
 }
