@@ -892,7 +892,7 @@ class _OutcomeTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (IconData icon, Color color, String help) = switch (o) {
-      Outcome.caught => (Icons.back_hand_outlined, C.green, 'Released far from people'),
+      Outcome.chased => (Icons.forest_outlined, C.green, 'Into the forest, away from people'),
       Outcome.rescuer => (Icons.health_and_safety_outlined, C.green, 'A snake rescuer took it'),
       Outcome.leftArea => (Icons.directions_run_rounded, C.green, 'Left on its own'),
       Outcome.notFound => (Icons.search_off_rounded, const Color(0xFFFFC46B), 'Searched, couldn’t find it'),

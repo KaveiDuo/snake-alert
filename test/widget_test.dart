@@ -33,7 +33,7 @@ void main() {
     s.arrive(r);
     expect(r.stage, Stage.onSite);
     expect(r.locationVerified, isTrue); // the demo location is beside Kameng
-    s.resolve(r, outcome: Outcome.caught, note: ' Moved it to the green belt. '); // photo and note are optional
+    s.resolve(r, outcome: Outcome.chased, note: ' Moved it to the green belt. '); // photo and note are optional
     expect(r.safe, isTrue);
     expect(r.caution, isFalse);
     expect(r.resolveNote, 'Moved it to the green belt.');

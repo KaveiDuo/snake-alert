@@ -164,7 +164,7 @@ enum Stage { reported, seen, onTheWay, onSite, resolved }
 
 /// What the authority found, picked with one tap (no writing needed).
 enum Outcome {
-  caught('Caught & moved', 'Snake caught and released away from people'),
+  chased('Chased away', 'Snake chased away into the forest'),
   rescuer('Rescuer took it', 'A snake rescuer caught it and took it away'),
   leftArea('It went away', 'Snake left on its own · area checked'),
   notFound('Not found', 'Area searched · snake not found');
@@ -474,10 +474,10 @@ class AppState extends ChangeNotifier {
       onSiteAt: DateTime.now().subtract(const Duration(minutes: 49)),
       onSiteMetres: 40,
       resolvedAt: DateTime.now().subtract(const Duration(minutes: 41)),
-      outcome: Outcome.caught,
+      outcome: Outcome.chased,
       searched: const ['Under vehicles'],
       proofPhoto: 'assets/snakes/wolf.jpg',
-      resolveNote: 'Guard caught it with the snake hook and released it in the green belt behind the hostel.',
+      resolveNote: 'Guard chased it into the forest behind the hostel.',
       reporterConfirmed: true,
     ),
     Report(
