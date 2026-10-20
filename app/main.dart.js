@@ -61845,7 +61845,7 @@ F(a){var s,r=this,q=null
 A.a6(a)
 s=r.r
 A.a6(a)
-return A.b2a(!1,q,B.cO,q,r.dy,r.k4,q,B.l,q,new A.aGr(a,!0,s,B.e2,q,q,q,q,q,q,q,q,q,!0,q,q,q,q,B.pv,q,q,q,q,q,q,q,q),q,B.Xv,q,q,q,q,q,q,!0,r.d,q,q,q,q,q,r.w,q,q,s,r.ax,q,q,r.CW,!0,r.ch,q,q,q)}}
+return A.b2a(!1,q,B.cO,q,r.dy,r.k4,q,B.l,q,new A.aGr(a,!0,s,B.e2,q,q,q,q,q,q,q,q,q,!0,q,q,q,q,B.pv,q,q,q,q,q,q,q,q),q,B.Xw,q,q,q,q,q,q,!0,r.d,q,q,q,q,q,r.w,q,q,s,r.ax,q,q,r.CW,!0,r.ch,q,q,q)}}
 A.aGr.prototype={
 gfh(){var s,r=this,q=r.id
 if(q===$){s=A.a6(r.fr)
@@ -109948,7 +109948,7 @@ r=s?B.dJ:B.E
 q=s?B.jw:B.bO
 p=A.c([],t.p)
 o=l===B.mX
-if(o)p.push(B.Xz)
+if(o)p.push(B.XA)
 else if(k!=null)p.push(A.b9(m,m,B.l,m,m,new A.aZ(k,m,m,m,m,m,B.ab),m,8,m,m,m,m,8))
 if(k!=null)p.push(B.ca)
 k=s?600:500
@@ -110166,7 +110166,7 @@ if(a3.b==null)a5.push(new A.dt(B.cK,a2,a2,A.iY(A.N("Use a sample photo (demo)",a
 if(a3.c){o=A.X(14,B.t,a2,a2,400)
 n=A.X(14,B.y,a2,a2,400)
 a5.push(new A.aH(B.UV,A.a_l(a2,!0,a1.d,a2,A.Gb(a2,new A.hs(4,A.bi(14),B.r),a2,a2,a2,a2,a2,a2,!0,a2,a2,a2,a2,a2,a2,B.dG,!0,a2,a2,a2,a2,a2,a2,a2,a2,a2,a2,a2,a2,a2,n,"Write a note for students",a2,a2,a2,a2,a2,a2,a2,a2,a2,!0,!0,!1,a2,a2,a2,a2,a2,a2,a2,a2,a2,a2,a2,a2,a2,a2),!0,a2,a2,a2,2,a2,!1,a2,a2,o),a2))}else{o=A.N("Write a note (optional)",a2,a2,a2,a2,A.X(13,B.y,a2,a2,400),a2,a2)
-a5.push(new A.dt(B.cK,a2,a2,new A.Km(!0,new A.aSN(a3,a8),a2,a2,a2,a2,B.l,a2,!1,a2,!0,a2,new A.a8H(o,B.Xn,a2,a2,a2),a2),a2))}a5.push(B.aV)
+a5.push(new A.dt(B.cK,a2,a2,new A.Km(!0,new A.aSN(a3,a8),a2,a2,a2,a2,B.l,a2,!1,a2,!0,a2,new A.a8H(o,B.Xo,a2,a2,a2),a2),a2))}a5.push(B.aV)
 o=A.bi(14)
 n=A.et(B.b2,1)
 l=r.cx
@@ -110396,7 +110396,7 @@ q.push(new A.bT(34,j,new A.ph(A.N(n,new A.d0(""+p+"-"+o+"-"+m,f),j,j,j,new A.v(!
 if(k.e)f.push(B.bd5)
 g=A.xm(A.dz(B.G,f,B.F,B.aH,j),new A.aZ(B.a4,j,s,g,j,j,B.L),B.cR,65,j,j)
 f=k.e?1:0
-f=A.D_(A.aK(A.c([B.Xp,B.ca,A.N("Code auto-filled from SMS",j,j,j,j,A.X(12.5,B.q,j,j,600),j,j)],r),B.n,j,B.i,B.j,0),B.Y,B.cR,f)
+f=A.D_(A.aK(A.c([B.Xq,B.ca,A.N("Code auto-filled from SMS",j,j,j,j,A.X(12.5,B.q,j,j,600),j,j)],r),B.n,j,B.i,B.j,0),B.Y,B.cR,f)
 s=k.d>=6?k.ga_x():j
 return A.jc(A.hK(A.c([B.bsj,B.fZ,i,B.aV,h,B.fZ,g,B.aV,f,B.b6,new A.dW("Verify",s,B.d6,j,52,j),B.aZ,A.e4(A.iY(A.N("Change number",j,j,j,j,A.X(13.5,B.y,j,j,600),j,j),new A.aDj(a),j),j,j),B.b6,A.N(u.F,j,j,j,j,A.X(11,B.b3,1.6,j,400),j,j)],r),j,j,B.no,j,B.a1),B.qU)}}
 A.aDo.prototype={
@@ -111199,7 +111199,7 @@ i=A.c([new A.cy("wght",400)],p)
 o=A.c([o,B.dW,new A.iB(1,B.ck,A.aU(A.c([l,B.cb,A.N(k,h,h,h,h,new A.v(!0,j,h,"Figtree",h,h,15,B.u,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,i,h),h,h)],g),B.B,B.i,B.j),h)],g)
 l=n.e
 if(l!=null)o.push(l)
-if(n.d)o.push(A.FL(h,h,B.Xo,h,h,new A.am0(a),h,h,h))
+if(n.d)o.push(A.FL(h,h,B.Xp,h,h,new A.am0(a),h,h,h))
 m.push(new A.aH(B.UM,A.aK(o,B.n,h,B.i,B.j,0),h))
 B.b.G(f,m)}return A.ey(h,A.aU(f,B.n,B.i,B.j),B.a4,h,B.k0,20)}}
 A.am0.prototype={
@@ -111447,7 +111447,7 @@ default:s=q}r=s.a
 return A.ey(q,A.aK(A.c([A.b9(q,q,B.l,q,q,new A.aZ(s.b,q,q,q,q,q,B.ab),q,10,q,q,q,q,10),B.bf,A.bs(A.N(r,q,q,q,q,A.X(15,B.t,q,q,600),q,q),1),A.iY(A.N("Change",q,q,q,q,A.X(14,B.q,q,q,600),q,q),this.d,q)],t.p),B.n,q,B.i,B.j,0),B.a4,q,B.Vn,20)}}
 A.a5i.prototype={
 F(a){var s=null,r=A.bi(16),q=t.p
-return A.dn(!1,B.H,!0,s,A.f8(!1,A.bi(16),!0,new A.aH(B.V2,A.aK(A.c([A.b9(s,B.Xi,B.l,s,s,new A.aZ(B.q.cu(0.16),s,s,A.bi(12),s,s,B.L),s,40,s,s,s,s,40),B.bf,A.bs(A.aU(A.c([A.N("Scan to identify",s,s,s,s,A.X(15,B.b9,s,s,700),s,s),B.cX,A.N("Not sure? Take a photo or pick from gallery",s,s,s,s,A.X(12,B.y,s,s,400),s,s)],q),B.B,B.i,B.j),1),B.Xx],q),B.n,s,B.i,B.j,0),s),s,!0,s,s,s,s,s,s,s,s,s,this.c,s,s,s,s,s,s,s),B.l,B.ch,0,s,s,new A.cn(r,B.mp),s,s,B.at)}}
+return A.dn(!1,B.H,!0,s,A.f8(!1,A.bi(16),!0,new A.aH(B.V2,A.aK(A.c([A.b9(s,B.Xi,B.l,s,s,new A.aZ(B.q.cu(0.16),s,s,A.bi(12),s,s,B.L),s,40,s,s,s,s,40),B.bf,A.bs(A.aU(A.c([A.N("Scan to identify",s,s,s,s,A.X(15,B.b9,s,s,700),s,s),B.cX,A.N("Not sure? Take a photo or pick from gallery",s,s,s,s,A.X(12,B.y,s,s,400),s,s)],q),B.B,B.i,B.j),1),B.Xy],q),B.n,s,B.i,B.j,0),s),s,!0,s,s,s,s,s,s,s,s,s,this.c,s,s,s,s,s,s,s),B.l,B.ch,0,s,s,new A.cn(r,B.mp),s,s,B.at)}}
 A.a5j.prototype={
 F(a){var s=this,r=null,q=A.iw(A.bi(10),A.cb(A.CK(s.c,B.bN),52,52)),p=t.p,o=A.c([A.N("Photo attached",r,r,r,r,A.X(14.5,B.t,r,r,600),r,r)],p),n=s.d,m=n==null
 if(!m)o.push(A.N("Matched "+A.hX(n).b,r,r,r,r,A.X(12.5,B.q,r,r,400),r,r))
@@ -111475,8 +111475,8 @@ $0(){A.bQ(this.a,!1).fc(null)
 return null},
 $S:0}
 A.aJh.prototype={
-$2(a1,a2){var s,r,q,p,o,n,m,l,k,j,i,h=this,g=null,f="Figtree",e="wght",d=A.e4(A.b9(g,g,B.l,g,g,new A.aZ(B.mH,g,g,A.bi(2),g,g,B.L),g,4,g,g,g,g,40),g,g),c=t.p,b=A.aK(A.c([A.bs(A.N("Select location",g,g,g,g,A.X(20,B.t,g,g,700),g,g),1),A.FL(g,g,B.Xr,g,g,new A.aJ9(a1),g,A.u5(g,B.b2,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g),"Close")],c),B.n,g,B.i,B.j,0),a=A.X(14.5,B.t,g,g,400),a0=A.X(14,B.b3,g,g,400)
-a=A.c([d,B.aZ,b,B.aV,A.a_l(g,!1,g,B.q,A.Gb(g,new A.hs(4,A.bi(16),B.r),g,g,g,g,g,g,!0,g,g,g,g,g,g,B.b2,!0,g,g,g,g,g,g,g,g,g,g,g,g,g,a0,"Search hostels and campus places",g,g,g,g,g,g,g,g,g,!0,!0,!1,g,B.Xq,g,g,g,g,g,g,g,g,g,g,g,g),!0,g,g,g,1,g,!1,new A.aJa(h.a),g,a),B.aq],c)
+$2(a1,a2){var s,r,q,p,o,n,m,l,k,j,i,h=this,g=null,f="Figtree",e="wght",d=A.e4(A.b9(g,g,B.l,g,g,new A.aZ(B.mH,g,g,A.bi(2),g,g,B.L),g,4,g,g,g,g,40),g,g),c=t.p,b=A.aK(A.c([A.bs(A.N("Select location",g,g,g,g,A.X(20,B.t,g,g,700),g,g),1),A.FL(g,g,B.Xs,g,g,new A.aJ9(a1),g,A.u5(g,B.b2,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g),"Close")],c),B.n,g,B.i,B.j,0),a=A.X(14.5,B.t,g,g,400),a0=A.X(14,B.b3,g,g,400)
+a=A.c([d,B.aZ,b,B.aV,A.a_l(g,!1,g,B.q,A.Gb(g,new A.hs(4,A.bi(16),B.r),g,g,g,g,g,g,!0,g,g,g,g,g,g,B.b2,!0,g,g,g,g,g,g,g,g,g,g,g,g,g,a0,"Search hostels and campus places",g,g,g,g,g,g,g,g,g,!0,!0,!1,g,B.Xr,g,g,g,g,g,g,g,g,g,g,g,g),!0,g,g,g,1,g,!1,new A.aJa(h.a),g,a),B.aq],c)
 d=h.b
 if(d.length===0){b=h.c
 B.b.G(a,A.c([new A.P1(B.oa,"Use my current location",new A.aJb(a1,b),g),B.aV,new A.P1(B.WJ,"Pick the exact spot on the map",new A.aJc(a1,b),g)],c))}for(b=$.baj(),a0=h.c,s=t.d,r=0;r<9;++r){q=b[r]
@@ -111490,7 +111490,7 @@ for(o=B.b.gN(o),m=new A.km(o,new A.aJe(d));m.p();){l=o.gL()
 k=new A.aP(12,12)
 j=l.a
 i=A.c([new A.cy(e,400)],s)
-n.push(A.f8(!1,new A.cv(k,k,k,k),!0,new A.aH(B.VK,A.aK(A.c([B.Xy,B.dW,new A.iB(1,B.ck,A.N(j,g,g,g,g,new A.v(!0,B.t,g,f,g,g,15.5,B.u,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,i,g),g,g),g)],c),B.n,g,B.i,B.j,0),g),g,!0,g,g,g,g,g,g,g,g,g,new A.aJf(a1,a0,l,q),g,g,g,g,g,g,g))}B.b.G(p,n)}B.b.G(a,p)}return A.f7(g,A.b9(g,A.hK(a,a2,g,B.Vc,g,B.a1),B.l,g,g,B.Ns,g,g,g,g,g,g,g),B.a_,!1,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,new A.aJg(),g,g,g,g,g,g)},
+n.push(A.f8(!1,new A.cv(k,k,k,k),!0,new A.aH(B.VK,A.aK(A.c([B.Xz,B.dW,new A.iB(1,B.ck,A.N(j,g,g,g,g,new A.v(!0,B.t,g,f,g,g,15.5,B.u,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,i,g),g,g),g)],c),B.n,g,B.i,B.j,0),g),g,!0,g,g,g,g,g,g,g,g,g,new A.aJf(a1,a0,l,q),g,g,g,g,g,g,g))}B.b.G(p,n)}B.b.G(a,p)}return A.f7(g,A.b9(g,A.hK(a,a2,g,B.Vc,g,B.a1),B.l,g,g,B.Ns,g,g,g,g,g,g,g),B.a_,!1,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,new A.aJg(),g,g,g,g,g,g)},
 $S:719}
 A.aJg.prototype={
 $0(){},
@@ -111595,7 +111595,7 @@ l(){this.gTK().l()
 this.gLh().l()
 this.afo()},
 apg(){var s=null,r=A.fI(this.gLh(),new A.aNI(this),s),q=A.b9(s,s,B.l,s,s,new A.aZ(s,s,A.et(B.q.cu(0.16),1.5),s,s,s,B.ab),s,200,s,s,s,s,200),p=A.b9(s,s,B.l,s,s,new A.aZ(B.q.cu(0.06),s,A.et(B.q.cu(0.38),2),s,s,s,B.ab),s,156,s,s,s,s,156),o=A.cC(B.NX,this.gTK(),s)
-return A.cb(A.dz(B.G,A.c([r,q,p,A.avw(A.b9(s,B.Xs,B.l,s,s,new A.aZ(B.q,s,s,s,A.c([new A.dV(2,B.cs,B.q.cu(0.45),B.h,36)],t.sq),s,B.ab),s,112,s,s,s,s,112),o)],t.p),B.F,B.aH,s),230,230)},
+return A.cb(A.dz(B.G,A.c([r,q,p,A.avw(A.b9(s,B.Xt,B.l,s,s,new A.aZ(B.q,s,s,s,A.c([new A.dV(2,B.cs,B.q.cu(0.45),B.h,36)],t.sq),s,B.ab),s,112,s,s,s,s,112),o)],t.p),B.F,B.aH,s),230,230)},
 F(a){var s,r,q,p,o,n,m,l,k,j,i,h=null
 a.ak(t.T).toString
 s=this.a.c
@@ -111612,7 +111612,7 @@ k=A.N(k,h,h,h,h,A.X(13.5,B.t,h,h,600),h,h)
 j=n?"They must reach the spot within 15 min and send a photo when it\u2019s safe. You\u2019ll see every step.":"No authority is notified for open areas. Students nearby can see your pin, and it clears itself after 2\u20133 days."
 i=t.p
 j=A.c([k,B.cb,A.N(j,h,h,h,h,A.X(12.5,B.y,1.4,h,400),h,h)],i)
-if(n)B.b.G(j,A.c([B.aV,A.f7(h,A.aK(A.c([new A.qT(s,h),B.bV,A.bs(A.N(s.gSu(),h,1,B.az,h,A.X(12.5,B.a5,h,h,600),h,h),1),A.N("Track",h,h,h,h,A.X(12.5,B.q,h,h,700),h,h),B.XA],i),B.n,h,B.i,B.j,0),B.a_,!1,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,new A.aNN(a,s),h,h,h,h,h,h)],i))
+if(n)B.b.G(j,A.c([B.aV,A.f7(h,A.aK(A.c([new A.qT(s,h),B.bV,A.bs(A.N(s.gSu(),h,1,B.az,h,A.X(12.5,B.a5,h,h,600),h,h),1),A.N("Track",h,h,h,h,A.X(12.5,B.q,h,h,700),h,h),B.XB],i),B.n,h,B.i,B.j,0),B.a_,!1,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,h,new A.aNN(a,s),h,h,h,h,h,h)],i))
 q=A.c([B.bi5,q,B.dp,p,B.aV,new A.aH(B.nn,o,h),B.bi4,A.ey(m,A.aK(A.c([l,B.bf,A.bs(A.aU(j,B.B,B.i,B.j),1)],i),B.B,h,B.i,B.j,0),B.a4,h,B.c3,20)],i)
 if(n)B.b.G(q,A.c([B.aq,new A.dW("Call the authority now",new A.aNO(a),B.eV,B.kj,50,h)],i))
 q.push(B.aV)
@@ -111714,7 +111714,7 @@ o=t.p
 r=A.cb(A.dz(B.aN,A.c([i,B.TB,A.fc(j,A.av3(B.df,j,new A.axU(a),40),j,j,16,j,r.r.b+8,j),A.fc(14,A.aU(A.c([A.bho(s),B.aZ,A.N(s.geT(),j,j,j,j,A.X(26,B.t,j,j,700),j,j),A.N(s.gAb(0),j,j,j,j,A.X(13.5,B.a5,j,j,400),j,j)],o),B.B,B.i,B.j),j,j,18,18,j,j)],o),B.F,B.iU,j),300,j)
 i=A.bi(12)
 n=A.et(B.Sn,1)
-i=A.c([A.f7(j,A.b9(j,A.aK(A.c([B.XB,B.ca,A.N("About "+B.c.av(p/10)*10+" m from you",j,j,j,j,A.X(13,B.f2,j,j,600),j,j),A.N("  \xb7  View on map",j,j,j,j,A.X(13,B.d9,j,j,700),j,j),B.Xk],o),B.n,j,B.i,B.aK,0),B.l,j,j,new A.aZ(B.mJ,j,n,i,j,j,B.L),j,j,j,B.u9,j,j,j),B.a_,!1,j,j,j,j,j,j,j,j,j,j,j,j,j,j,j,j,new A.axV(a,s),j,j,j,j,j,j),B.b6],o)
+i=A.c([A.f7(j,A.b9(j,A.aK(A.c([B.XC,B.ca,A.N("About "+B.c.av(p/10)*10+" m from you",j,j,j,j,A.X(13,B.f2,j,j,600),j,j),A.N("  \xb7  View on map",j,j,j,j,A.X(13,B.d9,j,j,700),j,j),B.Xk],o),B.n,j,B.i,B.aK,0),B.l,j,j,new A.aZ(B.mJ,j,n,i,j,j,B.L),j,j,j,B.u9,j,j,j),B.a_,!1,j,j,j,j,j,j,j,j,j,j,j,j,j,j,j,j,new A.axV(a,s),j,j,j,j,j,j),B.b6],o)
 n=s.f
 if(n.length!==0)i.push(A.ey(j,A.aU(A.c([A.N("\u201c"+n+"\u201d",j,j,j,j,A.X(14.5,B.t,1.45,j,400),j,j),B.aZ,A.N("Reported by "+s.r+" \xb7 "+A.QZ(s.w),j,j,j,j,A.X(12,B.y,j,j,400),j,j)],o),B.B,B.i,B.j),B.a4,j,B.c3,20))
 i.push(B.fZ)
@@ -111820,7 +111820,7 @@ if(s){q.toString
 A.bQ(q,!1).ej(A.fa(new A.aOT(),null,r))}else{q.toString
 A.bQ(q,!1).a73(A.b58(B.Mf,450,r))}},
 F(a){var s,r,q=this,p=null,o=A.akB(A.jm("assets/images/app_logo_dark.png",p,80,80),"logo",!1),n=A.N("Welcome to the\nall new Onestop",p,p,p,p,A.abJ(38,B.dH,1,-1.5),B.ad,p),m=q.d,l=t.gT,k=m?"Sign in with phone number":"Sign in with Outlook",j=t.p
-k=A.D4(A.aK(A.c([new A.ji(1,B.dd,A.aj3(B.G,A.N(k,p,p,p,p,A.aYp(16,B.m),p,p),B.l,B.jl),p),B.bV,B.Xu],j),B.n,new A.d0(m,l),B.c6,B.j,0),B.H,A.CA(),B.Y,A.abA())
+k=A.D4(A.aK(A.c([new A.ji(1,B.dd,A.aj3(B.G,A.N(k,p,p,p,p,A.aYp(16,B.m),p,p),B.l,B.jl),p),B.bV,B.Xv],j),B.n,new A.d0(m,l),B.c6,B.j,0),B.H,A.CA(),B.Y,A.abA())
 s=q.d
 r=s?"For registered hostel authorities \xb7 code by SMS":"For students and faculty with an @iitg.ac.in ID"
 return new A.Hv(new A.aH(B.i_,A.aU(A.c([B.KC,o,B.pZ,n,B.dq,new A.a7k(m,q.gats(),p),B.aq,new A.NA(B.f1,k,q.gaix(),p,p),B.aZ,A.D4(A.N(r,new A.d0(s,l),p,p,p,A.abJ(12,B.dH.cu(0.6),p,-0.2),B.ad,p),B.H,A.CA(),B.Y,A.abA()),B.bW,A.jm("assets/images/swc.png",p,32,p),B.eE],j),B.n,B.i,B.j),p),p)}}
@@ -111954,7 +111954,7 @@ return A.E($async$xx,r)},
 F(a){var s=this,r=null,q=a.ak(t.T).f,p=s.d,o=A.acL("Snake Alert",B.df,!1,q.gnU().length===1?"1 active report on campus":""+q.gnU().length+" active reports on campus"),n=q.b,m=q.gnU(),l=p==null,k=l?r:p.d,j=l?"Tap the map to drop a pin where you saw a snake":"Tap again to move the pin",i=q.b,h=t.p
 i=A.c([A.bs(A.dz(B.aN,A.c([A.Xp(0,A.aVd(B.UW,n,r,new A.aPp(s,q),new A.aPq(a),q.gQF(),m,k,new A.a3B(j,i,r))),A.fc(10,new A.a4e(i,r),r,r,10,10,r,r)],h),B.F,B.aH,r),1),B.aq],h)
 if(!l)i.push(new A.a5l(p,new A.aPr(s,p),new A.aPs(s),r))
-else i.push(A.dn(!1,B.H,!0,A.bi(20),A.f8(!1,A.bi(20),!0,new A.aH(B.Vt,A.aK(A.c([B.XC,B.dW,A.bs(A.aU(A.c([A.N("Report a sighting",r,r,r,r,A.X(17,B.m,r,r,600),r,r),A.N("Uses your current location \xb7 you can change it",r,r,r,r,A.X(12.5,B.m.cu(0.85),r,r,400),r,r)],h),B.B,B.i,B.j),1),B.Xt],h),B.n,r,B.i,B.j,0),r),r,!0,r,r,r,r,r,r,r,r,r,new A.aPt(s),r,r,r,r,r,r,r),B.l,B.ed,0,r,r,r,r,r,B.at))
+else i.push(A.dn(!1,B.H,!0,A.bi(20),A.f8(!1,A.bi(20),!0,new A.aH(B.Vt,A.aK(A.c([B.XD,B.dW,A.bs(A.aU(A.c([A.N("Report a sighting",r,r,r,r,A.X(17,B.m,r,r,600),r,r),A.N("Uses your current location \xb7 you can change it",r,r,r,r,A.X(12.5,B.m.cu(0.85),r,r,400),r,r)],h),B.B,B.i,B.j),1),B.Xu],h),B.n,r,B.i,B.j,0),r),r,!0,r,r,r,r,r,r,r,r,r,new A.aPt(s),r,r,r,r,r,r,r),B.l,B.ed,0,r,r,r,r,r,B.at))
 return A.jc(new A.aH(B.V6,A.aU(i,B.n,B.i,B.j),r),o)}}
 A.aPl.prototype={
 $0(){return this.a.d=null},
@@ -112000,7 +112000,7 @@ r=A.N(q,p,p,p,p,A.X(16,B.t,p,p,700),p,p)
 if(n)o=u.M
 else o=o.c?"Inside "+q+" premises \xb7 the "+q+" authority covers this spot":u.v
 q=t.p
-o=A.aK(A.c([s,B.bf,A.bs(A.aU(A.c([r,B.cX,A.N(o,p,p,p,p,A.X(12.5,B.y,1.35,p,400),p,p)],q),B.B,B.i,B.j),1),A.FL(p,p,B.Xm,p,p,this.e,p,p,"Remove pin")],q),B.B,p,B.i,B.j,0)
+o=A.aK(A.c([s,B.bf,A.bs(A.aU(A.c([r,B.cX,A.N(o,p,p,p,p,A.X(12.5,B.y,1.35,p,400),p,p)],q),B.B,B.i,B.j),1),A.FL(p,p,B.Xn,p,p,this.e,p,p,"Remove pin")],q),B.B,p,B.i,B.j,0)
 return A.ey(p,A.aU(A.c([o,B.aV,new A.aH(B.k_,new A.dW("Report snake sighting",n?p:this.d,B.eV,B.ki,48,p),p)],q),B.n,B.i,B.j),B.a4,p,B.V3,20)}}
 A.a3B.prototype={
 F(a){var s=null,r=this.d,q=r?B.jK:B.jB,p=A.bi(14),o=A.et(r?B.bO:B.jF,1)
@@ -112047,14 +112047,14 @@ F(a){var s=null,r=a.ak(t.T).f.ga5Y(),q=this.e,p=A.acL(q?"Emergency SOS":"",B.id,
 return A.qH(s,B.RR,A.ok(!0,A.aU(A.c([p,A.bs(A.D4(q?this.ahv(r):this.apk(),B.jY,A.CA(),B.Y,A.abA()),1)],t.p),B.n,B.i,B.j),B.an,!0),s,s,s)},
 apk(){var s=this,r=null,q=t.p
 return new A.aH(B.Vw,A.aU(A.c([A.N("EMERGENCY SOS",r,r,r,r,A.X(24,B.t,r,1.5,800),B.ad,r),A.bs(A.e4(A.aU(A.c([A.f7(r,A.fI(new A.p_(A.c([s.gqu(),s.gIl()],t.bA)),new A.aPw(s),r),B.a_,!1,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,new A.aPx(s),new A.aPy(s),new A.aPz(s),r,r,r),B.bhO,new A.ek(B.Nl,A.N("Hold to call. Your location is shared with the hospital and campus security.",r,r,r,r,A.X(13.5,B.y,1.5,r,400),B.ad,r),r),B.KB],q),B.n,B.i,B.aK),r,r),1)],q),B.n,B.i,B.j),B.bpp)},
-ahv(a){var s,r,q,p,o,n=null,m=t.p,l=A.c([A.e4(A.b9(n,B.XD,B.l,n,n,B.No,n,110,n,n,n,n,110),n,n),B.bW,A.N("Calling IITG Hospital",n,n,n,n,A.X(22,B.t,n,n,700),B.ad,n),B.cb,A.N("Emergency line \xb7 connecting\u2026",n,n,n,n,A.X(13,B.y,n,n,400),B.ad,n),B.dp],m),k=A.c(["Hospital alerted with your location","Security control room alerted"],t.s)
+ahv(a){var s,r,q,p,o,n=null,m=t.p,l=A.c([A.e4(A.b9(n,B.XE,B.l,n,n,B.No,n,110,n,n,n,n,110),n,n),B.bW,A.N("Calling IITG Hospital",n,n,n,n,A.X(22,B.t,n,n,700),B.ad,n),B.cb,A.N("Emergency line \xb7 connecting\u2026",n,n,n,n,A.X(13,B.y,n,n,400),B.ad,n),B.dp],m),k=A.c(["Hospital alerted with your location","Security control room alerted"],t.s)
 if(a!=null)k.push("Last report attached: "+a.geT()+", "+a.d)
 s=k.length
 r=t.d
 q=0
 for(;q<k.length;k.length===s||(0,A.z)(k),++q){p=k[q]
 o=A.c([new A.cy("wght",400)],r)
-l.push(new A.aH(B.nk,new A.qg(A.aK(A.c([B.Xw,B.cG,new A.iB(1,B.ck,A.N(p,n,n,n,n,new A.v(!0,B.t,n,"Figtree",n,n,13.5,B.u,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,o,n),n,n),n)],m),B.n,n,B.i,B.j,0),B.hZ,B.th,B.mW,20,n,n),n))}l.push(B.aZ)
+l.push(new A.aH(B.nk,new A.qg(A.aK(A.c([B.Xx,B.cG,new A.iB(1,B.ck,A.N(p,n,n,n,n,new A.v(!0,B.t,n,"Figtree",n,n,13.5,B.u,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,o,n),n,n),n)],m),B.n,n,B.i,B.j,0),B.hZ,B.th,B.mW,20,n,n),n))}l.push(B.aZ)
 l.push(A.ey(B.th,A.aU(A.c([A.N("WHILE YOU WAIT",n,n,n,n,A.X(11,B.bD,n,1,700),n,n),B.aZ,A.N("Keep the person still and calm \xb7 Remove rings and tight clothing \xb7 Keep the bitten limb below heart level \xb7 Do not cut, suck, or apply a tourniquet",n,n,n,n,A.X(13,B.a5,1.55,n,400),n,n)],m),B.B,B.i,B.j),B.mW,n,B.c3,20))
 l.push(B.bW)
 l.push(new A.dW("Call now (opens dialler)",this.gaje(),B.eV,B.vf,52,n))
@@ -112092,7 +112092,7 @@ r=8*s
 o=180-10*o+r
 r=A.c([new A.dV(2+r,B.cs,B.ed.cu(0.35+0.3*s),B.h,30+34*s)],t.sq)
 q=t.p
-return A.cb(A.dz(B.G,A.c([n,A.b9(p,A.aU(A.c([B.XE,B.aZ,A.N("IITG Hospital",p,p,p,p,A.X(19,B.m,1.1,p,800),p,p),B.h_,A.N("82779 92838",p,p,p,p,A.X(14.5,B.m,p,0.3,600),p,p)],q),B.n,B.c6,B.j),B.l,p,p,new A.aZ(B.mL,p,p,p,r,p,B.ab),p,o,p,p,p,p,o)],q),B.F,B.aH,p),220,220)},
+return A.cb(A.dz(B.G,A.c([n,A.b9(p,A.aU(A.c([B.Xm,B.aZ,A.N("IITG Hospital",p,p,p,p,A.X(19,B.m,1.1,p,800),p,p),B.h_,A.N("82779 92838",p,p,p,p,A.X(14.5,B.m,p,0.3,600),p,p)],q),B.n,B.c6,B.j),B.l,p,p,new A.aZ(B.mL,p,p,p,r,p,B.ab),p,o,p,p,p,p,o)],q),B.F,B.aH,p),220,220)},
 $S:730}
 A.aPv.prototype={
 $0(){var s=this.a,r=s.gqu()
@@ -121301,31 +121301,31 @@ B.vc=new A.aL(63531,"MaterialIcons",!1)
 B.Xj=new A.ch(B.vc,22,B.a5,null,null)
 B.Xk=new A.ch(B.fs,16,B.d9,null,null)
 B.Xl=new A.ch(B.o8,13,B.y,null,null)
-B.Xm=new A.ch(B.id,20,B.y,null,null)
+B.Xm=new A.ch(B.vf,52,B.m,null,null)
+B.Xn=new A.ch(B.id,20,B.y,null,null)
 B.uX=new A.aL(61453,"MaterialIcons",!1)
-B.Xn=new A.ch(B.uX,16,B.y,null,null)
-B.Xo=new A.ch(B.uX,19,B.q,null,null)
+B.Xo=new A.ch(B.uX,16,B.y,null,null)
+B.Xp=new A.ch(B.uX,19,B.q,null,null)
 B.o9=new A.aL(63030,"MaterialIcons",!1)
-B.Xp=new A.ch(B.o9,16,B.q,null,null)
-B.Xq=new A.ch(B.vh,null,B.y,null,null)
-B.Xr=new A.ch(B.id,20,B.a5,null,null)
-B.Xs=new A.ch(B.o9,56,B.hK,null,null)
-B.Xt=new A.ch(B.fs,null,B.m,null,null)
-B.Xu=new A.ch(B.v5,20,B.m,null,null)
+B.Xq=new A.ch(B.o9,16,B.q,null,null)
+B.Xr=new A.ch(B.vh,null,B.y,null,null)
+B.Xs=new A.ch(B.id,20,B.a5,null,null)
+B.Xt=new A.ch(B.o9,56,B.hK,null,null)
+B.Xu=new A.ch(B.fs,null,B.m,null,null)
+B.Xv=new A.ch(B.v5,20,B.m,null,null)
 B.Ww=new A.aL(57704,"MaterialIcons",!1)
-B.Xv=new A.ch(B.Ww,18,null,null,null)
-B.Xw=new A.ch(B.o9,18,B.q,null,null)
-B.Xx=new A.ch(B.fs,null,B.b9,null,null)
-B.Xy=new A.ch(B.ic,20,B.y,null,null)
+B.Xw=new A.ch(B.Ww,18,null,null,null)
+B.Xx=new A.ch(B.o9,18,B.q,null,null)
+B.Xy=new A.ch(B.fs,null,B.b9,null,null)
+B.Xz=new A.ch(B.ic,20,B.y,null,null)
 B.od=new A.ch(B.fs,null,B.y,null,null)
-B.Xz=new A.ch(B.vg,14,B.ba,null,null)
-B.XA=new A.ch(B.fs,18,B.q,null,null)
+B.XA=new A.ch(B.vg,14,B.ba,null,null)
+B.XB=new A.ch(B.fs,18,B.q,null,null)
 B.WL=new A.aL(61958,"MaterialIcons",!1)
-B.XB=new A.ch(B.WL,15,B.d9,null,null)
-B.XC=new A.ch(B.ki,26,B.m,null,null)
+B.XC=new A.ch(B.WL,15,B.d9,null,null)
+B.XD=new A.ch(B.ki,26,B.m,null,null)
 B.X4=new A.aL(983166,"MaterialIcons",!1)
-B.XD=new A.ch(B.X4,46,B.m,null,null)
-B.XE=new A.ch(B.vf,36,B.m,null,null)
+B.XE=new A.ch(B.X4,46,B.m,null,null)
 B.X9=new A.aL(983712,"MaterialIcons",!1)
 B.XF=new A.ch(B.X9,18,B.bD,null,null)
 B.Wv=new A.aL(57657,"MaterialIcons",!1)
