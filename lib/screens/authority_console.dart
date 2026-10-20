@@ -80,42 +80,26 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
       body: LiveClock(
         builder: (context) => Column(
           children: [
+            // Hostel and who is on duty, with the rules (ⓘ); the profile is in the bottom bar.
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 10, 8, 0),
+              padding: const EdgeInsets.fromLTRB(16, 12, 8, 14),
               child: Row(
                 children: [
-                  Text('Snake Alert', style: ft(20, w: 600)),
-                  const SizedBox(width: 10),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: C.greenSoft,
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: const Color(0xFF2C7A47)),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(s.authorityHostel, style: ft(23, w: 700)),
+                        Text('${AppState.kamengAuthority} · Hostel authority', style: ft(13.5, color: C.muted)),
+                      ],
                     ),
-                    child: Text('AUTHORITY VIEW', style: ft(10.5, w: 700, color: C.greenText, ls: 1)),
                   ),
-                  const Spacer(),
                   IconButton(
                     tooltip: 'How Snake Alert works for authorities',
                     onPressed: () => _rulesSheet(context),
                     icon: const Icon(Icons.info_outline_rounded, color: C.sub, size: 26),
                   ),
                 ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 14),
-              // Hostel and who is on duty; the profile is in the bottom bar.
-              child: SizedBox(
-                width: double.infinity,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(s.authorityHostel, style: ft(23, w: 700)),
-                    Text('${AppState.kamengAuthority} · Hostel authority', style: ft(13.5, color: C.muted)),
-                  ],
-                ),
               ),
             ),
             Padding(
