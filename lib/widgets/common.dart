@@ -94,10 +94,37 @@ class AppHeader extends StatelessWidget {
   final VoidCallback? onBack;
   final IconData backIcon;
   final Widget? trailing;
-  const AppHeader(this.title, {super.key, this.subtitle, this.onBack, this.backIcon = Icons.chevron_left_rounded, this.trailing});
+
+  /// Title centred across the bar instead of next to the back button.
+  final bool centerTitle;
+  const AppHeader(
+    this.title, {
+    super.key,
+    this.subtitle,
+    this.onBack,
+    this.backIcon = Icons.chevron_left_rounded,
+    this.trailing,
+    this.centerTitle = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    if (centerTitle) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Align(alignment: Alignment.centerLeft, child: RoundButton(backIcon, onTap: onBack ?? () => Navigator.maybePop(context))),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 56),
+              child: Text(title, style: ft(20, w: 700), maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+            ),
+            if (trailing != null) Align(alignment: Alignment.centerRight, child: trailing),
+          ],
+        ),
+      );
+    }
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
       child: Row(
