@@ -56,75 +56,80 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
   Widget _holdView() => Padding(
     key: const ValueKey('hold'),
     padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
-    // The button, with its explanation underneath, sits in the middle of the screen.
-    child: Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Title sits with the button, not up in the bar.
-          Text('EMERGENCY SOS', textAlign: TextAlign.center, style: ft(24, w: 800, ls: 1.5)),
-          const SizedBox(height: 100),
-          GestureDetector(
-            onTapDown: (_) => _hold.forward(),
-            onTapUp: (_) => _hold.isCompleted ? null : _hold.reverse(),
-            onTapCancel: () => _hold.isCompleted ? null : _hold.reverse(),
-            child: AnimatedBuilder(
-              animation: _hold,
-              builder: (_, _) => SizedBox(
-                width: 220,
-                height: 220,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    SizedBox(
+    child: Column(
+      children: [
+        // Title near the top; the button and its explanation sit in the middle.
+        const SizedBox(height: 18),
+        Text('EMERGENCY SOS', textAlign: TextAlign.center, style: ft(24, w: 800, ls: 1.5)),
+        Expanded(
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GestureDetector(
+                  onTapDown: (_) => _hold.forward(),
+                  onTapUp: (_) => _hold.isCompleted ? null : _hold.reverse(),
+                  onTapCancel: () => _hold.isCompleted ? null : _hold.reverse(),
+                  child: AnimatedBuilder(
+                    animation: _hold,
+                    builder: (_, _) => SizedBox(
                       width: 220,
                       height: 220,
-                      child: CircularProgressIndicator(
-                        value: _hold.value,
-                        strokeWidth: 5,
-                        color: Colors.white,
-                        backgroundColor: const Color(0x33FF453A),
-                      ),
-                    ),
-                    Container(
-                      width: 180 - 10 * _hold.value,
-                      height: 180 - 10 * _hold.value,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: const Color(0xFFE5382D),
-                        boxShadow: [BoxShadow(color: C.red.withValues(alpha: 0.45), blurRadius: 40, spreadRadius: 4)],
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      child: Stack(
+                        alignment: Alignment.center,
                         children: [
-                          // Who it calls (the title already says SOS).
-                          const Icon(Icons.phone_rounded, color: Colors.white, size: 36),
-                          const SizedBox(height: 8),
-                          Text('IITG Hospital', style: ft(19, w: 800, color: Colors.white, height: 1.1)),
-                          const SizedBox(height: 3),
-                          Text('82779 92838', style: ft(14.5, w: 600, color: Colors.white, ls: 0.3)),
-                          const SizedBox(height: 6),
-                          Text('24×7 · hold to call', style: ft(11, color: Colors.white.withValues(alpha: 0.78))),
+                          SizedBox(
+                            width: 220,
+                            height: 220,
+                            child: CircularProgressIndicator(
+                              value: _hold.value,
+                              strokeWidth: 5,
+                              color: Colors.white,
+                              backgroundColor: const Color(0x33FF453A),
+                            ),
+                          ),
+                          Container(
+                            width: 180 - 10 * _hold.value,
+                            height: 180 - 10 * _hold.value,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: const Color(0xFFE5382D),
+                              boxShadow: [BoxShadow(color: C.red.withValues(alpha: 0.45), blurRadius: 40, spreadRadius: 4)],
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                // Who it calls (the title already says SOS).
+                                const Icon(Icons.phone_rounded, color: Colors.white, size: 36),
+                                const SizedBox(height: 8),
+                                Text('IITG Hospital', style: ft(19, w: 800, color: Colors.white, height: 1.1)),
+                                const SizedBox(height: 3),
+                                Text('82779 92838', style: ft(14.5, w: 600, color: Colors.white, ls: 0.3)),
+                                const SizedBox(height: 6),
+                                Text('24×7 · hold to call', style: ft(11, color: Colors.white.withValues(alpha: 0.78))),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
+                const SizedBox(height: 72),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 290),
+                  child: Text(
+                    'Hold to call. Your location is shared with the hospital and campus security.',
+                    textAlign: TextAlign.center,
+                    style: ft(13.5, color: C.muted, height: 1.5),
+                  ),
+                ),
+                const SizedBox(height: 40), // keeps the button near the middle
+              ],
             ),
           ),
-          const SizedBox(height: 72),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 290),
-            child: Text(
-              'Hold to call. Your location is shared with the hospital and campus security.',
-              textAlign: TextAlign.center,
-              style: ft(13.5, color: C.muted, height: 1.5),
-            ),
-          ),
-          const SizedBox(height: 104), // keeps the button just below the middle
-        ],
-      ),
+        ),
+      ],
     ),
   );
 
