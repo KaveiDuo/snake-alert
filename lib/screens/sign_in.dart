@@ -210,13 +210,12 @@ class _OnestopButton extends StatelessWidget {
   final Color color;
   final Widget child;
   final VoidCallback onTap;
-  final BorderSide? side;
-  const _OnestopButton({required this.color, required this.child, required this.onTap, this.side});
+  const _OnestopButton({required this.color, required this.child, required this.onTap});
 
   @override
   Widget build(BuildContext context) => Material(
     color: color,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: side ?? BorderSide.none),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     child: InkWell(
       borderRadius: BorderRadius.circular(16),
       onTap: onTap,
@@ -319,16 +318,8 @@ class _AuthenticatingScreenState extends State<AuthenticatingScreen> with Ticker
             const SizedBox(width: 36, height: 36, child: CircularProgressIndicator(color: C.onestopGreen, strokeWidth: 4)),
             const SizedBox(height: 40),
             Text('Complete the login in your browser.', style: geist(16, color: C.onestopInk.withValues(alpha: 0.8), ls: -0.76)),
-            const SizedBox(height: 24),
-            _OnestopButton(
-              color: Colors.white,
-              side: const BorderSide(color: C.onestopGreen),
-              onTap: _go,
-              child: Center(
-                child: Text('Try again', style: mont(16, color: C.onestopGreen)),
-              ),
-            ),
-            const SizedBox(height: 15),
+            // No retry button: it made signing in look like it had failed.
+            const SizedBox(height: 99),
             Image.asset('assets/images/swc.png', height: 32),
             const SizedBox(height: 16),
           ],
