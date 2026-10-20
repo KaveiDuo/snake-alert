@@ -112,7 +112,7 @@ class _SosScreenState extends State<SosScreen> with TickerProviderStateMixin {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   // Who it calls (the title already says SOS).
-                                  const Icon(Icons.phone_rounded, color: Colors.white, size: 36),
+                                  const Icon(Icons.phone_rounded, color: Colors.white, size: 52),
                                   const SizedBox(height: 8),
                                   Text('IITG Hospital', style: ft(19, w: 800, color: Colors.white, height: 1.1)),
                                   const SizedBox(height: 3),
