@@ -63,7 +63,7 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
         children: [
           // Title sits with the button, not up in the bar.
           Text('Emergency SOS', textAlign: TextAlign.center, style: ft(24, w: 700)),
-          const SizedBox(height: 28),
+          const SizedBox(height: 60),
           GestureDetector(
             onTapDown: (_) => _hold.forward(),
             onTapUp: (_) => _hold.isCompleted ? null : _hold.reverse(),
@@ -119,7 +119,7 @@ class _SosScreenState extends State<SosScreen> with SingleTickerProviderStateMix
             textAlign: TextAlign.center,
             style: ft(13.5, color: C.muted, height: 1.5),
           ),
-          const SizedBox(height: 40), // sits a touch above the middle
+          const SizedBox(height: 72), // keeps the button just below the middle
         ],
       ),
     ),
