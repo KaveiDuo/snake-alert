@@ -67,7 +67,8 @@ class SightingDetailScreen extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 30),
+            // Clear the phone's navigation bar so the last card isn't hidden under it.
+            padding: EdgeInsets.fromLTRB(16, 8, 16, 30 + MediaQuery.paddingOf(context).bottom),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

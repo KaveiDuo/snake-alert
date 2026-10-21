@@ -582,7 +582,7 @@ class _LocationSheetState extends State<LocationSheet> {
             ),
             child: ListView(
               controller: scroll,
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 30),
+              padding: EdgeInsets.fromLTRB(16, 10, 16, 30 + MediaQuery.paddingOf(context).bottom),
               children: [
                 Center(
                   child: Container(

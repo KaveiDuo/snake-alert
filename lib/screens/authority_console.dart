@@ -701,7 +701,7 @@ Future<void> _resolveSheet(BuildContext context, Report r) async {
         return Padding(
           padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(18, 12, 18, 20),
+            padding: EdgeInsets.fromLTRB(18, 12, 18, 20 + MediaQuery.paddingOf(ctx).bottom),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
