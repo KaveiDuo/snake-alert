@@ -73,7 +73,7 @@ class _IdentifyScreenState extends State<IdentifyScreen> with SingleTickerProvid
     });
     // If the AI is slow, offer to go back to the report and keep scanning there.
     _slowTimer?.cancel();
-    _slowTimer = Timer(const Duration(seconds: 5), () {
+    _slowTimer = Timer(const Duration(seconds: 8), () {
       if (mounted && _scanning) setState(() => _slow = true);
     });
     _scan.repeat(reverse: true, period: const Duration(milliseconds: 900));
@@ -207,7 +207,7 @@ class _IdentifyScreenState extends State<IdentifyScreen> with SingleTickerProvid
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  _slow ? 'The AI is busy right now — still identifying…' : 'Identifying the snake…',
+                  _slow ? 'Taking a little longer…' : 'Identifying the snake…',
                   textAlign: TextAlign.center,
                   style: ft(13.5, w: 600, color: Colors.white).copyWith(shadows: const [Shadow(blurRadius: 8)]),
                 ),

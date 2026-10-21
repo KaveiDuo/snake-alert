@@ -26,7 +26,14 @@ if ($Copy) {
     $env:APP_LABEL = "Snake Alert $Copy"
     $out = "SnakeAlert_$Copy.apk"
 }
-flutter build apk --release "--dart-define=SCANNER_KEY_R=$keyR"
+# Optional backup scanner (Groq), from groq_key.txt (not committed), also reversed.
+$groqFile = Join-Path $here 'groq_key.txt'
+$groqR = ''
+if (Test-Path $groqFile) {
+    $g = (Get-Content $groqFile -Raw).Trim()
+    $gc = $g.ToCharArray(); [array]::Reverse($gc); $groqR = -join $gc
+}
+flutter build apk --release "--dart-define=SCANNER_KEY_R=$keyR" "--dart-define=GROQ_KEY_R=$groqR"
 Remove-Item Env:APP_ID_SUFFIX, Env:APP_LABEL -ErrorAction SilentlyContinue
 Copy-Item "$here\build\app\outputs\flutter-apk\app-release.apk" "$here\$out" -Force
 Write-Host "APK ready: $here\$out"

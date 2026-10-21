@@ -61,6 +61,16 @@ class Scanner {
   static const _builtInReversed = String.fromEnvironment('SCANNER_KEY_R');
   static String? get builtInKey => _builtInReversed.isEmpty ? null : _builtInReversed.split('').reversed.join();
 
+  /// Backup scanner: Groq's free vision model, asked when Gemini is slow or
+  /// fails. Its key comes from the untracked groq_key.txt at build time (also
+  /// reversed); without it the app simply uses Gemini alone.
+  static const _groqReversed = String.fromEnvironment('GROQ_KEY_R');
+  static String? get groqKey => _groqReversed.isEmpty ? null : _groqReversed.split('').reversed.join();
+  static const groqModel = 'meta-llama/llama-4-scout-17b-16e-instruct';
+
+  /// Gemini gets this long on its own before Groq is asked as well.
+  static const groqAfter = Duration(seconds: 4);
+
   /// The key a scan will use: the user's own key, else the built-in free one.
   static Future<String?> activeKey() async => await loadKey() ?? builtInKey;
 
@@ -107,8 +117,80 @@ Reply with ONLY this JSON:
 Rules: up to 3 matches, most likely first; confidences add up to at most 100. "venomous" means dangerous to people (true for cobras, kraits, vipers, pit vipers and other medically significant species). If unsure about venom, use null. If the photo is unclear, keep confidences low and say so in the note. No snake: "is_snake": false and "matches": [].''';
   }
 
-  static Future<ScanResult> identify(Uint8List image, String apiKey) =>
-      apiKey.startsWith('sk-ant-') ? _claude(image, apiKey) : _gemini(image, apiKey);
+  static Future<ScanResult> identify(Uint8List image, String apiKey) {
+    if (apiKey.startsWith('sk-ant-')) return _claude(image, apiKey);
+    final groq = groqKey;
+    return groq == null ? _gemini(image, apiKey) : _race(image, apiKey, groq);
+  }
+
+  /// Gemini first. If it hasn't answered after [groqAfter], or fails, Groq is
+  /// asked too and the first good answer wins. Fails only if both fail.
+  static Future<ScanResult> _race(Uint8List image, String geminiKey, String groqKey) {
+    final done = Completer<ScanResult>();
+    Object? firstError;
+    var pending = 1;
+    var groqStarted = false;
+    void ok(ScanResult r) {
+      if (!done.isCompleted) done.complete(r);
+    }
+
+    void fail(Object e) {
+      firstError ??= e;
+      if (--pending == 0 && !done.isCompleted) done.completeError(firstError!);
+    }
+
+    void startGroq() {
+      if (groqStarted || done.isCompleted) return;
+      groqStarted = true;
+      pending++;
+      _groq(image, groqKey).then(ok, onError: fail);
+    }
+
+    _gemini(image, geminiKey).then(ok, onError: (Object e) {
+      startGroq();
+      fail(e);
+    });
+    Future<void>.delayed(groqAfter, startGroq);
+    return done.future;
+  }
+
+  static Future<ScanResult> _groq(Uint8List image, String key) async {
+    final http.Response res;
+    try {
+      res = await _client
+          .post(
+            Uri.parse('https://api.groq.com/openai/v1/chat/completions'),
+            headers: {'content-type': 'application/json', 'authorization': 'Bearer $key'},
+            body: jsonEncode({
+              'model': groqModel,
+              'temperature': 0.2,
+              'response_format': {'type': 'json_object'},
+              'messages': [
+                {
+                  'role': 'user',
+                  'content': [
+                    {'type': 'text', 'text': _prompt},
+                    {
+                      'type': 'image_url',
+                      'image_url': {'url': 'data:${_mediaType(image)};base64,${base64Encode(image)}'},
+                    },
+                  ],
+                },
+              ],
+            }),
+          )
+          .timeout(const Duration(seconds: 25));
+    } catch (_) {
+      throw const ScanException('Couldn’t reach the scanner. Check your internet connection and try again.');
+    }
+    if (res.statusCode != 200) throw ScanException('Scanner error (${res.statusCode}). Try again.');
+    try {
+      final json = jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
+      return parse(json['choices'][0]['message']['content'] as String);
+    } catch (_) {
+      throw const ScanException('The scanner gave an answer the app couldn’t read. Try again.');
+    }
+  }
 
   static const _geminiBase = 'https://generativelanguage.googleapis.com/v1beta/models';
 
