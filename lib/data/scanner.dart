@@ -66,7 +66,7 @@ class Scanner {
   /// reversed); without it the app simply uses Gemini alone.
   static const _groqReversed = String.fromEnvironment('GROQ_KEY_R');
   static String? get groqKey => _groqReversed.isEmpty ? null : _groqReversed.split('').reversed.join();
-  static const groqModel = 'meta-llama/llama-4-scout-17b-16e-instruct';
+  static const groqModel = 'qwen/qwen3.8-27b';
 
   /// Gemini gets this long on its own before Groq is asked as well.
   static const groqAfter = Duration(seconds: 4);
