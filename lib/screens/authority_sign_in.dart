@@ -81,9 +81,6 @@ class _AuthorityPhoneScreenState extends State<AuthorityPhoneScreen> {
   Widget build(BuildContext context) {
     final active = _ctrl.text.isNotEmpty || _focus.hasFocus;
     final who = _who;
-      for (final s in staffList)
-        if (s.post == _post) s,
-    ];
     return DarkPage(
       header: AppHeader('${_post.label} sign-in'),
       body: ListView(
