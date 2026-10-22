@@ -1383,14 +1383,13 @@ class AuthorityProfile extends StatelessWidget {
           Text('Profile', style: ft(24, w: 700)),
           const SizedBox(height: 16),
           IdCard(
-            avatar: s.adminRole == AdminRole.warden
-                ? ClipOval(child: Image.asset('assets/images/avatar_authority.jpg', width: 88, height: 88, fit: BoxFit.cover))
-                : Container(
-                    width: 88,
-                    height: 88,
-                    decoration: const BoxDecoration(color: Color(0xFF2A2A2A), shape: BoxShape.circle),
-                    child: Icon(_roleIcon(s.adminRole), color: C.muted, size: 40),
-                  ),
+            avatar: ClipOval(
+              child: Image.asset(switch (s.adminRole) {
+                AdminRole.housekeeping => 'assets/images/avatar_housekeeping.png',
+                AdminRole.security => 'assets/images/avatar_security.png',
+                AdminRole.warden => 'assets/images/avatar_authority.jpg',
+              }, width: 88, height: 88, fit: BoxFit.cover),
+            ),
             name: s.adminRole.person,
             lines: ['${s.adminRole.label} · ${s.authorityHostel}'],
           ),

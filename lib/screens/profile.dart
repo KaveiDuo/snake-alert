@@ -264,12 +264,7 @@ class StudentProfile extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           IdCard(
-            avatar: Container(
-              width: 88,
-              height: 88,
-              decoration: const BoxDecoration(color: Color(0xFF2A2A2A), shape: BoxShape.circle),
-              child: const Icon(Icons.person_outline_rounded, color: C.muted, size: 42),
-            ),
+            avatar: ClipOval(child: Image.asset('assets/images/avatar_student.png', width: 88, height: 88, fit: BoxFit.cover)),
             name: s.studentName,
             lines: const ['210102043', 'IIT Guwahati'],
             barcode: true,
