@@ -31,7 +31,7 @@ class _Steps extends StatelessWidget {
   );
 }
 
-const _smallPrint = 'Only registered admins can sign in. Students use their Outlook ID as usual.';
+const _smallPrint = 'Only registered admins can sign in.';
 
 /// Step 1 — choose your post (Housekeeping, Security or Warden), then enter
 /// your own registered phone number. Each post has several employees, each
