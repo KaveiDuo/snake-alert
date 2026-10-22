@@ -146,8 +146,8 @@ class _PickedCard extends StatelessWidget {
                       loc.outside
                           ? 'Snake Alert only takes reports inside the campus. Move the pin onto campus.'
                           : loc.covered
-                          ? 'Inside ${loc.name} premises · the ${loc.name} authority covers this spot'
-                          : 'Open area · pin only. No authority is notified; students nearby still see it',
+                          ? 'Inside ${loc.name} premises · the ${loc.name} admin covers this spot'
+                          : 'Open area · pin only. No admin is notified; students nearby still see it',
                       style: ft(12.5, color: C.muted, height: 1.35),
                     ),
                   ],

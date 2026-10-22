@@ -91,7 +91,7 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
                 children: [
                   Expanded(child: Text(s.authorityHostel, style: ft(23, w: 700))),
                   IconButton(
-                    tooltip: 'How Snake Alert works for authorities',
+                    tooltip: 'How Snake Alert works for admins',
                     onPressed: () => _rulesSheet(context),
                     icon: const Icon(Icons.info_outline_rounded, color: C.sub, size: 26),
                   ),
@@ -999,7 +999,7 @@ class AuthorityProfile extends StatelessWidget {
           IdCard(
             avatar: ClipOval(child: Image.asset('assets/images/avatar_authority.jpg', width: 88, height: 88, fit: BoxFit.cover)),
             name: AppState.kamengAuthority,
-            lines: ['Hostel authority · ${s.authorityHostel}'],
+            lines: ['Admin · ${s.authorityHostel}'],
           ),
           const SizedBox(height: 22),
           Text('Snake Alert · ${s.authorityHostel}', style: ft(17, w: 600)),
@@ -1027,7 +1027,7 @@ class AuthorityProfile extends StatelessWidget {
               editable: false,
               trailing: const Tag('VERIFIED', fg: C.green, bg: C.greenSoft),
             ),
-            const InfoRow(Icons.person_outline_rounded, 'Role', 'Hostel authority', editable: false),
+            const InfoRow(Icons.person_outline_rounded, 'Role', 'Admin', editable: false),
             InfoRow(Icons.apartment_outlined, 'Hostel', s.authorityHostel.replaceAll(' Hostel', ''), editable: false),
             const InfoRow(Icons.apartment_outlined, 'Office', 'Kameng Hostel · Ground floor'),
           ]),

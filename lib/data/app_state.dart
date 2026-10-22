@@ -197,7 +197,7 @@ class Loc {
   /// True when the spot is outside the IIT Guwahati campus (can't be reported).
   final bool outside;
   const Loc(this.name, this.source, {required this.covered, this.pos = demoYou, this.outside = false});
-  String get authority => '$name authority';
+  String get authority => '$name admin';
 }
 
 class Report {
@@ -285,7 +285,7 @@ class Report {
 
   /// Time spent at the spot before closing, recorded automatically.
   Duration? get timeAtSpot => onSiteAt != null && resolvedAt != null ? resolvedAt!.difference(onSiteAt!) : null;
-  String get handlerName => handler ?? 'The $place authority';
+  String get handlerName => handler ?? 'The $place admin';
   bool get locationVerified => onSiteMetres != null && onSiteMetres! <= onSiteRadiusMetres;
 
   /// Not reached the spot within [respondWithin].
@@ -297,7 +297,7 @@ class Report {
 
   /// One line for students on how the response is going.
   String get statusLine => switch (stage) {
-    Stage.reported => 'Waiting for the authority to open it',
+    Stage.reported => 'Waiting for the admin to open it',
     Stage.seen => 'Seen by $handlerName · not on the way yet',
     Stage.onTheWay => '$handlerName is on the way',
     Stage.onSite => '$handlerName is at the spot',

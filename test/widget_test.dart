@@ -10,21 +10,21 @@ import 'package:snake_watch/screens/notifications.dart';
 import 'package:snake_watch/screens/sighting_detail.dart';
 
 void main() {
-  testWidgets('Sign-in: Student / Hostel authority switch changes the one button', (tester) async {
+  testWidgets('Sign-in: Student / Admin switch changes the one button', (tester) async {
     SharedPreferences.setMockInitialValues({});
     await tester.pumpWidget(SnakeWatchApp(state: AppState()));
     await tester.pumpAndSettle();
     expect(find.text('Student'), findsOneWidget);
-    expect(find.text('Hostel authority'), findsOneWidget);
+    expect(find.text('Admin'), findsOneWidget);
     expect(find.text('Sign in with Outlook'), findsOneWidget);
-    await tester.tap(find.text('Hostel authority'));
+    await tester.tap(find.text('Admin'));
     await tester.pumpAndSettle();
     expect(find.text('Sign in with phone number'), findsOneWidget);
     expect(find.text('Sign in with Outlook'), findsNothing);
     expect((await SharedPreferences.getInstance()).getBool('sign_in_as_authority'), isTrue); // remembered
   });
 
-  testWidgets('On the way: "At the spot" fills in by itself when the authority gets there', (tester) async {
+  testWidgets('On the way: "At the spot" fills in by itself when the admin gets there', (tester) async {
     final s = AppState()..role = Role.authority;
     final r = s.hostelReports.firstWhere((r) => r.stage == Stage.seen);
     s.setOnTheWay(r);
@@ -78,7 +78,7 @@ void main() {
     expect(done.flagged, isTrue);
   });
 
-  test('Pins on a hostel or campus building go to its authority; open areas go to nobody', () {
+  test('Pins on a hostel or campus building go to its admin; open areas go to nobody', () {
     final s = AppState();
     expect(s.locFromMap(const LatLng(26.19043, 91.70156)).name, 'Kameng Hostel');
     expect(s.locFromMap(const LatLng(26.18574, 91.68935)).name, 'Core 5');
@@ -111,7 +111,7 @@ void main() {
     expect(s.locFromMap(const LatLng(26.19057, 91.69705)).name, 'Cricket Pitch');
   });
 
-  test("A student's report inside Kameng reaches the Kameng authority's console", () {
+  test("A student's report inside Kameng reaches the Kameng admin's console", () {
     final s = AppState();
     final before = s.hostelOpen;
     s.startDraft(at: s.locFromMap(const LatLng(26.19043, 91.70156)));
@@ -189,13 +189,13 @@ void main() {
     expect(r.rescuerCalledAt, isNotNull);
   });
 
-  testWidgets('Only students see "Call the authority now" on a sighting', (tester) async {
+  testWidgets('Only students see "Call the admin now" on a sighting', (tester) async {
     for (final role in [Role.student, Role.authority]) {
       final s = AppState()..role = role;
       await tester.pumpWidget(
         AppScope(state: s, child: MaterialApp(home: SightingDetailScreen(report: s.reports.firstWhere((r) => r.id == 'r1')))),
       );
-      expect(find.text('Call the authority now'), role == Role.student ? findsOneWidget : findsNothing);
+      expect(find.text('Call the admin now'), role == Role.student ? findsOneWidget : findsNothing);
       await tester.pumpWidget(const SizedBox()); // stop the live clock
     }
   });

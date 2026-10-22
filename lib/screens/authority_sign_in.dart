@@ -28,7 +28,7 @@ class _Steps extends StatelessWidget {
   );
 }
 
-const _smallPrint = 'Only registered hostel authorities can sign in. Students use their Outlook ID as usual.';
+const _smallPrint = 'Only registered admins can sign in. Students use their Outlook ID as usual.';
 
 /// Step 1 — phone number. The demo types the number in by itself after 0.5 s;
 /// you can also type your own.
@@ -76,7 +76,7 @@ class _AuthorityPhoneScreenState extends State<AuthorityPhoneScreen> {
   Widget build(BuildContext context) {
     final active = _ctrl.text.isNotEmpty || _focus.hasFocus;
     return DarkPage(
-      header: const AppHeader('Hostel authority sign-in'),
+      header: const AppHeader('Admin sign-in'),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 18),
         children: [
@@ -85,7 +85,7 @@ class _AuthorityPhoneScreenState extends State<AuthorityPhoneScreen> {
           Text("What's your phone number?", style: ft(22, w: 700)),
           const SizedBox(height: 10),
           Text(
-            "Use the number the Hostel Affairs office has on record for you. Hostel authorities don't need an Outlook ID.",
+            "Use the number the Hostel Affairs office has on record for you. Admins don't need an Outlook ID.",
             style: ft(13, color: C.muted, height: 1.5),
           ),
           const SizedBox(height: 20),
@@ -199,7 +199,7 @@ class _AuthorityCodeScreenState extends State<AuthorityCodeScreen> {
   @override
   Widget build(BuildContext context) {
     return DarkPage(
-      header: const AppHeader('Hostel authority sign-in'),
+      header: const AppHeader('Admin sign-in'),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 18),
         children: [

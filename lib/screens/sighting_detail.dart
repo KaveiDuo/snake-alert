@@ -114,7 +114,7 @@ class SightingDetailScreen extends StatelessWidget {
                   _Step('Reported', '${r.reporter} · ${ago(r.time)}', C.green, true),
                   _Step('Students nearby notified', '412 students within 500 m', C.green, true),
                   _Step(
-                    'Open area · pin only, no authority',
+                    'Open area · pin only, no admin',
                     r.safe ? 'Marked safe' : 'The pin clears itself after 2–3 days',
                     r.safe ? C.green : C.amber,
                     false,
@@ -144,7 +144,7 @@ class _Response extends StatelessWidget {
       children: [
         Row(
           children: [
-            Text('AUTHORITY RESPONSE', style: ft(11.5, w: 700, color: C.muted, ls: 1.2)),
+            Text('ADMIN RESPONSE', style: ft(11.5, w: 700, color: C.muted, ls: 1.2)),
             const Spacer(),
             StatusChip(r),
           ],
@@ -189,7 +189,7 @@ class _Response extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     r.outcome == Outcome.notFound
-                        ? 'The authority searched but couldn’t find it. If you see it again, tap “Snake still here”: the report reopens and the hostel security guard is alerted.'
+                        ? 'The admin searched but couldn’t find it. If you see it again, tap “Snake still here”: the report reopens and the hostel security guard is alerted.'
                         : 'You reported this snake. Tell us if it’s really gone. If it’s still there, the report reopens and the hostel security guard is alerted.',
                     style: ft(12.5, color: C.muted, height: 1.4),
                   ),
@@ -239,7 +239,7 @@ class _Response extends StatelessWidget {
         if (!r.safe && s.role != Role.authority) ...[
           const SizedBox(height: 12),
           Btn(
-            'Call the authority now',
+            'Call the admin now',
             kind: BtnKind.danger,
             icon: Icons.call_rounded,
             height: 48,

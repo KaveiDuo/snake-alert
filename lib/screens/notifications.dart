@@ -29,12 +29,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       _Update(
         r.time,
         mine ? 'You reported it' : (r.venom == Venom.venomous ? 'Venomous snake reported' : 'Snake sighting reported'),
-        mine ? 'Sent to the ${r.place} authority.' : 'Avoid the area until it is marked safe.',
+        mine ? 'Sent to the ${r.place} admin.' : 'Avoid the area until it is marked safe.',
       ),
       if (mine && r.seenAt != null) _Update(r.seenAt!, 'Your report was seen', '${r.handlerName} has opened it.'),
-      if (mine && r.onTheWayAt != null) _Update(r.onTheWayAt!, 'Authority on the way', '${r.handlerName} is heading there.'),
+      if (mine && r.onTheWayAt != null) _Update(r.onTheWayAt!, 'Admin on the way', '${r.handlerName} is heading there.'),
       if (mine && r.rescuerCalledAt != null) _Update(r.rescuerCalledAt!, 'Snake catcher called', '${r.handlerName} called the snake catcher.'),
-      if (mine && r.onSiteAt != null) _Update(r.onSiteAt!, 'Authority at the spot', '${r.handlerName} has reached the spot.'),
+      if (mine && r.onSiteAt != null) _Update(r.onSiteAt!, 'Admin at the spot', '${r.handlerName} has reached the spot.'),
       if (r.safe)
         r.outcome == Outcome.notFound
             ? _Update(

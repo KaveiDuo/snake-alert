@@ -146,7 +146,7 @@ class _ReportScreenState extends State<ReportScreen> {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  Text('Helps the authority prepare.', style: ft(13, color: C.muted)),
+                  Text('Helps the admin prepare.', style: ft(13, color: C.muted)),
                   const SizedBox(height: 14),
                   // Pick the snake first; the scanner is there for when they aren't sure.
                   SizedBox(
@@ -232,7 +232,7 @@ class _ReportScreenState extends State<ReportScreen> {
                       ? 'Answer the question above to continue'
                       : loc.covered
                       ? 'Alerts the ${loc.authority} and students nearby'
-                      : 'Pin only · alerts students nearby, no authority for open areas',
+                      : 'Pin only · alerts students nearby, no admin for open areas',
                   style: ft(11.5, color: C.muted),
                   textAlign: TextAlign.center,
                 ),
@@ -633,7 +633,7 @@ class _LocationSheetState extends State<LocationSheet> {
                       child: Row(
                         children: [
                           Text(g.title, style: ft(11.5, w: 700, color: C.muted, ls: 1.2)),
-                          if (!g.covered) ...[const SizedBox(width: 8), Text('· pin only, no authority', style: ft(11, color: C.faint))],
+                          if (!g.covered) ...[const SizedBox(width: 8), Text('· pin only, no admin', style: ft(11, color: C.faint))],
                         ],
                       ),
                     ),
@@ -770,8 +770,8 @@ class _PickOnMapScreenState extends State<PickOnMapScreen> {
                             _loc.outside
                                 ? 'Snake Alert only takes reports inside the campus. Move the pin onto campus.'
                                 : _loc.covered
-                                ? 'Inside ${_loc.name} premises · the ${_loc.name} authority covers this spot'
-                                : 'Open area · pin only. No authority is notified; students nearby still see it',
+                                ? 'Inside ${_loc.name} premises · the ${_loc.name} admin covers this spot'
+                                : 'Open area · pin only. No admin is notified; students nearby still see it',
                             style: ft(12.5, color: C.muted, height: 1.4),
                           ),
                         ],
@@ -919,12 +919,12 @@ class _ReportedScreenState extends State<ReportedScreen> with TickerProviderStat
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(r.covered ? 'Sent to the ${r.place} authority' : '${r.place} · open area', style: ft(13.5, w: 600)),
+                            Text(r.covered ? 'Sent to the ${r.place} admin' : '${r.place} · open area', style: ft(13.5, w: 600)),
                             const SizedBox(height: 4),
                             Text(
                               r.covered
                                   ? 'They must reach the spot within ${respondWithin.inMinutes} min and send a photo when it’s safe. You’ll see every step.'
-                                  : 'No authority is notified for open areas. Students nearby can see your pin, and it clears itself after 2–3 days.',
+                                  : 'No admin is notified for open areas. Students nearby can see your pin, and it clears itself after 2–3 days.',
                               style: ft(12.5, color: C.muted, height: 1.4),
                             ),
                             if (r.covered) ...[
@@ -958,7 +958,7 @@ class _ReportedScreenState extends State<ReportedScreen> with TickerProviderStat
                 if (r.covered) ...[
                   const SizedBox(height: 12),
                   Btn(
-                    'Call the authority now',
+                    'Call the admin now',
                     kind: BtnKind.danger,
                     icon: Icons.call_rounded,
                     height: 50,

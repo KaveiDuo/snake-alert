@@ -124,8 +124,8 @@ class ResponseTimeline extends StatelessWidget {
     final steps = <_StepData>[
       _StepData('Reported', '${r.reporter} · ${clock(r.time)}', true),
       _StepData(
-        r.seenAt != null ? 'Seen by $who' : 'Waiting for the authority to open it',
-        r.seenAt != null ? '${clock(r.seenAt!)} · ${mins(r.seenAt!.difference(r.time))} after the report' : 'Sent to the ${r.place} authority',
+        r.seenAt != null ? 'Seen by $who' : 'Waiting for the admin to open it',
+        r.seenAt != null ? '${clock(r.seenAt!)} · ${mins(r.seenAt!.difference(r.time))} after the report' : 'Sent to the ${r.place} admin',
         r.seenAt != null,
       ),
       _StepData(

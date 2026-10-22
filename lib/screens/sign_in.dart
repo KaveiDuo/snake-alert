@@ -118,7 +118,7 @@ class _SignInScreenState extends State<SignInScreen> {
               duration: const Duration(milliseconds: 200),
               child: Text(
                 _authority
-                    ? 'For registered hostel authorities · code by SMS'
+                    ? 'For registered admins · code by SMS'
                     : 'For students and faculty with an @iitg.ac.in ID',
                 key: ValueKey(_authority),
                 textAlign: TextAlign.center,
@@ -198,7 +198,7 @@ class _RoleSwitch extends StatelessWidget {
         Row(
           children: [
             _side('Student', Icons.school_outlined, !authority, () => onChanged(false)),
-            _side('Hostel authority', Icons.shield_outlined, authority, () => onChanged(true)),
+            _side('Admin', Icons.shield_outlined, authority, () => onChanged(true)),
           ],
         ),
       ],
