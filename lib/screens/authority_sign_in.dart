@@ -37,7 +37,9 @@ const _smallPrint = 'Only registered admins can sign in. Students use their Outl
 /// your own registered phone number. Each post has several employees, each
 /// with their own number.
 class AuthorityPhoneScreen extends StatefulWidget {
-  const AuthorityPhoneScreen({super.key});
+  /// Chosen on the first sign-in screen; when null, the post is chosen here.
+  final AdminRole? post;
+  const AuthorityPhoneScreen({super.key, this.post});
   @override
   State<AuthorityPhoneScreen> createState() => _AuthorityPhoneScreenState();
 }
@@ -51,7 +53,7 @@ IconData _postIcon(AdminRole r) => switch (r) {
 class _AuthorityPhoneScreenState extends State<AuthorityPhoneScreen> {
   final _ctrl = TextEditingController();
   final _focus = FocusNode();
-  AdminRole _post = AdminRole.housekeeping;
+  late AdminRole _post = widget.post ?? AdminRole.housekeeping;
 
   @override
   void initState() {
@@ -84,49 +86,51 @@ class _AuthorityPhoneScreenState extends State<AuthorityPhoneScreen> {
         if (s.post == _post) s,
     ];
     return DarkPage(
-      header: const AppHeader('Admin sign-in'),
+      header: AppHeader('${_post.label} sign-in'),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 18),
         children: [
           const _Steps(1),
-          const SizedBox(height: 20),
-          Text('Sign in as', style: ft(22, w: 700)),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              for (final (i, r) in AdminRole.values.indexed) ...[
-                if (i > 0) const SizedBox(width: 8),
-                Expanded(
-                  child: Material(
-                    color: _post == r ? C.greenSoft : C.card,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      side: BorderSide(color: _post == r ? C.green : C.line, width: _post == r ? 1.5 : 1),
-                    ),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(16),
-                      onTap: () => _choose(r),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        child: Column(
-                          children: [
-                            Icon(_postIcon(r), color: _post == r ? C.green : C.sub, size: 24),
-                            const SizedBox(height: 6),
-                            Text(
-                              r == AdminRole.security ? 'Security' : r.label,
-                              style: ft(13.5, w: 600, color: _post == r ? C.greenText : C.sub),
-                            ),
-                          ],
+          if (widget.post == null) ...[
+            const SizedBox(height: 20),
+            Text('Sign in as', style: ft(22, w: 700)),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                for (final (i, r) in AdminRole.values.indexed) ...[
+                  if (i > 0) const SizedBox(width: 8),
+                  Expanded(
+                    child: Material(
+                      color: _post == r ? C.greenSoft : C.card,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: BorderSide(color: _post == r ? C.green : C.line, width: _post == r ? 1.5 : 1),
+                      ),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(16),
+                        onTap: () => _choose(r),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          child: Column(
+                            children: [
+                              Icon(_postIcon(r), color: _post == r ? C.green : C.sub, size: 24),
+                              const SizedBox(height: 6),
+                              Text(
+                                r == AdminRole.security ? 'Security' : r.label,
+                                style: ft(13.5, w: 600, color: _post == r ? C.greenText : C.sub),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ],
-            ],
-          ),
+            ),
+          ],
           const SizedBox(height: 22),
-          Text('Your phone number', style: ft(16, w: 700)),
+          Text('Your phone number', style: ft(widget.post == null ? 16 : 22, w: 700)),
           const SizedBox(height: 6),
           Text(
             'The number the Hostel Affairs office has on record for you. No Outlook ID needed.',
@@ -315,7 +319,7 @@ class _AuthorityCodeScreenState extends State<AuthorityCodeScreen> {
   @override
   Widget build(BuildContext context) {
     return DarkPage(
-      header: const AppHeader('Admin sign-in'),
+      header: AppHeader('${widget.account.post.label} sign-in'),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 18),
         children: [

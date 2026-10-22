@@ -20,7 +20,11 @@ class OnestopBackground extends StatelessWidget {
     child: Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [C.onestopGreen, C.onestopMint]),
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [C.onestopGreen, C.onestopMint],
+          ),
         ),
         // Fills the screen on normal phones and scrolls on very short ones.
         child: SafeArea(
@@ -48,8 +52,10 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
-  static const _prefsKey = 'sign_in_as_authority';
-  bool _authority = false;
+  static const _prefsKey = 'sign_in_as';
+
+  /// null = Student; otherwise the admin post.
+  AdminRole? _post;
 
   @override
   void initState() {
@@ -59,20 +65,21 @@ class _SignInScreenState extends State<SignInScreen> {
 
   Future<void> _restore() async {
     try {
-      final saved = (await SharedPreferences.getInstance()).getBool(_prefsKey) ?? false;
-      if (mounted && saved != _authority) setState(() => _authority = saved);
+      final saved = (await SharedPreferences.getInstance()).getString(_prefsKey);
+      final post = AdminRole.values.where((r) => r.name == saved).firstOrNull;
+      if (mounted && post != _post) setState(() => _post = post);
     } catch (_) {}
   }
 
-  void _pick(bool authority) {
-    if (authority == _authority) return;
-    setState(() => _authority = authority);
-    SharedPreferences.getInstance().then((p) => p.setBool(_prefsKey, authority)).catchError((_) => false);
+  void _pick(AdminRole? post) {
+    if (post == _post) return;
+    setState(() => _post = post);
+    SharedPreferences.getInstance().then((p) => p.setString(_prefsKey, post?.name ?? 'student')).catchError((_) => false);
   }
 
   void _continue() {
-    if (_authority) {
-      Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AuthorityPhoneScreen()));
+    if (_post != null) {
+      Navigator.of(context).push(MaterialPageRoute(builder: (_) => AuthorityPhoneScreen(post: _post)));
     } else {
       Navigator.of(context).pushReplacement(_fade(const AuthenticatingScreen(), 450));
     }
@@ -80,6 +87,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final admin = _post != null;
     return OnestopBackground(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -90,7 +98,7 @@ class _SignInScreenState extends State<SignInScreen> {
             const SizedBox(height: 24),
             Text('Welcome to the\nall new Onestop', textAlign: TextAlign.center, style: geist(38, height: 1, ls: -1.5)),
             const Spacer(),
-            _RoleSwitch(authority: _authority, onChanged: _pick),
+            _RoleSwitch(post: _post, onChanged: _pick),
             const SizedBox(height: 12),
             _OnestopButton(
               color: C.onestopGreen,
@@ -98,13 +106,13 @@ class _SignInScreenState extends State<SignInScreen> {
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 200),
                 child: Row(
-                  key: ValueKey(_authority),
+                  key: ValueKey(admin),
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Flexible(
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
-                        child: Text(_authority ? 'Sign in with phone number' : 'Sign in with Outlook', style: mont(16)),
+                        child: Text(admin ? 'Sign in with phone number' : 'Sign in with Outlook', style: mont(16)),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -117,10 +125,13 @@ class _SignInScreenState extends State<SignInScreen> {
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
               child: Text(
-                _authority
-                    ? 'For registered admins · code by SMS'
-                    : 'For students and faculty with an @iitg.ac.in ID',
-                key: ValueKey(_authority),
+                switch (_post) {
+                  null => 'For students and faculty with an @iitg.ac.in ID',
+                  AdminRole.housekeeping => 'For registered housekeeping staff · code by SMS',
+                  AdminRole.security => 'For registered security guards · code by SMS',
+                  AdminRole.warden => 'For registered wardens · code by SMS',
+                },
+                key: ValueKey(_post),
                 textAlign: TextAlign.center,
                 style: geist(12, color: C.onestopInk.withValues(alpha: 0.6), ls: -0.2),
               ),
@@ -135,75 +146,88 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 }
 
-/// Two-way switch: Student | Hostel authority. The white pill slides under the
-/// chosen side.
+/// Four-way switch: Student | Housekeeping | Security | Warden, each a small
+/// icon over a short label so it stays one compact row. The white pill slides
+/// under the chosen one.
 class _RoleSwitch extends StatelessWidget {
-  final bool authority;
-  final ValueChanged<bool> onChanged;
-  const _RoleSwitch({required this.authority, required this.onChanged});
+  final AdminRole? post;
+  final ValueChanged<AdminRole?> onChanged;
+  const _RoleSwitch({required this.post, required this.onChanged});
 
-  Widget _side(String label, IconData icon, bool selected, VoidCallback onTap) => Expanded(
-    child: Semantics(
-      button: true,
-      selected: selected,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: SizedBox(
-          height: 44,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 18, color: selected ? C.onestopGreen : C.onestopInk.withValues(alpha: 0.55)),
-              const SizedBox(width: 6),
-              Flexible(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(label, style: mont(14, color: selected ? C.onestopInk : C.onestopInk.withValues(alpha: 0.6))),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
+  static const _options = <(AdminRole?, String, IconData)>[
+    (null, 'Student', Icons.school_outlined),
+    (AdminRole.housekeeping, 'Housekeeping', Icons.cleaning_services_outlined),
+    (AdminRole.security, 'Security', Icons.local_police_outlined),
+    (AdminRole.warden, 'Warden', Icons.badge_outlined),
+  ];
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(4),
-    decoration: BoxDecoration(
-      color: Colors.white.withValues(alpha: 0.45),
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: Colors.white.withValues(alpha: 0.7)),
-    ),
-    child: Stack(
-      children: [
-        AnimatedAlign(
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOutCubic,
-          alignment: authority ? Alignment.centerRight : Alignment.centerLeft,
-          child: FractionallySizedBox(
-            widthFactor: 0.5,
-            child: Container(
-              height: 44,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: const [BoxShadow(color: Color(0x1F000000), blurRadius: 6, offset: Offset(0, 2))],
+  Widget build(BuildContext context) {
+    final index = _options.indexWhere((o) => o.$1 == post);
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.7)),
+      ),
+      child: Stack(
+        children: [
+          AnimatedAlign(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment(-1 + 2 * index / (_options.length - 1), 0),
+            child: FractionallySizedBox(
+              widthFactor: 1 / _options.length,
+              child: Container(
+                height: 54,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: const [BoxShadow(color: Color(0x1F000000), blurRadius: 6, offset: Offset(0, 2))],
+                ),
               ),
             ),
           ),
-        ),
-        Row(
-          children: [
-            _side('Student', Icons.school_outlined, !authority, () => onChanged(false)),
-            _side('Admin', Icons.shield_outlined, authority, () => onChanged(true)),
-          ],
-        ),
-      ],
-    ),
-  );
+          Row(
+            children: [
+              for (final (p, label, icon) in _options)
+                Expanded(
+                  child: Semantics(
+                    button: true,
+                    selected: p == post,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => onChanged(p),
+                      child: SizedBox(
+                        height: 54,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(icon, size: 19, color: p == post ? C.onestopGreen : C.onestopInk.withValues(alpha: 0.55)),
+                            const SizedBox(height: 3),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 3),
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  label,
+                                  style: mont(11.5, color: p == post ? C.onestopInk : C.onestopInk.withValues(alpha: 0.6)),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _OnestopButton extends StatelessWidget {
