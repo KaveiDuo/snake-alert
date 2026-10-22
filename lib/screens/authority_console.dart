@@ -1375,20 +1375,6 @@ class AuthorityProfile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = AppScope.of(context);
-    final avg = s.avgArrival;
-    Widget stat(String v, String l, Color c) => Expanded(
-      child: Column(
-        children: [
-          Text(v, style: ft(22, w: 700, color: c)),
-          const SizedBox(height: 4),
-          Text(
-            l,
-            style: ft(12, color: C.muted),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
     return DarkPage(
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 30),
@@ -1407,21 +1393,6 @@ class AuthorityProfile extends StatelessWidget {
                   ),
             name: s.adminRole.person,
             lines: ['${s.adminRole.label} · ${s.authorityHostel}'],
-          ),
-          const SizedBox(height: 22),
-          Text('Snake Alert · ${s.authorityHostel}', style: ft(17, w: 600)),
-          const SizedBox(height: 12),
-          Panel(
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-            child: Row(
-              children: [
-                stat('${s.hostelOpen}', 'Open now', C.redText),
-                Container(width: 1, height: 40, color: C.line),
-                stat('${s.safeThisWeek}', 'Marked safe this week', C.green),
-                Container(width: 1, height: 40, color: C.line),
-                stat(avg == null ? '—' : '${avg.inMinutes} min', 'Avg. arrival', C.text),
-              ],
-            ),
           ),
           const SizedBox(height: 22),
           Text('Details', style: ft(17, w: 600)),
