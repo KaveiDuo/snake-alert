@@ -742,6 +742,7 @@ class _Deadline extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         line,
+        if (role == AdminRole.security && r.stage.index < Stage.onSite.index) ...[const SizedBox(height: 6), _BeforeYou(r)],
         if (reminder) ...[
           const SizedBox(height: 6),
           Row(
@@ -790,7 +791,7 @@ IconData _roleIcon(AdminRole r) => switch (r) {
 String _roleHelp(AdminRole r) => switch (r) {
   AdminRole.housekeeping => 'Gets every new report first and sees all reports',
   AdminRole.security =>
-    'Sees only reports nobody reached in ${escalateEvery.inMinutes} min, or that the reporter says are still there',
+    'Backup: sees reports Housekeeping didn’t reach in ${escalateEvery.inMinutes} min (or the reporter says are still there), checks with them, then goes',
   AdminRole.warden => 'Oversees: sees reports nobody reached in ${escalateEvery.inMinutes * 2} min and follows up with the team',
 };
 
@@ -926,7 +927,7 @@ class _EscalatedBanner extends StatelessWidget {
               Text(
                 role == AdminRole.warden
                     ? 'Nobody reached the spot in ${escalateEvery.inMinutes * 2} min. Call the team, find out why, and get someone there.'
-                    : 'Nobody reached the spot in time. Take one and tap “On my way”.',
+                    : 'Housekeeping hasn’t reached these in ${escalateEvery.inMinutes} min. Check with them, or go yourself and tap “On my way”.',
                 style: ft(12.5, color: const Color(0xFFF2B8B5), height: 1.35),
               ),
             ],
@@ -1438,15 +1439,7 @@ class _WardenPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = AppScope.read(context);
-    String response(AdminRole who) {
-      if (r.handlerRole == who && r.onTheWayAt != null) {
-        return r.onSiteAt != null
-            ? 'Took it · reached the spot ${clock(r.onSiteAt!)}'
-            : 'Took it ${clock(r.onTheWayAt!)} · on the way';
-      }
-      if (who == AdminRole.housekeeping && r.seenAt != null) return 'Opened it ${clock(r.seenAt!)} · didn’t go';
-      return 'No response';
-    }
+    String response(AdminRole who) => _response(r, who);
 
     Widget step(AdminRole who) {
       final ok = r.handlerRole == who && r.onTheWayAt != null;
@@ -1547,6 +1540,66 @@ class _WardenPanel extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+/// How someone on the ladder responded to a report, for the warden and the security guard.
+String _response(Report r, AdminRole who) {
+  if (r.handlerRole == who && r.onTheWayAt != null) {
+    return r.onSiteAt != null
+        ? 'Took it · reached the spot ${clock(r.onSiteAt!)}'
+        : 'Took it ${clock(r.onTheWayAt!)} · on the way';
+  }
+  if (who == AdminRole.housekeeping && r.seenAt != null) return 'Opened it ${clock(r.seenAt!)} · didn’t go';
+  return 'No response';
+}
+
+/// For the security guard: what Housekeeping did before the report reached
+/// them, and a quick call to check whether they're already going.
+class _BeforeYou extends StatelessWidget {
+  final Report r;
+  const _BeforeYou(this.r);
+  @override
+  Widget build(BuildContext context) {
+    const hk = AdminRole.housekeeping;
+    final going = r.handlerRole == hk && r.onTheWayAt != null;
+    final color = going ? C.greenText : const Color(0xFFFFC46B);
+    return Container(
+      padding: const EdgeInsets.fromLTRB(10, 8, 6, 8),
+      decoration: BoxDecoration(
+        color: C.card2,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: C.line2),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.cleaning_services_outlined, size: 16, color: color),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Before you · ${hk.label}', style: ft(12.5, w: 700)),
+                Text(
+                  '${hk.person} · ${_response(r, hk)[0].toLowerCase()}${_response(r, hk).substring(1)}',
+                  style: ft(12, w: 600, color: color, height: 1.3),
+                ),
+              ],
+            ),
+          ),
+          TextButton.icon(
+            onPressed: () async {
+              if (!await launchUrl(Uri.parse('tel:$authorityPhone')) && context.mounted) {
+                toast(context, 'Could not open the dialler');
+              }
+            },
+            style: TextButton.styleFrom(foregroundColor: C.green, padding: const EdgeInsets.symmetric(horizontal: 10)),
+            icon: const Icon(Icons.call_rounded, size: 16),
+            label: Text('Call ${hk.person.split(' ').last}', style: ft(13, w: 700, color: C.green)),
+          ),
+        ],
+      ),
     );
   }
 }
