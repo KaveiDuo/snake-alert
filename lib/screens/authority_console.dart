@@ -1385,8 +1385,8 @@ class AuthorityProfile extends StatelessWidget {
           IdCard(
             avatar: ClipOval(
               child: Image.asset(switch (s.adminRole) {
-                AdminRole.housekeeping => 'assets/images/avatar_housekeeping.png',
-                AdminRole.security => 'assets/images/avatar_security.png',
+                AdminRole.housekeeping => 'assets/images/avatar_housekeeping.jpg',
+                AdminRole.security => 'assets/images/avatar_security.jpg',
                 AdminRole.warden => 'assets/images/avatar_authority.jpg',
               }, width: 88, height: 88, fit: BoxFit.cover),
             ),
