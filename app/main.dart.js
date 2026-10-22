@@ -110882,9 +110882,9 @@ r=A.e6(B.em,1)
 return A.b8(q,A.aL(A.c([A.iz(A.bd(10),A.c9(A.CO(p,B.bS),56,56)),B.aW,B.Ya,B.bL,A.bf(A.M("Photo added",q,q,q,q,A.X(14.5,B.aK,q,q,600),q,q),1),A.jL(A.M("Retake",q,q,q,q,A.X(13.5,B.X,q,q,600),q,q),this.d,q)],t.p),B.n,q,B.h,B.j),B.l,q,q,new A.aV(B.bU,q,r,s,q,q,B.K),q,q,q,B.fl,q,q,q)}}
 A.RS.prototype={
 F(a){var s,r,q,p,o,n,m=null,l=a.ak(t.T).f,k=A.M("Profile",m,m,m,m,A.X(24,B.r,m,m,700),m,m),j=l.f
-switch(j.a){case 0:s="assets/images/avatar_housekeeping.png"
+switch(j.a){case 0:s="assets/images/avatar_housekeeping.jpg"
 break
-case 1:s="assets/images/avatar_security.png"
+case 1:s="assets/images/avatar_security.jpg"
 break
 case 2:s="assets/images/avatar_authority.jpg"
 break
@@ -111930,7 +111930,7 @@ A.a_9.prototype={
 F(a){var s,r=null
 a.ak(t.T).toString
 s=t.p
-return A.je(A.i7(A.c([A.aL(A.c([A.Ko(A.cS(A.c([A.cS(r,r,r,r,r,r,r,r,r,A.X(28,B.r,r,r,700),"One"),A.cS(r,r,r,r,r,r,r,r,r,A.X(28,B.q,r,r,700),".")],t.VO),r,r,r,r,r,r,r,r,r,r),r,r,r,r)],s),B.n,r,B.h,B.j),B.cK,new A.FU(A.b_T(A.jn("assets/images/avatar_student.png",B.bS,88,88)),"Ananya Sharma",B.b05,!0,r),B.eO,A.M("Additional Information",r,r,r,r,A.X(17,B.r,r,r,600),r,r),B.aq,new A.G8(A.c([new A.fp(B.vj,"Outlook ID","210102043@iitg.ac.in",!1,r),B.YU,B.YL,B.YT,B.YQ,B.YK,B.YO,B.YS,B.YN,B.YJ,B.YR,B.YP],t.d4),r),B.eO,B.Jo],s),r,B.VA,r,B.a5),r)}}
+return A.je(A.i7(A.c([A.aL(A.c([A.Ko(A.cS(A.c([A.cS(r,r,r,r,r,r,r,r,r,A.X(28,B.r,r,r,700),"One"),A.cS(r,r,r,r,r,r,r,r,r,A.X(28,B.q,r,r,700),".")],t.VO),r,r,r,r,r,r,r,r,r,r),r,r,r,r)],s),B.n,r,B.h,B.j),B.cK,new A.FU(A.b_T(A.jn("assets/images/avatar_student.jpg",B.bS,88,88)),"Ananya Sharma",B.b05,!0,r),B.eO,A.M("Additional Information",r,r,r,r,A.X(17,B.r,r,r,600),r,r),B.aq,new A.G8(A.c([new A.fp(B.vj,"Outlook ID","210102043@iitg.ac.in",!1,r),B.YU,B.YL,B.YT,B.YQ,B.YK,B.YO,B.YS,B.YN,B.YJ,B.YR,B.YP],t.d4),r),B.eO,B.Jo],s),r,B.VA,r,B.a5),r)}}
 A.IQ.prototype={
 aa(){return new A.Oy(new A.oJ(B.lF,$.aD()))}}
 A.Oy.prototype={
