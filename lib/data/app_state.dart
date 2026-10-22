@@ -270,6 +270,10 @@ class Report {
   /// When the reporter said the snake is still there (starts the ladder at the security guard).
   DateTime? escalatedAt;
 
+  /// The warden's follow-up: a reminder sent to Housekeeping and Security, and calls made.
+  DateTime? remindedAt;
+  final wardenCalls = <(AdminRole, DateTime)>[];
+
   /// While on the way: how far the authority still is from the pin (live).
   double? distanceLeft;
 
@@ -343,6 +347,9 @@ class Report {
   /// guard and the warden only see reports escalated to them, plus any they took.
   bool visibleTo(AdminRole role) =>
       role == AdminRole.housekeeping || handlerRole == role || (covered && level.index >= role.index);
+
+  /// When each step of the ladder was (or will be) alerted.
+  DateTime alertedAt(AdminRole role) => role == AdminRole.housekeeping ? time : _ladderStart.add(escalateEvery * role.index);
 
   /// Escalated to [role] and still nobody at the spot.
   bool needs(AdminRole role) =>
@@ -433,11 +440,29 @@ class AppState extends ChangeNotifier {
 
   final _alerted = <String>{};
 
-  /// Escalations the signed-in admin hasn't been alerted about yet (each once per role).
+  /// Open reports the warden has sent a reminder about (to Housekeeping and Security).
+  List<Report> get remindedToMe => adminRole == AdminRole.warden
+      ? const []
+      : adminReports.where((r) => r.remindedAt != null && !r.safe && r.stage.index < Stage.onSite.index).toList();
+
+  /// Escalations (and warden reminders) the signed-in admin hasn't been alerted about yet.
   List<Report> takeNewEscalations() => [
-    for (final r in escalatedToMe)
-      if (_alerted.add('${r.id}:${adminRole.name}')) r,
+    for (final r in {...escalatedToMe, ...remindedToMe})
+      if (_alerted.add('${r.id}:${adminRole.name}:${r.remindedAt?.millisecondsSinceEpoch ?? 0}')) r,
   ];
+
+  /// The warden nudges Housekeeping and the security guard about an overdue report.
+  void remind(Report r) {
+    r.remindedAt = DateTime.now();
+    notifyListeners();
+  }
+
+  /// The warden phoned someone about a report (shown in the follow-up trail).
+  void logWardenCall(Report r, AdminRole who) {
+    r.wardenCalls.add((who, DateTime.now()));
+    notifyListeners();
+  }
+
   final String studentName = 'Ananya Sharma';
   final String studentEmail = '210102043@iitg.ac.in';
 

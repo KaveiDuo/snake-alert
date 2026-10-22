@@ -116,7 +116,7 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final s = AppScope.read(context);
-      s.markSeen(s.adminReports);
+      if (s.adminRole != AdminRole.warden) s.markSeen(s.adminReports);
       s.followApproaches(); // "At the spot" fills in when they get there
     });
   }
@@ -429,6 +429,11 @@ void _rulesSheet(BuildContext context) {
               'Who is alerted',
               'New reports go to Housekeeping first. Not reached within ${escalateEvery.inMinutes} min, or the reporter says it’s still there: the security guard is alerted. After ${escalateEvery.inMinutes * 2} min: the warden too. Tap “On my way” to take a report, so the others see who has it.',
             ),
+            rule(
+              Icons.supervisor_account_outlined,
+              'The warden follows up',
+              'The warden doesn’t go to the spot. They see who was alerted and when, call Housekeeping or Security to ask why, and can send both a reminder.',
+            ),
             const SizedBox(height: 4),
             Btn('Got it', kind: BtnKind.ghost, height: 48, onTap: () => Navigator.pop(ctx)),
           ],
@@ -559,56 +564,60 @@ class _ReportCardState extends State<_ReportCard> {
                       const SizedBox(height: 12),
                       _Deadline(r),
                       const SizedBox(height: 12),
-                      // One row: call the snake catcher, the next step, the map.
-                      Row(
-                        children: [
-                          if (!r.safe) ...[
+                      // The warden oversees: who was alerted, and calls / reminders to them.
+                      if (s.adminRole == AdminRole.warden)
+                        _WardenPanel(r)
+                      else
+                        // One row: call the snake catcher, the next step, the map.
+                        Row(
+                          children: [
+                            if (!r.safe) ...[
+                              Expanded(
+                                flex: 5,
+                                child: _Pill(
+                                  called ? 'Called' : 'Call rescuer',
+                                  called ? Icons.phone_callback_rounded : Icons.call_rounded,
+                                  // The snake catcher / wildlife department, for big or dangerous snakes.
+                                  // Red until called; grey once it has been done.
+                                  bg: called ? const Color(0xFF262626) : const Color(0xFFE5484D),
+                                  fg: called ? C.sub : Colors.white,
+                                  onTap: () async {
+                                    s.callRescuer(r);
+                                    if (!await launchUrl(Uri.parse('tel:$rescuerPhone')) && context.mounted) {
+                                      toast(context, 'Could not open the dialler');
+                                    }
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                            ],
                             Expanded(
                               flex: 5,
-                              child: _Pill(
-                                called ? 'Called' : 'Call rescuer',
-                                called ? Icons.phone_callback_rounded : Icons.call_rounded,
-                                // The snake catcher / wildlife department, for big or dangerous snakes.
-                                // Red until called; grey once it has been done.
-                                bg: called ? const Color(0xFF262626) : const Color(0xFFE5484D),
-                                fg: called ? C.sub : Colors.white,
-                                onTap: () async {
-                                  s.callRescuer(r);
-                                  if (!await launchUrl(Uri.parse('tel:$rescuerPhone')) && context.mounted) {
-                                    toast(context, 'Could not open the dialler');
-                                  }
-                                },
-                              ),
+                              child: r.safe
+                                  ? _Pill(label, icon, bg: const Color(0xFF262626), fg: C.sub, onTap: onTap)
+                                  : _Pill(
+                                      label,
+                                      icon,
+                                      bg: const Color(0xFF173A24),
+                                      fg: C.greenText,
+                                      border: const Color(0xFF245A36),
+                                      onTap: onTap,
+                                    ),
                             ),
                             const SizedBox(width: 8),
-                          ],
-                          Expanded(
-                            flex: 5,
-                            child: r.safe
-                                ? _Pill(label, icon, bg: const Color(0xFF262626), fg: C.sub, onTap: onTap)
-                                : _Pill(
-                                    label,
-                                    icon,
-                                    bg: const Color(0xFF173A24),
-                                    fg: C.greenText,
-                                    border: const Color(0xFF245A36),
-                                    onTap: onTap,
-                                  ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            flex: 3,
-                            child: _Pill(
-                              'Map',
-                              Icons.location_on_outlined,
-                              bg: const Color(0xFF262626),
-                              fg: C.text,
-                              onTap: () =>
-                                  Navigator.push(context, MaterialPageRoute(builder: (_) => ReportLocationScreen(report: r))),
+                            Expanded(
+                              flex: 3,
+                              child: _Pill(
+                                'Map',
+                                Icons.location_on_outlined,
+                                bg: const Color(0xFF262626),
+                                fg: C.text,
+                                onTap: () =>
+                                    Navigator.push(context, MaterialPageRoute(builder: (_) => ReportLocationScreen(report: r))),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
                     ],
                   ),
           ),
@@ -685,7 +694,9 @@ class _Deadline extends StatelessWidget {
       _ when r.overdue => (
         Icons.timer_off_outlined,
         C.redText,
-        'Overdue by ${mins(-r.dueIn)} · escalated to ${_ladder(r.level)}',
+        AppScope.read(context).adminRole == AdminRole.warden
+            ? 'Overdue by ${mins(-r.dueIn)} · nobody has reached the spot'
+            : 'Overdue by ${mins(-r.dueIn)} · escalated to ${_ladder(r.level)}',
       ),
       _ when r.stage == Stage.onTheWay && r.distanceLeft != null => (
         Icons.near_me_rounded,
@@ -722,13 +733,30 @@ class _Deadline extends StatelessWidget {
         ),
       ],
     );
+    final role = AppScope.read(context).adminRole;
+    final reminder = r.remindedAt != null && role != AdminRole.warden && !r.safe && r.stage.index < Stage.onSite.index;
     // Once escalated: has anyone taken it yet?
-    if (r.safe || r.level == AdminRole.housekeeping) return line;
+    if (r.safe || (r.level == AdminRole.housekeeping && !reminder)) return line;
     final taken = r.stage.index >= Stage.onTheWay.index;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         line,
+        if (reminder) ...[
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              const Icon(Icons.campaign_rounded, size: 16, color: C.redText),
+              const SizedBox(width: 7),
+              Expanded(
+                child: Text(
+                  'Reminder from the warden at ${clock(r.remindedAt!)} · please go now',
+                  style: ft(12.5, w: 700, color: C.redText, height: 1.35),
+                ),
+              ),
+            ],
+          ),
+        ],
         const SizedBox(height: 6),
         Row(
           children: [
@@ -736,7 +764,11 @@ class _Deadline extends StatelessWidget {
             const SizedBox(width: 7),
             Expanded(
               child: Text(
-                taken ? 'Taken by ${r.handlerName}' : 'Not taken yet · tap “On my way” to take it',
+                taken
+                    ? 'Taken by ${r.handlerName}'
+                    : (AppScope.read(context).adminRole == AdminRole.warden
+                          ? 'Not taken yet · call the team below'
+                          : 'Not taken yet · tap “On my way” to take it'),
                 style: ft(12.5, w: 600, color: taken ? C.greenText : C.sub, height: 1.35),
               ),
             ),
@@ -759,7 +791,7 @@ String _roleHelp(AdminRole r) => switch (r) {
   AdminRole.housekeeping => 'Gets every new report first and sees all reports',
   AdminRole.security =>
     'Sees only reports nobody reached in ${escalateEvery.inMinutes} min, or that the reporter says are still there',
-  AdminRole.warden => 'Sees only reports nobody reached in ${escalateEvery.inMinutes * 2} min',
+  AdminRole.warden => 'Oversees: sees reports nobody reached in ${escalateEvery.inMinutes * 2} min and follows up with the team',
 };
 
 /// Small pill next to the hostel name showing who is signed in.
@@ -893,7 +925,7 @@ class _EscalatedBanner extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 role == AdminRole.warden
-                    ? 'Nobody reached the spot in ${escalateEvery.inMinutes * 2} min. Make sure someone goes now.'
+                    ? 'Nobody reached the spot in ${escalateEvery.inMinutes * 2} min. Call the team, find out why, and get someone there.'
                     : 'Nobody reached the spot in time. Take one and tap “On my way”.',
                 style: ft(12.5, color: const Color(0xFFF2B8B5), height: 1.35),
               ),
@@ -915,7 +947,10 @@ class _EscalationAlert extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final r = reports.first;
-    final why = r.escalated
+    final reminded = r.remindedAt != null && role != AdminRole.warden;
+    final why = reminded
+        ? 'Reminder from the warden · please go now'
+        : r.escalated
         ? '${r.reporter} says it’s still there'
         : 'Not reached in ${r.level == AdminRole.warden ? escalateEvery.inMinutes * 2 : escalateEvery.inMinutes} min';
     return Material(
@@ -1389,6 +1424,129 @@ class AuthorityProfile extends StatelessWidget {
           const ProfileActions(),
         ],
       ),
+    );
+  }
+}
+
+/// The warden's view of an overdue report: who was alerted and how they
+/// responded, plus calls and a reminder to Housekeeping and Security. The
+/// warden doesn't go to the spot themselves.
+class _WardenPanel extends StatelessWidget {
+  final Report r;
+  const _WardenPanel(this.r);
+
+  @override
+  Widget build(BuildContext context) {
+    final s = AppScope.read(context);
+    String response(AdminRole who) {
+      if (r.handlerRole == who && r.onTheWayAt != null) {
+        return r.onSiteAt != null
+            ? 'Took it · reached the spot ${clock(r.onSiteAt!)}'
+            : 'Took it ${clock(r.onTheWayAt!)} · on the way';
+      }
+      if (who == AdminRole.housekeeping && r.seenAt != null) return 'Opened it ${clock(r.seenAt!)} · didn’t go';
+      return 'No response';
+    }
+
+    Widget step(AdminRole who) {
+      final ok = r.handlerRole == who && r.onTheWayAt != null;
+      final calls = r.wardenCalls.where((c) => c.$1 == who).toList();
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(_roleIcon(who), size: 18, color: ok ? C.greenText : C.redText),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('${who.label} · ${who.person}', style: ft(13.5, w: 700)),
+                  Text(
+                    'Alerted ${clock(r.alertedAt(who))} · ${response(who)}',
+                    style: ft(12.5, color: ok ? C.greenText : C.redText, height: 1.35),
+                  ),
+                  if (calls.isNotEmpty)
+                    Text(
+                      'You called ${calls.length == 1 ? 'at ${clock(calls.last.$2)}' : '${calls.length} times, last ${clock(calls.last.$2)}'}',
+                      style: ft(12, color: C.muted),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    Future<void> call(AdminRole who) async {
+      s.logWardenCall(r, who);
+      if (!await launchUrl(Uri.parse('tel:$authorityPhone')) && context.mounted) toast(context, 'Could not open the dialler');
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 2),
+          decoration: BoxDecoration(
+            color: C.card2,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: C.line2),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('WHO WAS ALERTED', style: ft(11, w: 700, color: C.muted, ls: 1.1)),
+              const SizedBox(height: 10),
+              step(AdminRole.housekeeping),
+              step(AdminRole.security),
+            ],
+          ),
+        ),
+        if (!r.safe) ...[
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _Pill(
+                  'Call housekeeping',
+                  Icons.call_rounded,
+                  bg: const Color(0xFF262626),
+                  fg: C.text,
+                  onTap: () => call(AdminRole.housekeeping),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _Pill(
+                  'Call security',
+                  Icons.call_rounded,
+                  bg: const Color(0xFF262626),
+                  fg: C.text,
+                  onTap: () => call(AdminRole.security),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: _Pill(
+              r.remindedAt == null ? 'Send reminder to both' : 'Reminder sent ${clock(r.remindedAt!)} · send again',
+              Icons.campaign_rounded,
+              bg: const Color(0xFFE5484D),
+              fg: Colors.white,
+              onTap: () {
+                s.remind(r);
+                toast(context, 'Reminder sent to ${AdminRole.housekeeping.person} and ${AdminRole.security.person}');
+              },
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

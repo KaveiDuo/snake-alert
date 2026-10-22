@@ -75,6 +75,24 @@ void main() {
     expect(s.adminReports.every((x) => x.level == AdminRole.warden || x.handlerRole == AdminRole.warden), isTrue);
   });
 
+  test('The warden oversees: reminders reach Housekeeping and Security again; the warden is never alerted to go', () {
+    final s = AppState()..role = Role.authority;
+    s.setAdminRole(AdminRole.warden);
+    final r = s.escalatedToMe.first;
+    expect(r.seenAt, isNotNull); // seen earlier by Housekeeping, not by the warden opening it
+    s.takeNewEscalations();
+    s.remind(r);
+    s.logWardenCall(r, AdminRole.security);
+    expect(r.wardenCalls.single.$1, AdminRole.security);
+    expect(s.remindedToMe, isEmpty); // the warden doesn't remind themselves
+    s.setAdminRole(AdminRole.housekeeping);
+    expect(s.takeNewEscalations(), contains(r));
+    s.setAdminRole(AdminRole.security);
+    expect(s.takeNewEscalations(), contains(r));
+    expect(s.takeNewEscalations(), isEmpty); // once per reminder
+    expect(r.alertedAt(AdminRole.warden).difference(r.alertedAt(AdminRole.security)), escalateEvery);
+  });
+
   testWidgets('On the way: "At the spot" fills in by itself when the admin gets there', (tester) async {
     final s = AppState()..role = Role.authority;
     final r = s.hostelReports.firstWhere((r) => r.stage == Stage.seen);
