@@ -27,6 +27,13 @@ html,body{margin:0;height:100%;background:#0F0F0F;overflow:hidden;overscroll-beh
 #install b{color:#fff}
 #install button{flex:none;border:0;border-radius:12px;padding:10px 13px;font:700 12px Figtree,system-ui,sans-serif;background:#2FD46B;color:#06210F;cursor:pointer}
 #install .x{flex:none;background:none;color:#6E6E6E;padding:10px 4px;font-weight:600}
+/* wide browser window: show the app at phone width in the middle, like the main app */
+@media (min-width:561px){
+  html,body{background:#070707}
+  #app,#splash{left:calc(50% - 215px);right:auto;top:12px;bottom:12px;width:430px;height:auto;border-radius:24px;overflow:hidden}
+  #app{height:calc(100% - 24px)}
+  #install{left:calc(50% - 203px);right:auto;width:406px;bottom:24px;box-sizing:border-box}
+}
 </style>
 </head>
 <body>
