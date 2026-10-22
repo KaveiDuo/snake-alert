@@ -11,20 +11,18 @@ import 'package:snake_watch/screens/notifications.dart';
 import 'package:snake_watch/screens/sighting_detail.dart';
 
 void main() {
-  testWidgets('Sign-in: Student, Housekeeping, Security and Warden options change the one button', (tester) async {
+  testWidgets('Sign-in: Student / Admin switch changes the one button', (tester) async {
     SharedPreferences.setMockInitialValues({});
     await tester.pumpWidget(SnakeWatchApp(state: AppState()));
     await tester.pumpAndSettle();
     expect(find.text('Student'), findsOneWidget);
-    for (final o in ['Housekeeping', 'Security', 'Warden']) {
-      expect(find.text(o), findsOneWidget);
-    }
+    expect(find.text('Admin'), findsOneWidget);
     expect(find.text('Sign in with Outlook'), findsOneWidget);
-    await tester.tap(find.text('Security'));
+    await tester.tap(find.text('Admin'));
     await tester.pumpAndSettle();
     expect(find.text('Sign in with phone number'), findsOneWidget);
     expect(find.text('Sign in with Outlook'), findsNothing);
-    expect((await SharedPreferences.getInstance()).getString('sign_in_as'), 'security'); // remembered
+    expect((await SharedPreferences.getInstance()).getBool('sign_in_as_authority'), isTrue); // remembered
   });
 
   test('Escalation ladder: Housekeeping, then security guard at 15 min, then warden at 30 min', () {

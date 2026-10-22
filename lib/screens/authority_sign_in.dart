@@ -82,7 +82,7 @@ class _AuthorityPhoneScreenState extends State<AuthorityPhoneScreen> {
     final active = _ctrl.text.isNotEmpty || _focus.hasFocus;
     final who = _who;
     return DarkPage(
-      header: AppHeader('${_post.label} sign-in'),
+      header: AppHeader(widget.post == null ? 'Admin sign-in' : '${_post.label} sign-in'),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 18),
         children: [
