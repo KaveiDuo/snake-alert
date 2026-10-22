@@ -22,3 +22,5 @@ flutter build apk --release
 On the original Windows PC use `build_apk.ps1`, which works around a Java temp-folder issue.
 
 Snake photos: Wikimedia Commons. Map © OpenStreetMap contributors.
+
+- Profile pictures (student, Housekeeping, Security guard): "Personas" by Draftbot, via DiceBear (https://www.dicebear.com/styles/personas/), licensed CC BY 4.0.
