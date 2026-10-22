@@ -180,31 +180,36 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: _Segmented(
-                open: openCount,
+                // The security guard and the warden only see overdue reports, so the tab says so.
+                openLabel: focus ? 'Overdue' : 'Open',
+                open: focus ? mine.where((r) => !r.safe && ConsoleFilter.overdue.matches(r)).length : openCount,
                 resolved: mine.length - openCount,
                 resolvedSelected: resolvedTab,
                 onChanged: s.setConsoleTab,
               ),
             ),
-            SizedBox(
-              height: 52,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
-                children: [
-                  for (final f in filters)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: _FilterChip(
-                        f,
-                        count: inTab.where(f.matches).length,
-                        selected: filter == f,
-                        onTap: focus ? () {} : () => s.setConsoleFilter(f),
+            if (focus)
+              const SizedBox(height: 8)
+            else
+              SizedBox(
+                height: 52,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
+                  children: [
+                    for (final f in filters)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: _FilterChip(
+                          f,
+                          count: inTab.where(f.matches).length,
+                          selected: filter == f,
+                          onTap: focus ? () {} : () => s.setConsoleFilter(f),
+                        ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
-            ),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -249,9 +254,16 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
 /// Open / Resolved switch with a count badge on each side.
 class _Segmented extends StatelessWidget {
   final int open, resolved;
+  final String openLabel;
   final bool resolvedSelected;
   final ValueChanged<ConsoleTab> onChanged;
-  const _Segmented({required this.open, required this.resolved, required this.resolvedSelected, required this.onChanged});
+  const _Segmented({
+    required this.open,
+    required this.resolved,
+    required this.resolvedSelected,
+    required this.onChanged,
+    this.openLabel = 'Open',
+  });
 
   Widget _side(String label, int count, bool selected, Color badgeBg, Color badgeFg, VoidCallback onTap) => Expanded(
     child: GestureDetector(
@@ -299,7 +311,7 @@ class _Segmented extends StatelessWidget {
     ),
     child: Row(
       children: [
-        _side('Open', open, !resolvedSelected, const Color(0xFFE5383B), Colors.white, () => onChanged(ConsoleTab.open)),
+        _side(openLabel, open, !resolvedSelected, const Color(0xFFE5383B), Colors.white, () => onChanged(ConsoleTab.open)),
         _side(
           'Resolved',
           resolved,
