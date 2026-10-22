@@ -81,7 +81,6 @@ class _AuthorityPhoneScreenState extends State<AuthorityPhoneScreen> {
   Widget build(BuildContext context) {
     final active = _ctrl.text.isNotEmpty || _focus.hasFocus;
     final who = _who;
-    final staff = [
       for (final s in staffList)
         if (s.post == _post) s,
     ];
@@ -204,49 +203,6 @@ class _AuthorityPhoneScreenState extends State<AuthorityPhoneScreen> {
           ),
           const SizedBox(height: 22),
           Text(_smallPrint, style: ft(11, color: C.faint, height: 1.6)),
-          const SizedBox(height: 22),
-          // Demo only: the staff registered for this post; tap one to fill in their number.
-          Text('DEMO STAFF · ${_post.label.toUpperCase()}', style: ft(11, w: 700, color: C.muted, ls: 1.1)),
-          const SizedBox(height: 8),
-          for (final s in staff)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Material(
-                color: C.card,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  side: BorderSide(color: who == s ? C.green : C.line),
-                ),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(14),
-                  onTap: () => _ctrl.value = TextEditingValue(
-                    text: s.phone,
-                    selection: TextSelection.collapsed(offset: s.phone.length),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(s.name, style: ft(14, w: 600)),
-                              Text('+91 ${s.phone} · ${s.shift}', style: ft(12.5, color: C.muted)),
-                            ],
-                          ),
-                        ),
-                        Icon(
-                          who == s ? Icons.check_circle_rounded : Icons.chevron_right_rounded,
-                          color: who == s ? C.green : C.muted,
-                          size: 20,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
           const SizedBox(height: 20),
         ],
       ),

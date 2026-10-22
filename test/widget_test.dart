@@ -112,7 +112,7 @@ void main() {
     await t.pumpWidget(AppScope(state: s, child: const MaterialApp(home: AuthorityPhoneScreen())));
     await t.tap(find.text('Security'));
     await t.pump();
-    await t.tap(find.text('R. Das'));
+    await t.enterText(find.byType(TextField), '98765 43211');
     await t.pump();
     expect(find.text('Registered: R. Das · Security guard'), findsOneWidget);
     // A housekeeping number can't sign in under Security.
