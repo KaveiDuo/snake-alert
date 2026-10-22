@@ -561,7 +561,7 @@ class _DutyCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  duty ? 'On duty · you get Snake Alert reports' : 'Off duty · no alerts until you’re back',
+                  duty ? 'On duty' : 'Off duty',
                   style: ft(15, color: duty ? C.greenText : C.muted),
                 ),
               ],
