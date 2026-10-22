@@ -272,7 +272,9 @@ class Report {
 
   /// The warden's follow-up: a reminder sent to Housekeeping and Security, and calls made.
   DateTime? remindedAt;
-  final wardenCalls = <(AdminRole, DateTime)>[];
+
+  /// Follow-up calls about this report: who called whom, and when.
+  final calls = <(AdminRole by, AdminRole to, DateTime at)>[];
 
   /// While on the way: how far the authority still is from the pin (live).
   double? distanceLeft;
@@ -457,9 +459,9 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// The warden phoned someone about a report (shown in the follow-up trail).
-  void logWardenCall(Report r, AdminRole who) {
-    r.wardenCalls.add((who, DateTime.now()));
+  /// The signed-in admin phoned someone about a report (shown to the warden).
+  void logCall(Report r, AdminRole to) {
+    r.calls.add((adminRole, to, DateTime.now()));
     notifyListeners();
   }
 

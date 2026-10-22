@@ -427,7 +427,7 @@ void _rulesSheet(BuildContext context) {
             rule(
               Icons.timer_off_outlined,
               'Who is alerted',
-              'New reports go to Housekeeping first. Not reached within ${escalateEvery.inMinutes} min, or the reporter says it’s still there: the security guard is alerted. After ${escalateEvery.inMinutes * 2} min: the warden too. Tap “On my way” to take a report, so the others see who has it.',
+              'New reports go to Housekeeping first. Not reached within ${escalateEvery.inMinutes} min, or the reporter says it’s still there: the security guard is alerted. After ${escalateEvery.inMinutes * 2} min: the warden too. Housekeeping goes to the spot and taps “On my way”. The security guard doesn’t go: they call Housekeeping, and the warden if Housekeeping can’t finish it.',
             ),
             rule(
               Icons.supervisor_account_outlined,
@@ -567,6 +567,8 @@ class _ReportCardState extends State<_ReportCard> {
                       // The warden oversees: who was alerted, and calls / reminders to them.
                       if (s.adminRole == AdminRole.warden)
                         _WardenPanel(r)
+                      else if (s.adminRole == AdminRole.security)
+                        _SecurityPanel(r)
                       else
                         // One row: call the snake catcher, the next step, the map.
                         Row(
@@ -751,7 +753,7 @@ class _Deadline extends StatelessWidget {
               const SizedBox(width: 7),
               Expanded(
                 child: Text(
-                  'Reminder from the warden at ${clock(r.remindedAt!)} · please go now',
+                  'Reminder from the warden at ${clock(r.remindedAt!)} · ${role == AdminRole.security ? 'please follow up now' : 'please go now'}',
                   style: ft(12.5, w: 700, color: C.redText, height: 1.35),
                 ),
               ),
@@ -767,9 +769,11 @@ class _Deadline extends StatelessWidget {
               child: Text(
                 taken
                     ? 'Taken by ${r.handlerName}'
-                    : (AppScope.read(context).adminRole == AdminRole.warden
-                          ? 'Not taken yet · call the team below'
-                          : 'Not taken yet · tap “On my way” to take it'),
+                    : switch (role) {
+                        AdminRole.warden => 'Not taken yet · call the team below',
+                        AdminRole.security => 'Not taken yet · call Housekeeping to get it done',
+                        AdminRole.housekeeping => 'Not taken yet · tap “On my way” to take it',
+                      },
                 style: ft(12.5, w: 600, color: taken ? C.greenText : C.sub, height: 1.35),
               ),
             ),
@@ -791,7 +795,7 @@ IconData _roleIcon(AdminRole r) => switch (r) {
 String _roleHelp(AdminRole r) => switch (r) {
   AdminRole.housekeeping => 'Gets every new report first and sees all reports',
   AdminRole.security =>
-    'Backup: sees reports Housekeeping didn’t reach in ${escalateEvery.inMinutes} min (or the reporter says are still there), checks with them, then goes',
+    'Follows up: sees reports Housekeeping didn’t reach in ${escalateEvery.inMinutes} min, calls them, and calls the warden if they can’t',
   AdminRole.warden => 'Oversees: sees reports nobody reached in ${escalateEvery.inMinutes * 2} min and follows up with the team',
 };
 
@@ -927,7 +931,7 @@ class _EscalatedBanner extends StatelessWidget {
               Text(
                 role == AdminRole.warden
                     ? 'Nobody reached the spot in ${escalateEvery.inMinutes * 2} min. Call the team, find out why, and get someone there.'
-                    : 'Housekeeping hasn’t reached these in ${escalateEvery.inMinutes} min. Check with them, or go yourself and tap “On my way”.',
+                    : 'Housekeeping hasn’t reached these in ${escalateEvery.inMinutes} min. Call them to get it done, and call the warden if they can’t.',
                 style: ft(12.5, color: const Color(0xFFF2B8B5), height: 1.35),
               ),
             ],
@@ -950,7 +954,7 @@ class _EscalationAlert extends StatelessWidget {
     final r = reports.first;
     final reminded = r.remindedAt != null && role != AdminRole.warden;
     final why = reminded
-        ? 'Reminder from the warden · please go now'
+        ? 'Reminder from the warden · ${role == AdminRole.security ? 'please follow up now' : 'please go now'}'
         : r.escalated
         ? '${r.reporter} says it’s still there'
         : 'Not reached in ${r.level == AdminRole.warden ? escalateEvery.inMinutes * 2 : escalateEvery.inMinutes} min';
@@ -1442,8 +1446,10 @@ class _WardenPanel extends StatelessWidget {
     String response(AdminRole who) => _response(r, who);
 
     Widget step(AdminRole who) {
-      final ok = r.handlerRole == who && r.onTheWayAt != null;
-      final calls = r.wardenCalls.where((c) => c.$1 == who).toList();
+      final ok = who == AdminRole.security
+          ? r.calls.any((c) => c.$1 == AdminRole.security)
+          : r.handlerRole == who && r.onTheWayAt != null;
+      final calls = r.calls.where((c) => c.$1 == AdminRole.warden && c.$2 == who).toList();
       return Padding(
         padding: const EdgeInsets.only(bottom: 10),
         child: Row(
@@ -1462,7 +1468,7 @@ class _WardenPanel extends StatelessWidget {
                   ),
                   if (calls.isNotEmpty)
                     Text(
-                      'You called ${calls.length == 1 ? 'at ${clock(calls.last.$2)}' : '${calls.length} times, last ${clock(calls.last.$2)}'}',
+                      'You called ${calls.length == 1 ? 'at ${clock(calls.last.$3)}' : '${calls.length} times, last ${clock(calls.last.$3)}'}',
                       style: ft(12, color: C.muted),
                     ),
                 ],
@@ -1474,7 +1480,7 @@ class _WardenPanel extends StatelessWidget {
     }
 
     Future<void> call(AdminRole who) async {
-      s.logWardenCall(r, who);
+      s.logCall(r, who);
       if (!await launchUrl(Uri.parse('tel:$authorityPhone')) && context.mounted) toast(context, 'Could not open the dialler');
     }
 
@@ -1552,6 +1558,14 @@ String _response(Report r, AdminRole who) {
         : 'Took it ${clock(r.onTheWayAt!)} · on the way';
   }
   if (who == AdminRole.housekeeping && r.seenAt != null) return 'Opened it ${clock(r.seenAt!)} · didn’t go';
+  if (who == AdminRole.security) {
+    final c = r.calls.where((c) => c.$1 == AdminRole.security).toList();
+    if (c.isNotEmpty) {
+      final to = {for (final x in c) x.$2.label.toLowerCase()}.join(' and ');
+      return 'Called $to · last ${clock(c.last.$3)}';
+    }
+    return 'Hasn’t followed up yet';
+  }
   return 'No response';
 }
 
@@ -1588,18 +1602,63 @@ class _BeforeYou extends StatelessWidget {
               ],
             ),
           ),
-          TextButton.icon(
-            onPressed: () async {
-              if (!await launchUrl(Uri.parse('tel:$authorityPhone')) && context.mounted) {
-                toast(context, 'Could not open the dialler');
-              }
-            },
-            style: TextButton.styleFrom(foregroundColor: C.green, padding: const EdgeInsets.symmetric(horizontal: 10)),
-            icon: const Icon(Icons.call_rounded, size: 16),
-            label: Text('Call ${hk.person.split(' ').last}', style: ft(13, w: 700, color: C.green)),
-          ),
         ],
       ),
+    );
+  }
+}
+
+/// The security guard's actions on an escalated report: they don't go to the
+/// spot, they chase Housekeeping and bring in the warden if Housekeeping can't
+/// finish it. Calls are logged for the warden.
+class _SecurityPanel extends StatelessWidget {
+  final Report r;
+  const _SecurityPanel(this.r);
+  @override
+  Widget build(BuildContext context) {
+    final s = AppScope.read(context);
+    final mine = r.calls.where((c) => c.$1 == AdminRole.security).toList();
+    Future<void> call(AdminRole who) async {
+      s.logCall(r, who);
+      if (!await launchUrl(Uri.parse('tel:$authorityPhone')) && context.mounted) toast(context, 'Could not open the dialler');
+    }
+
+    if (r.safe) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _Pill(
+                'Call housekeeping',
+                Icons.call_rounded,
+                bg: const Color(0xFF173A24),
+                fg: C.greenText,
+                border: const Color(0xFF245A36),
+                onTap: () => call(AdminRole.housekeeping),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _Pill(
+                'Call warden',
+                Icons.call_rounded,
+                bg: const Color(0xFF262626),
+                fg: C.text,
+                onTap: () => call(AdminRole.warden),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          mine.isEmpty
+              ? 'Call the warden if Housekeeping can’t finish it.'
+              : 'You called ${{for (final c in mine) c.$2.label.toLowerCase()}.join(' and ')} · last ${clock(mine.last.$3)}',
+          style: ft(12, color: C.muted),
+        ),
+      ],
     );
   }
 }

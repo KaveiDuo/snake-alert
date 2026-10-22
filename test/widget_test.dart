@@ -38,7 +38,9 @@ void main() {
     expect(open(20).level, AdminRole.security);
     expect(open(40).level, AdminRole.warden);
     // Reaching the spot stops the climb.
-    final reached = open(40)..stage = Stage.onSite..onSiteAt = DateTime.now().subtract(const Duration(minutes: 30));
+    final reached = open(40)
+      ..stage = Stage.onSite
+      ..onSiteAt = DateTime.now().subtract(const Duration(minutes: 30));
     expect(reached.level, AdminRole.housekeeping);
     expect(reached.needs(AdminRole.security), isFalse);
     // The reporter saying it's still there goes straight to the security guard.
@@ -70,7 +72,10 @@ void main() {
     final all = s.adminReports.length;
     s.setAdminRole(AdminRole.security);
     expect(s.adminReports.length, lessThan(all));
-    expect(s.adminReports.where((x) => !x.safe).every((x) => x.level != AdminRole.housekeeping || x.handlerRole == AdminRole.security), isTrue);
+    expect(
+      s.adminReports.where((x) => !x.safe).every((x) => x.level != AdminRole.housekeeping || x.handlerRole == AdminRole.security),
+      isTrue,
+    );
     s.setAdminRole(AdminRole.warden);
     expect(s.adminReports.every((x) => x.level == AdminRole.warden || x.handlerRole == AdminRole.warden), isTrue);
   });
@@ -82,8 +87,9 @@ void main() {
     expect(r.seenAt, isNotNull); // seen earlier by Housekeeping, not by the warden opening it
     s.takeNewEscalations();
     s.remind(r);
-    s.logWardenCall(r, AdminRole.security);
-    expect(r.wardenCalls.single.$1, AdminRole.security);
+    s.logCall(r, AdminRole.security);
+    expect(r.calls.single.$1, AdminRole.warden);
+    expect(r.calls.single.$2, AdminRole.security);
     expect(s.remindedToMe, isEmpty); // the warden doesn't remind themselves
     s.setAdminRole(AdminRole.housekeeping);
     expect(s.takeNewEscalations(), contains(r));
@@ -262,7 +268,10 @@ void main() {
     for (final role in [Role.student, Role.authority]) {
       final s = AppState()..role = role;
       await tester.pumpWidget(
-        AppScope(state: s, child: MaterialApp(home: SightingDetailScreen(report: s.reports.firstWhere((r) => r.id == 'r1')))),
+        AppScope(
+          state: s,
+          child: MaterialApp(home: SightingDetailScreen(report: s.reports.firstWhere((r) => r.id == 'r1'))),
+        ),
       );
       expect(find.text('Call the admin now'), role == Role.student ? findsOneWidget : findsNothing);
       await tester.pumpWidget(const SizedBox()); // stop the live clock
@@ -271,7 +280,12 @@ void main() {
 
   testWidgets('Notifications: snake-type filter under Snake Alert', (tester) async {
     final s = AppState()..role = Role.student;
-    await tester.pumpWidget(AppScope(state: s, child: const MaterialApp(home: NotificationsScreen())));
+    await tester.pumpWidget(
+      AppScope(
+        state: s,
+        child: const MaterialApp(home: NotificationsScreen()),
+      ),
+    );
     expect(find.text('Open area'), findsNothing); // only under Snake Alert
     await tester.tap(find.text('Snake Alert'));
     await tester.pumpAndSettle();
