@@ -23,4 +23,4 @@ On the original Windows PC use `build_apk.ps1`, which works around a Java temp-f
 
 Snake photos: Wikimedia Commons. Map © OpenStreetMap contributors.
 
-- Profile photos (student, Housekeeping, Security guard): Unsplash (Unsplash License): https://unsplash.com/photos/XrF99ON2upU, https://unsplash.com/photos/C7m7RSFONYc, https://unsplash.com/photos/o73QvWNLags
+- Profile photos (student, Housekeeping, Security guard): Unsplash (Unsplash License): https://unsplash.com/photos/XrF99ON2upU, https://unsplash.com/photos/Vm4zwt6kDKc, https://unsplash.com/photos/o73QvWNLags
