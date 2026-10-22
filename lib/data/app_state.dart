@@ -197,26 +197,44 @@ const respondWithin = Duration(minutes: 15);
 /// [escalateEvery] (or the reporter says the snake is still there) it is
 /// escalated to the security guard, and after another [escalateEvery] to the
 /// warden too. Each step is a separate alert to that person.
-///
-/// Each admin has their own account: the phone number they sign in with
-/// (registered by the Hostel Affairs office) decides their role.
 enum AdminRole {
-  housekeeping('Housekeeping', 'M. Kalita', '98765 43210'),
-  security('Security guard', 'R. Das', '98765 43211'),
-  warden('Warden', 'Dr. P. Saikia', '98765 43212');
+  housekeeping('Housekeeping'),
+  security('Security guard'),
+  warden('Warden');
 
-  const AdminRole(this.label, this.person, this.phone);
-  final String label, person, phone;
+  const AdminRole(this.label);
+  final String label;
+}
 
-  /// The account registered to this number, if any.
-  static AdminRole? byPhone(String number) {
+/// One admin employee. Each post has several; each signs in with their own
+/// phone number (registered by the Hostel Affairs office), which decides who
+/// they are and their post.
+class Staff {
+  final String name, phone, shift;
+  final AdminRole post;
+  final String? photo;
+  const Staff(this.name, this.post, this.phone, this.shift, [this.photo]);
+
+  /// The employee registered to this number, if any.
+  static Staff? byPhone(String number) {
     final digits = number.replaceAll(RegExp(r'\D'), '');
-    for (final r in values) {
-      if (r.phone.replaceAll(' ', '') == digits) return r;
+    for (final s in staffList) {
+      if (s.phone.replaceAll(' ', '') == digits) return s;
     }
     return null;
   }
 }
+
+/// Kameng Hostel's admin staff (demo).
+const staffList = [
+  Staff('M. Kalita', AdminRole.housekeeping, '98765 43210', '6 AM – 2 PM', 'assets/images/avatar_housekeeping.jpg'),
+  Staff('S. Bora', AdminRole.housekeeping, '98765 43213', '2 PM – 10 PM'),
+  Staff('P. Deka', AdminRole.housekeeping, '98765 43214', '10 PM – 6 AM'),
+  Staff('R. Das', AdminRole.security, '98765 43211', '6 AM – 6 PM', 'assets/images/avatar_security.jpg'),
+  Staff('A. Rabha', AdminRole.security, '98765 43215', '6 PM – 6 AM'),
+  Staff('Dr. P. Saikia', AdminRole.warden, '98765 43212', 'Office hours · on call', 'assets/images/avatar_authority.jpg'),
+  Staff('Dr. N. Baruah', AdminRole.warden, '98765 43216', 'Office hours · on call'),
+];
 
 const escalateEvery = Duration(minutes: 15);
 
@@ -436,14 +454,36 @@ class AppState extends ChangeNotifier {
   /// Who handles Kameng's reports first (Housekeeping), in the demo data.
   static const kamengAuthority = 'M. Kalita';
 
-  // ---------- Admin roles & escalation alerts ----------
-  /// Which admin is signed in (demo: switched in the console or Profile).
-  /// Everyone sees the same reports; the role decides which escalations alert them.
-  AdminRole adminRole = AdminRole.housekeeping;
+  // ---------- Admin staff, duty & escalation alerts ----------
+  /// The signed-in admin employee. Everyone sees the same portal; their post
+  /// decides which reports and alerts they get.
+  Staff me = staffList.first;
+  AdminRole get adminRole => me.post;
+  set adminRole(AdminRole r) => me = staffList.firstWhere((s) => s.post == r);
+
+  void signInAs(Staff s) {
+    me = s;
+    notifyListeners();
+  }
+
   void setAdminRole(AdminRole r) {
     adminRole = r;
     notifyListeners();
   }
+
+  /// Night-shift staff start off duty in the demo.
+  final _offDuty = <String>{'98765 43214', '98765 43215'};
+  bool onDuty(Staff s) => !_offDuty.contains(s.phone);
+  void setOnDuty(bool on) {
+    on ? _offDuty.remove(me.phone) : _offDuty.add(me.phone);
+    notifyListeners();
+  }
+
+  /// Everyone on duty in a post (alerts go to all of them; the first to act takes it).
+  List<Staff> onDutyIn(AdminRole post) => [
+    for (final s in staffList)
+      if (s.post == post && onDuty(s)) s,
+  ];
 
   /// The signed-in admin's reports (see [Report.visibleTo]).
   List<Report> get adminReports => hostelReports.where((r) => r.visibleTo(adminRole)).toList();
@@ -460,10 +500,18 @@ class AppState extends ChangeNotifier {
       : adminReports.where((r) => r.remindedAt != null && !r.safe && r.stage.index < Stage.onSite.index).toList();
 
   /// Escalations (and warden reminders) the signed-in admin hasn't been alerted about yet.
-  List<Report> takeNewEscalations() => [
-    for (final r in {...escalatedToMe, ...remindedToMe})
-      if (_alerted.add('${r.id}:${adminRole.name}:${r.remindedAt?.millisecondsSinceEpoch ?? 0}')) r,
-  ];
+  List<Report> takeNewEscalations() => !onDuty(me)
+      ? const []
+      : [
+          for (final r in {...escalatedToMe, ...remindedToMe})
+            if (_alerted.add('${r.id}:${me.phone}:${r.remindedAt?.millisecondsSinceEpoch ?? 0}')) r,
+        ];
+
+  /// What's waiting for the signed-in admin: for Housekeeping, open reports
+  /// nobody has taken; for the security guard and the warden, their escalations.
+  List<Report> get needsMe => adminRole == AdminRole.housekeeping
+      ? adminReports.where((r) => r.covered && !r.safe && r.stage.index < Stage.onTheWay.index).toList()
+      : escalatedToMe;
 
   /// The warden nudges Housekeeping and the security guard about an overdue report.
   void remind(Report r) {
@@ -989,7 +1037,7 @@ class AppState extends ChangeNotifier {
   /// other admins see who is handling it.
   void _takeBy(Report r) {
     if (role != Role.authority) return;
-    r.handler = adminRole.person;
+    r.handler = me.name;
     r.handlerRole = adminRole;
   }
 

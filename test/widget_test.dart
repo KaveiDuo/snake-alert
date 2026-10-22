@@ -101,15 +101,22 @@ void main() {
   });
 
   testWidgets('Admin sign-in: the phone number decides the account; unregistered numbers are refused', (t) async {
-    expect(AdminRole.byPhone('98765 43210'), AdminRole.housekeeping);
-    expect(AdminRole.byPhone('9876543211'), AdminRole.security);
-    expect(AdminRole.byPhone('+91 98765 43212'.substring(4)), AdminRole.warden);
-    expect(AdminRole.byPhone('91234 56780'), isNull);
+    expect(Staff.byPhone('98765 43210')!.post, AdminRole.housekeeping);
+    expect(Staff.byPhone('9876543213')!.name, 'S. Bora'); // several staff per post
+    expect(Staff.byPhone('98765 43211')!.post, AdminRole.security);
+    expect(Staff.byPhone('98765 43212')!.post, AdminRole.warden);
+    expect(Staff.byPhone('91234 56780'), isNull);
     final s = AppState();
     await t.pumpWidget(AppScope(state: s, child: const MaterialApp(home: AuthorityPhoneScreen())));
-    await t.tap(find.text('Security guard · R. Das'));
+    await t.tap(find.text('Security'));
     await t.pump();
-    expect(find.text('Registered: Security guard · R. Das'), findsOneWidget);
+    await t.tap(find.text('R. Das'));
+    await t.pump();
+    expect(find.text('Registered: R. Das · Security guard'), findsOneWidget);
+    // A housekeeping number can't sign in under Security.
+    await t.enterText(find.byType(TextField), '98765 43213');
+    await t.pump();
+    expect(find.textContaining('registered for Housekeeping'), findsOneWidget);
     await t.enterText(find.byType(TextField), '91234 56780');
     await t.pump();
     expect(find.textContaining('isn’t registered'), findsOneWidget);

@@ -61,7 +61,7 @@ class _AuthorityShellState extends State<AuthorityShell> {
           onTap: () {
             entry.remove();
             if (_alert == entry) _alert = null;
-            setState(() => _tab = 0);
+            setState(() => _tab = 1);
           },
         ),
       ),
@@ -85,11 +85,19 @@ class _AuthorityShellState extends State<AuthorityShell> {
 
   Widget _scaffold() => Scaffold(
     backgroundColor: C.bg,
-    body: IndexedStack(index: _tab, children: const [AuthorityConsole(), AuthorityProfile()]),
+    body: IndexedStack(
+      index: _tab,
+      children: [
+        AdminHome(onOpenReports: () => setState(() => _tab = 1)),
+        const AuthorityConsole(),
+        const AuthorityProfile(),
+      ],
+    ),
     bottomNavigationBar: AppTabBar(
       index: _tab,
       onTap: (i) => setState(() => _tab = i),
       items: const [
+        (Icons.home_outlined, Icons.home_rounded, 'Home'),
         (Icons.assignment_outlined, Icons.assignment_rounded, 'Reports'),
         (Icons.person_outline_rounded, Icons.person_rounded, 'Profile'),
       ],
@@ -1292,22 +1300,7 @@ class AuthorityProfile extends StatelessWidget {
           // A tab, so no back button.
           Text('Profile', style: ft(24, w: 700)),
           const SizedBox(height: 16),
-          IdCard(
-            avatar: ClipOval(
-              child: Image.asset(
-                switch (s.adminRole) {
-                  AdminRole.housekeeping => 'assets/images/avatar_housekeeping.jpg',
-                  AdminRole.security => 'assets/images/avatar_security.jpg',
-                  AdminRole.warden => 'assets/images/avatar_authority.jpg',
-                },
-                width: 88,
-                height: 88,
-                fit: BoxFit.cover,
-              ),
-            ),
-            name: s.adminRole.person,
-            lines: ['${s.adminRole.label} · ${s.authorityHostel}'],
-          ),
+          IdCard(avatar: StaffAvatar(s.me, size: 88), name: s.me.name, lines: ['${s.adminRole.label} · ${s.authorityHostel}']),
           const SizedBox(height: 22),
           Text('Details', style: ft(17, w: 600)),
           const SizedBox(height: 12),
@@ -1315,11 +1308,12 @@ class AuthorityProfile extends StatelessWidget {
             InfoRow(
               Icons.call_outlined,
               'Registered phone',
-              '+91 ${s.adminRole.phone}',
+              '+91 ${s.me.phone}',
               editable: false,
               trailing: const Tag('VERIFIED', fg: C.green, bg: C.greenSoft),
             ),
-            InfoRow(_roleIcon(s.adminRole), 'Role', s.adminRole.label, editable: false),
+            InfoRow(_roleIcon(s.adminRole), 'Post', s.adminRole.label, editable: false),
+            InfoRow(Icons.schedule_rounded, 'Shift', s.me.shift, editable: false),
             InfoRow(Icons.apartment_outlined, 'Hostel', s.authorityHostel.replaceAll(' Hostel', ''), editable: false),
             const InfoRow(Icons.apartment_outlined, 'Office', 'Kameng Hostel · Ground floor'),
           ]),
@@ -1359,7 +1353,7 @@ class _WardenPanel extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('${who.label} · ${who.person}', style: ft(13.5, w: 700)),
+                  Text('${who.label} · ${s.onDutyIn(who).length} on duty', style: ft(13.5, w: 700)),
                   Text(
                     'Alerted ${clock(r.alertedAt(who))} · ${response(who)}',
                     style: ft(12.5, color: ok ? C.greenText : C.redText, height: 1.35),
@@ -1438,7 +1432,7 @@ class _WardenPanel extends StatelessWidget {
               fg: Colors.white,
               onTap: () {
                 s.remind(r);
-                toast(context, 'Reminder sent to ${AdminRole.housekeeping.person} and ${AdminRole.security.person}');
+                toast(context, 'Reminder sent to Housekeeping and Security on duty');
               },
             ),
           ),
@@ -1452,8 +1446,8 @@ class _WardenPanel extends StatelessWidget {
 String _response(Report r, AdminRole who) {
   if (r.handlerRole == who && r.onTheWayAt != null) {
     return r.onSiteAt != null
-        ? 'Took it · reached the spot ${clock(r.onSiteAt!)}'
-        : 'Took it ${clock(r.onTheWayAt!)} · on the way';
+        ? '${r.handler} took it · reached the spot ${clock(r.onSiteAt!)}'
+        : '${r.handler} took it ${clock(r.onTheWayAt!)} · on the way';
   }
   if (who == AdminRole.housekeeping && r.seenAt != null) return 'Opened it ${clock(r.seenAt!)} · didn’t go';
   if (who == AdminRole.security) {
@@ -1518,6 +1512,223 @@ class _SecurityPanel extends StatelessWidget {
           style: ft(12, color: C.muted),
         ),
       ],
+    );
+  }
+}
+
+/// An employee's photo, or their initials when there isn't one.
+class StaffAvatar extends StatelessWidget {
+  final Staff staff;
+  final double size;
+  const StaffAvatar(this.staff, {super.key, this.size = 40});
+  @override
+  Widget build(BuildContext context) {
+    if (staff.photo != null) {
+      return ClipOval(
+        child: Image.asset(staff.photo!, width: size, height: size, fit: BoxFit.cover),
+      );
+    }
+    final initials = staff.name.replaceAll('Dr. ', '').split(' ').where((w) => w.isNotEmpty).map((w) => w[0]).take(2).join();
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: const BoxDecoration(color: Color(0xFF24382B), shape: BoxShape.circle),
+      child: Text(initials, style: ft(size * 0.36, w: 700, color: C.greenText)),
+    );
+  }
+}
+
+/// The admin's Home (different from the students'): who you are and whether
+/// you're on duty, what needs you right now, and the team on duty to call.
+class AdminHome extends StatelessWidget {
+  final VoidCallback onOpenReports;
+  const AdminHome({super.key, required this.onOpenReports});
+
+  Future<void> _call(BuildContext context, String number) async {
+    if (!await launchUrl(Uri.parse('tel:${number.replaceAll(' ', '')}')) && context.mounted) {
+      toast(context, 'Could not open the dialler');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = AppScope.of(context);
+    final me = s.me;
+    final duty = s.onDuty(me);
+    final needs = s.needsMe;
+    final role = s.adminRole;
+    Widget title(String t, [String? trailing]) => Padding(
+      padding: const EdgeInsets.only(top: 22, bottom: 10),
+      child: Row(
+        children: [
+          Expanded(child: Text(t, style: ft(18, w: 700))),
+          if (trailing != null) Text(trailing, style: ft(13, color: C.muted)),
+        ],
+      ),
+    );
+    Widget callRow(Widget lead, String name, String sub, String number) => Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Panel(
+        padding: const EdgeInsets.fromLTRB(12, 10, 6, 10),
+        child: Row(
+          children: [
+            lead,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(name, style: ft(14.5, w: 600)),
+                  Text(sub, style: ft(12.5, color: C.muted)),
+                ],
+              ),
+            ),
+            IconButton(
+              tooltip: 'Call',
+              onPressed: () => _call(context, number),
+              icon: const Icon(Icons.call_rounded, color: C.green),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    return DarkPage(
+      body: LiveClock(
+        builder: (context) => ListView(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 30),
+          children: [
+            // Who you are
+            Row(
+              children: [
+                StaffAvatar(me, size: 48),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Hello, ${me.name}', style: ft(21, w: 700)),
+                      Text('${role.label} · ${s.authorityHostel}', style: ft(13.5, color: C.muted)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            // On duty
+            Panel(
+              color: duty ? C.greenSoft : C.card,
+              border: duty ? const Color(0xFF245A36) : C.line2,
+              padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+              child: Row(
+                children: [
+                  Icon(
+                    duty ? Icons.notifications_active_rounded : Icons.notifications_off_outlined,
+                    color: duty ? C.green : C.muted,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(duty ? 'On duty' : 'Off duty', style: ft(16, w: 700, color: duty ? C.greenText : C.text)),
+                        Text(
+                          duty
+                              ? 'Shift ${me.shift} · you get Snake Alert reports'
+                              : 'You won’t get alerts until you’re back on duty',
+                          style: ft(12.5, color: duty ? C.greenText : C.muted, height: 1.35),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Switch(value: duty, activeThumbColor: C.green, onChanged: s.setOnDuty),
+                ],
+              ),
+            ),
+            // What needs you
+            title('Needs you now', needs.isEmpty ? null : '${needs.length}'),
+            if (needs.isEmpty)
+              Panel(
+                child: Row(
+                  children: [
+                    const Icon(Icons.verified_outlined, color: C.green),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        role == AdminRole.housekeeping
+                            ? 'All clear. New reports will show here.'
+                            : 'Nothing is overdue for you right now.',
+                        style: ft(14, color: C.sub),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else ...[
+              for (final r in needs.take(4))
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Panel(
+                    onTap: onOpenReports,
+                    border: r.flagged ? const Color(0xFF5A2424) : C.line2,
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      children: [
+                        SnakeThumb(r, size: 44),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(r.title, style: ft(15, w: 700)),
+                              Text(
+                                r.where,
+                                style: ft(12.5, color: C.muted),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              StatusChip(r),
+                            ],
+                          ),
+                        ),
+                        const Icon(Icons.chevron_right_rounded, color: C.sub),
+                      ],
+                    ),
+                  ),
+                ),
+              Btn('Open reports', kind: BtnKind.ghost, height: 46, icon: Icons.assignment_outlined, onTap: onOpenReports),
+            ],
+            // Team on duty, to call
+            title('On duty now'),
+            for (final post in AdminRole.values)
+              for (final st in s.onDutyIn(post))
+                if (st != me) callRow(StaffAvatar(st, size: 40), st.name, '${post.label} · ${st.shift}', st.phone),
+            title('Emergency numbers'),
+            callRow(
+              const CircleAvatar(
+                radius: 20,
+                backgroundColor: C.redSoft,
+                child: Icon(Icons.pest_control_outlined, color: C.redText, size: 20),
+              ),
+              'Snake rescuer',
+              'Wildlife department · big or venomous snakes',
+              rescuerPhone,
+            ),
+            callRow(
+              const CircleAvatar(
+                radius: 20,
+                backgroundColor: C.redSoft,
+                child: Icon(Icons.local_hospital_outlined, color: C.redText, size: 20),
+              ),
+              'IITG Hospital',
+              '24×7 emergency',
+              '8277992838',
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -33,52 +33,56 @@ class _Steps extends StatelessWidget {
 
 const _smallPrint = 'Only registered admins can sign in. Students use their Outlook ID as usual.';
 
-/// Step 1 — phone number. The demo types the number in by itself after 0.5 s;
-/// you can also type your own.
+/// Step 1 — choose your post (Housekeeping, Security or Warden), then enter
+/// your own registered phone number. Each post has several employees, each
+/// with their own number.
 class AuthorityPhoneScreen extends StatefulWidget {
   const AuthorityPhoneScreen({super.key});
   @override
   State<AuthorityPhoneScreen> createState() => _AuthorityPhoneScreenState();
 }
 
+IconData _postIcon(AdminRole r) => switch (r) {
+  AdminRole.housekeeping => Icons.cleaning_services_outlined,
+  AdminRole.security => Icons.local_police_outlined,
+  AdminRole.warden => Icons.badge_outlined,
+};
+
 class _AuthorityPhoneScreenState extends State<AuthorityPhoneScreen> {
   final _ctrl = TextEditingController();
   final _focus = FocusNode();
-  Timer? _typer;
-  bool _userTyped = false;
+  AdminRole _post = AdminRole.housekeeping;
 
   @override
   void initState() {
     super.initState();
-    const demo = '98765 43210';
-    var i = 0;
-    _typer = Timer.periodic(const Duration(milliseconds: 75), (t) {
-      if (_userTyped || !mounted) return t.cancel();
-      if (t.tick < 7) return; // ~0.5 s pause before "typing"
-      i++;
-      _ctrl.value = TextEditingValue(
-        text: demo.substring(0, i),
-        selection: TextSelection.collapsed(offset: i),
-      );
-      if (i >= demo.length) t.cancel();
-    });
     _ctrl.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
-    _typer?.cancel();
     _ctrl.dispose();
     _focus.dispose();
     super.dispose();
   }
 
   int get _digits => _ctrl.text.replaceAll(RegExp(r'\D'), '').length;
-  AdminRole? get _account => _digits == 10 ? AdminRole.byPhone(_ctrl.text) : null;
+  Staff? get _who => _digits == 10 ? Staff.byPhone(_ctrl.text) : null;
+  bool get _ok => _who != null && _who!.post == _post;
+
+  void _choose(AdminRole r) => setState(() {
+    _post = r;
+    _ctrl.clear();
+  });
 
   @override
   Widget build(BuildContext context) {
     final active = _ctrl.text.isNotEmpty || _focus.hasFocus;
+    final who = _who;
+    final staff = [
+      for (final s in staffList)
+        if (s.post == _post) s,
+    ];
     return DarkPage(
       header: const AppHeader('Admin sign-in'),
       body: ListView(
@@ -86,13 +90,49 @@ class _AuthorityPhoneScreenState extends State<AuthorityPhoneScreen> {
         children: [
           const _Steps(1),
           const SizedBox(height: 20),
-          Text("What's your phone number?", style: ft(22, w: 700)),
-          const SizedBox(height: 10),
+          Text('Sign in as', style: ft(22, w: 700)),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              for (final (i, r) in AdminRole.values.indexed) ...[
+                if (i > 0) const SizedBox(width: 8),
+                Expanded(
+                  child: Material(
+                    color: _post == r ? C.greenSoft : C.card,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(color: _post == r ? C.green : C.line, width: _post == r ? 1.5 : 1),
+                    ),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () => _choose(r),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        child: Column(
+                          children: [
+                            Icon(_postIcon(r), color: _post == r ? C.green : C.sub, size: 24),
+                            const SizedBox(height: 6),
+                            Text(
+                              r == AdminRole.security ? 'Security' : r.label,
+                              style: ft(13.5, w: 600, color: _post == r ? C.greenText : C.sub),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 22),
+          Text('Your phone number', style: ft(16, w: 700)),
+          const SizedBox(height: 6),
           Text(
-            "Use the number the Hostel Affairs office has on record for you. Admins don't need an Outlook ID.",
+            'The number the Hostel Affairs office has on record for you. No Outlook ID needed.',
             style: ft(13, color: C.muted, height: 1.5),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 14),
           AnimatedContainer(
             duration: const Duration(milliseconds: 150),
             height: 54,
@@ -114,8 +154,6 @@ class _AuthorityPhoneScreenState extends State<AuthorityPhoneScreen> {
                     cursorColor: C.green,
                     style: ft(15),
                     inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9 ]')), LengthLimitingTextInputFormatter(11)],
-                    onChanged: (_) => _userTyped = true,
-                    onTap: () => _userTyped = true,
                     decoration: InputDecoration(
                       border: InputBorder.none,
                       hintText: '98765 43210',
@@ -127,22 +165,23 @@ class _AuthorityPhoneScreenState extends State<AuthorityPhoneScreen> {
             ),
           ),
           const SizedBox(height: 10),
-          // The number decides whose account this is.
           if (_digits == 10)
             Row(
               children: [
                 Icon(
-                  _account != null ? Icons.verified_user_outlined : Icons.error_outline_rounded,
+                  _ok ? Icons.verified_user_outlined : Icons.error_outline_rounded,
                   size: 16,
-                  color: _account != null ? C.greenText : C.redText,
+                  color: _ok ? C.greenText : C.redText,
                 ),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    _account != null
-                        ? 'Registered: ${_account!.label} · ${_account!.person}'
-                        : 'This number isn’t registered as an admin. Ask the Hostel Affairs office to add it.',
-                    style: ft(12.5, w: 600, color: _account != null ? C.greenText : C.redText, height: 1.35),
+                    who == null
+                        ? 'This number isn’t registered as an admin. Ask the Hostel Affairs office to add it.'
+                        : (_ok
+                              ? 'Registered: ${who.name} · ${who.post.label}'
+                              : 'This number is registered for ${who.post.label}, not ${_post.label}.'),
+                    style: ft(12.5, w: 600, color: _ok ? C.greenText : C.redText, height: 1.35),
                   ),
                 ),
               ],
@@ -150,11 +189,11 @@ class _AuthorityPhoneScreenState extends State<AuthorityPhoneScreen> {
           const SizedBox(height: 14),
           Btn(
             'Send code on SMS',
-            onTap: _account != null
+            onTap: _ok
                 ? () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => AuthorityCodeScreen(phone: _ctrl.text, account: _account!),
+                      builder: (_) => AuthorityCodeScreen(phone: _ctrl.text, account: who!),
                     ),
                   )
                 : null,
@@ -162,28 +201,24 @@ class _AuthorityPhoneScreenState extends State<AuthorityPhoneScreen> {
           const SizedBox(height: 22),
           Text(_smallPrint, style: ft(11, color: C.faint, height: 1.6)),
           const SizedBox(height: 22),
-          // Demo only: each admin has their own number; tap one to sign in as them.
-          Text('DEMO ACCOUNTS', style: ft(11, w: 700, color: C.muted, ls: 1.1)),
+          // Demo only: the staff registered for this post; tap one to fill in their number.
+          Text('DEMO STAFF · ${_post.label.toUpperCase()}', style: ft(11, w: 700, color: C.muted, ls: 1.1)),
           const SizedBox(height: 8),
-          for (final r in AdminRole.values)
+          for (final s in staff)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Material(
                 color: C.card,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
-                  side: BorderSide(color: _account == r ? C.green : C.line),
+                  side: BorderSide(color: who == s ? C.green : C.line),
                 ),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(14),
-                  onTap: () {
-                    _userTyped = true;
-                    _typer?.cancel();
-                    _ctrl.value = TextEditingValue(
-                      text: r.phone,
-                      selection: TextSelection.collapsed(offset: r.phone.length),
-                    );
-                  },
+                  onTap: () => _ctrl.value = TextEditingValue(
+                    text: s.phone,
+                    selection: TextSelection.collapsed(offset: s.phone.length),
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
                     child: Row(
@@ -192,14 +227,14 @@ class _AuthorityPhoneScreenState extends State<AuthorityPhoneScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('${r.label} · ${r.person}', style: ft(14, w: 600)),
-                              Text('+91 ${r.phone}', style: ft(12.5, color: C.muted)),
+                              Text(s.name, style: ft(14, w: 600)),
+                              Text('+91 ${s.phone} · ${s.shift}', style: ft(12.5, color: C.muted)),
                             ],
                           ),
                         ),
                         Icon(
-                          _account == r ? Icons.check_circle_rounded : Icons.chevron_right_rounded,
-                          color: _account == r ? C.green : C.muted,
+                          who == s ? Icons.check_circle_rounded : Icons.chevron_right_rounded,
+                          color: who == s ? C.green : C.muted,
                           size: 20,
                         ),
                       ],
@@ -218,7 +253,7 @@ class _AuthorityPhoneScreenState extends State<AuthorityPhoneScreen> {
 /// Step 2 — the SMS code fills itself in, turns green, then signs in.
 class AuthorityCodeScreen extends StatefulWidget {
   final String phone;
-  final AdminRole account;
+  final Staff account;
   const AuthorityCodeScreen({super.key, required this.phone, required this.account});
   @override
   State<AuthorityCodeScreen> createState() => _AuthorityCodeScreenState();
@@ -257,7 +292,7 @@ class _AuthorityCodeScreenState extends State<AuthorityCodeScreen> {
   void _signIn() {
     if (!mounted) return;
     final s = AppScope.read(context);
-    s.setAdminRole(widget.account); // signed in to this person's own account
+    s.signInAs(widget.account); // signed in to this employee's own account
     s.setRole(Role.authority);
     Navigator.of(context).pushAndRemoveUntil(
       PageRouteBuilder(
@@ -290,7 +325,7 @@ class _AuthorityCodeScreenState extends State<AuthorityCodeScreen> {
           const SizedBox(height: 10),
           Text('Sent to +91 ${widget.phone} · valid 10 min', style: ft(13, color: C.muted)),
           const SizedBox(height: 4),
-          Text('Signing in as ${widget.account.label} · ${widget.account.person}', style: ft(13, w: 600, color: C.greenText)),
+          Text('Signing in as ${widget.account.name} · ${widget.account.post.label}', style: ft(13, w: 600, color: C.greenText)),
           const SizedBox(height: 20),
           AnimatedContainer(
             duration: const Duration(milliseconds: 250),
