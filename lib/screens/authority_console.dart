@@ -1646,89 +1646,203 @@ class TeamTab extends StatelessWidget {
 }
 
 /// The admin's notifications: what happened to the reports they're part of,
-/// newest first. Different from the Reports list, which is where they act.
-class AdminNotificationsScreen extends StatelessWidget {
+/// newest first, plus other Onestop alerts. Filter chips like the students':
+/// All · Snake Alert (with snake types) · Cab Sharing · Gatelog. Different
+/// from the Reports list, which is where they act.
+class AdminNotificationsScreen extends StatefulWidget {
   const AdminNotificationsScreen({super.key});
+  @override
+  State<AdminNotificationsScreen> createState() => _AdminNotificationsScreenState();
+}
+
+class _AdminNotificationsScreenState extends State<AdminNotificationsScreen> {
+  String _filter = 'All';
+  Venom? _venom;
 
   @override
   Widget build(BuildContext context) {
     final s = AppScope.of(context);
     final role = s.adminRole;
-    final items = <(DateTime, IconData, Color, String, Report)>[];
+    // (time, icon, colour, title, subtitle, report, source)
+    final items = <(DateTime, IconData, Color, String, String, Report?, String)>[];
+    void add(DateTime at, IconData icon, Color c, String title, Report r) =>
+        items.add((at, icon, c, title, '${r.title} · ${r.where}', r, 'Snake Alert'));
     for (final r in s.adminReports.where((r) => r.covered)) {
-      if (role == AdminRole.housekeeping) {
-        items.add((r.time, Icons.add_alert_outlined, C.amber, 'New report from ${r.reporter}', r));
-      }
+      if (role == AdminRole.housekeeping) add(r.time, Icons.add_alert_outlined, C.amber, 'New report from ${r.reporter}', r);
       if (role != AdminRole.housekeeping && r.level.index >= role.index) {
         final why = r.escalated && role == AdminRole.security
             ? '${r.reporter} says it’s still there'
             : 'Nobody reached the spot in time';
-        items.add((r.alertedAt(role), Icons.notifications_active_rounded, C.redText, 'Escalated to you · $why', r));
+        add(r.alertedAt(role), Icons.notifications_active_rounded, C.redText, 'Escalated to you · $why', r);
       }
       if (r.remindedAt != null && role != AdminRole.warden) {
-        items.add((r.remindedAt!, Icons.campaign_rounded, C.redText, 'Reminder from the warden · please follow up', r));
+        add(r.remindedAt!, Icons.campaign_rounded, C.redText, 'Reminder from the warden · please follow up', r);
       }
       if (r.onTheWayAt != null && r.handler != null && r.handler != s.me.name) {
-        items.add((r.onTheWayAt!, Icons.how_to_reg_rounded, C.greenText, '${r.handlerName} took it', r));
+        add(r.onTheWayAt!, Icons.how_to_reg_rounded, C.greenText, '${r.handlerName} took it', r);
       }
       if (r.resolvedAt != null) {
-        items.add((
+        final nf = r.outcome == Outcome.notFound;
+        add(
           r.resolvedAt!,
-          r.outcome == Outcome.notFound ? Icons.search_off_rounded : Icons.verified_rounded,
-          r.outcome == Outcome.notFound ? const Color(0xFFFFC46B) : C.greenText,
-          r.outcome == Outcome.notFound ? 'Closed as not found' : 'Marked safe · ${r.outcome!.short.toLowerCase()}',
+          nf ? Icons.search_off_rounded : Icons.verified_rounded,
+          nf ? const Color(0xFFFFC46B) : C.greenText,
+          nf ? 'Closed as not found' : 'Marked safe · ${r.outcome!.short.toLowerCase()}',
           r,
-        ));
+        );
       }
     }
+    // Other Onestop alerts (demo).
+    final now = DateTime.now();
+    items.add((
+      now.subtract(const Duration(minutes: 40)),
+      Icons.door_front_door_outlined,
+      C.sub,
+      'Main gate closes at 11 PM tonight',
+      'Gatelog · Hostel Affairs office',
+      null,
+      'Gatelog',
+    ));
+    items.add((
+      now.subtract(const Duration(hours: 3)),
+      Icons.local_taxi_outlined,
+      C.sub,
+      'Seat confirmed in a shared cab',
+      'Cab Sharing · Kameng to Guwahati station, 7 PM',
+      null,
+      'Cab Sharing',
+    ));
     items.sort((a, b) => b.$1.compareTo(a.$1));
+
+    final shown = items
+        .where((i) => _filter == 'All' || i.$7 == _filter)
+        .where((i) => _filter != 'Snake Alert' || _venom == null || i.$6!.venom == _venom)
+        .toList();
+    final snake = items.where((i) => i.$7 == 'Snake Alert').toList();
+    Widget chip(String label, bool selected, VoidCallback onTap, {Color? dot, int? count}) => Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: ChoiceChip(
+        selected: selected,
+        onSelected: (_) => onTap(),
+        showCheckmark: false,
+        avatar: dot == null
+            ? null
+            : Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
+              ),
+        label: Text(count == null ? label : '$label  $count', style: ft(13, w: 600, color: selected ? C.greenInk : C.sub)),
+        selectedColor: C.green,
+        backgroundColor: C.card,
+        side: BorderSide(color: selected ? C.green : C.line2),
+        shape: const StadiumBorder(),
+      ),
+    );
+
     return DarkPage(
       header: const AppHeader('Notifications'),
-      body: items.isEmpty
-          ? Center(
-              child: Text('No notifications yet', style: ft(15, color: C.muted)),
-            )
-          : ListView.separated(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 30),
-              itemCount: items.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 8),
-              itemBuilder: (context, i) {
-                final (at, icon, color, title, r) = items[i];
-                return Panel(
-                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SightingDetailScreen(report: r))),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(color: color.withValues(alpha: 0.14), shape: BoxShape.circle),
-                        child: Icon(icon, size: 19, color: color),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
+      body: Column(
+        children: [
+          SizedBox(
+            height: 44,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              children: [
+                for (final f in ['All', 'Snake Alert', 'Cab Sharing', 'Gatelog'])
+                  chip(
+                    f,
+                    _filter == f,
+                    () => setState(() {
+                      _filter = f;
+                      _venom = null;
+                    }),
+                  ),
+              ],
+            ),
+          ),
+          // Snake types, only under "Snake Alert".
+          AnimatedSize(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.topCenter,
+            child: _filter != 'Snake Alert'
+                ? const SizedBox(width: double.infinity)
+                : SizedBox(
+                    height: 44,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                      children: [
+                        for (final (v, label, dot) in [
+                          (Venom.venomous, 'Venomous', pinVenomous),
+                          (Venom.nonVenomous, 'Non-venomous', pinNonVenomous),
+                          (Venom.unsure, 'Not sure', pinUnsure),
+                        ])
+                          chip(
+                            label,
+                            _venom == v,
+                            () => setState(() => _venom = _venom == v ? null : v),
+                            dot: dot,
+                            count: snake.where((i) => i.$6!.venom == v).length,
+                          ),
+                      ],
+                    ),
+                  ),
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: shown.isEmpty
+                ? Center(
+                    child: Text('No ${_filter == 'All' ? '' : '$_filter '}notifications', style: ft(15, color: C.muted)),
+                  )
+                : ListView.separated(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 30),
+                    itemCount: shown.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 8),
+                    itemBuilder: (context, i) {
+                      final (at, icon, color, title, sub, r, _) = shown[i];
+                      return Panel(
+                        padding: const EdgeInsets.all(12),
+                        onTap: r == null
+                            ? null
+                            : () => Navigator.push(context, MaterialPageRoute(builder: (_) => SightingDetailScreen(report: r))),
+                        child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(title, style: ft(14.5, w: 600, height: 1.3)),
-                            const SizedBox(height: 2),
-                            Text(
-                              '${r.title} · ${r.where}',
-                              style: ft(12.5, color: C.muted),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(color: color.withValues(alpha: 0.14), shape: BoxShape.circle),
+                              child: Icon(icon, size: 19, color: color),
                             ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(title, style: ft(14.5, w: 600, height: 1.3)),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    sub,
+                                    style: ft(12.5, color: C.muted),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(ago(at), style: ft(12, color: C.faint)),
                           ],
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(ago(at), style: ft(12, color: C.faint)),
-                    ],
+                      );
+                    },
                   ),
-                );
-              },
-            ),
+          ),
+        ],
+      ),
     );
   }
 }
