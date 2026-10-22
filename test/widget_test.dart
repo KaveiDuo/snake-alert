@@ -65,6 +65,14 @@ void main() {
     final r = s.escalatedToMe.first;
     s.setOnTheWay(r);
     expect(r.handlerName, 'R. Das (Security guard)');
+    // Housekeeping sees everything; the security guard and warden only what reached them.
+    s.setAdminRole(AdminRole.housekeeping);
+    final all = s.adminReports.length;
+    s.setAdminRole(AdminRole.security);
+    expect(s.adminReports.length, lessThan(all));
+    expect(s.adminReports.where((x) => !x.safe).every((x) => x.level != AdminRole.housekeeping || x.handlerRole == AdminRole.security), isTrue);
+    s.setAdminRole(AdminRole.warden);
+    expect(s.adminReports.every((x) => x.level == AdminRole.warden || x.handlerRole == AdminRole.warden), isTrue);
   });
 
   testWidgets('On the way: "At the spot" fills in by itself when the admin gets there', (tester) async {

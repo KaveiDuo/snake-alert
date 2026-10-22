@@ -116,7 +116,7 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final s = AppScope.read(context);
-      s.markSeen(s.hostelReports);
+      s.markSeen(s.adminReports);
       s.followApproaches(); // "At the spot" fills in when they get there
     });
   }
@@ -125,7 +125,10 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
   Widget build(BuildContext context) {
     final s = AppScope.of(context);
     final resolvedTab = s.consoleTab == ConsoleTab.resolved;
-    final inTab = s.hostelReports.where((r) => r.safe == resolvedTab).toList();
+    // Housekeeping sees every report; the security guard and the warden only
+    // the ones escalated to them (and any they took).
+    final mine = s.adminReports;
+    final inTab = mine.where((r) => r.safe == resolvedTab).toList();
     final shown = inTab.where(s.consoleFilter.matches).toList()
       // Open: flagged first, then oldest first. Resolved: newest first.
       ..sort((a, b) {
@@ -135,7 +138,7 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
         final c = (a.flagged ? 0 : 1).compareTo(b.flagged ? 0 : 1);
         return c != 0 ? c : a.time.compareTo(b.time);
       });
-    final openCount = s.hostelReports.where((r) => !r.safe).length;
+    final openCount = mine.where((r) => !r.safe).length;
     final filters = [
       ConsoleFilter.all,
       ConsoleFilter.venomous,
@@ -172,7 +175,7 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: _Segmented(
                 open: openCount,
-                resolved: s.hostelReports.length - openCount,
+                resolved: mine.length - openCount,
                 resolvedSelected: resolvedTab,
                 onChanged: s.setConsoleTab,
               ),
@@ -210,7 +213,9 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
                           Text(resolvedTab ? 'Nothing here yet' : 'All clear', style: ft(20, w: 700)),
                           const SizedBox(height: 4),
                           Text(
-                            '${resolvedTab ? 'No resolved' : 'No open'} ${s.consoleFilter == ConsoleFilter.all ? '' : '${s.consoleFilter.label.toLowerCase()} '}reports for ${s.authorityHostel}.',
+                            s.adminRole != AdminRole.housekeeping && s.consoleFilter == ConsoleFilter.all
+                                ? '${resolvedTab ? 'No resolved reports' : 'Nothing is overdue'} for you right now. Reports reach the ${s.adminRole.label.toLowerCase()} only if nobody gets to the spot in ${s.adminRole == AdminRole.warden ? escalateEvery.inMinutes * 2 : escalateEvery.inMinutes} min.'
+                                : '${resolvedTab ? 'No resolved' : 'No open'} ${s.consoleFilter == ConsoleFilter.all ? '' : '${s.consoleFilter.label.toLowerCase()} '}reports for ${s.authorityHostel}.',
                             textAlign: TextAlign.center,
                             style: ft(13.5, color: C.muted),
                           ),
@@ -751,10 +756,10 @@ IconData _roleIcon(AdminRole r) => switch (r) {
 };
 
 String _roleHelp(AdminRole r) => switch (r) {
-  AdminRole.housekeeping => 'Gets every new report first',
+  AdminRole.housekeeping => 'Gets every new report first and sees all reports',
   AdminRole.security =>
-    'Alerted if nobody reaches the spot in ${escalateEvery.inMinutes} min, or the reporter says it’s still there',
-  AdminRole.warden => 'Alerted if nobody reaches the spot in ${escalateEvery.inMinutes * 2} min',
+    'Sees only reports nobody reached in ${escalateEvery.inMinutes} min, or that the reporter says are still there',
+  AdminRole.warden => 'Sees only reports nobody reached in ${escalateEvery.inMinutes * 2} min',
 };
 
 /// Small pill next to the hostel name showing who is signed in.

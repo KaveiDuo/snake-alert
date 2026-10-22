@@ -339,6 +339,11 @@ class Report {
     return AdminRole.values[steps.clamp(0, AdminRole.values.length - 1)];
   }
 
+  /// Shown in [role]'s list. Housekeeping sees every report; the security
+  /// guard and the warden only see reports escalated to them, plus any they took.
+  bool visibleTo(AdminRole role) =>
+      role == AdminRole.housekeeping || handlerRole == role || (covered && level.index >= role.index);
+
   /// Escalated to [role] and still nobody at the spot.
   bool needs(AdminRole role) =>
       role != AdminRole.housekeeping && covered && !safe && stage.index < Stage.onSite.index && level.index >= role.index;
@@ -418,6 +423,9 @@ class AppState extends ChangeNotifier {
     adminRole = r;
     notifyListeners();
   }
+
+  /// The signed-in admin's reports (see [Report.visibleTo]).
+  List<Report> get adminReports => hostelReports.where((r) => r.visibleTo(adminRole)).toList();
 
   /// Reports escalated to the signed-in admin and not reached yet, most urgent first.
   List<Report> get escalatedToMe =>
