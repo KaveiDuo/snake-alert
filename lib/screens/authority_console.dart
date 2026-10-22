@@ -1321,7 +1321,7 @@ class AuthorityProfile extends StatelessWidget {
               trailing: const Tag('VERIFIED', fg: C.green, bg: C.greenSoft),
             ),
             InfoRow(_roleIcon(s.adminRole), 'Post', s.adminRole.label, editable: false),
-            InfoRow(Icons.schedule_rounded, 'Shift', s.me.shift, editable: false),
+            InfoRow(Icons.schedule_rounded, 'Shift', s.shiftOf(s.me), editable: false),
             InfoRow(Icons.apartment_outlined, 'Hostel', s.authorityHostel.replaceAll(' Hostel', ''), editable: false),
             const InfoRow(Icons.apartment_outlined, 'Office', 'Kameng Hostel · Ground floor'),
           ]),
@@ -1616,7 +1616,7 @@ class TeamTab extends StatelessWidget {
             title('On duty now', s.authorityHostel),
             for (final post in AdminRole.values)
               for (final st in s.onDutyIn(post))
-                if (st != me) callRow(StaffAvatar(st, size: 40), st.name, '${post.label} · ${st.shift}', st.phone),
+                if (st != me) callRow(StaffAvatar(st, size: 40), st.name, '${post.label} · ${s.shiftOf(st)}', st.phone),
             title('Emergency numbers'),
             callRow(
               const CircleAvatar(
@@ -1641,6 +1641,94 @@ class TeamTab extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// The admin's notifications: what happened to the reports they're part of,
+/// newest first. Different from the Reports list, which is where they act.
+class AdminNotificationsScreen extends StatelessWidget {
+  const AdminNotificationsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final s = AppScope.of(context);
+    final role = s.adminRole;
+    final items = <(DateTime, IconData, Color, String, Report)>[];
+    for (final r in s.adminReports.where((r) => r.covered)) {
+      if (role == AdminRole.housekeeping) {
+        items.add((r.time, Icons.add_alert_outlined, C.amber, 'New report from ${r.reporter}', r));
+      }
+      if (role != AdminRole.housekeeping && r.level.index >= role.index) {
+        final why = r.escalated && role == AdminRole.security
+            ? '${r.reporter} says it’s still there'
+            : 'Nobody reached the spot in time';
+        items.add((r.alertedAt(role), Icons.notifications_active_rounded, C.redText, 'Escalated to you · $why', r));
+      }
+      if (r.remindedAt != null && role != AdminRole.warden) {
+        items.add((r.remindedAt!, Icons.campaign_rounded, C.redText, 'Reminder from the warden · please follow up', r));
+      }
+      if (r.onTheWayAt != null && r.handler != null && r.handler != s.me.name) {
+        items.add((r.onTheWayAt!, Icons.how_to_reg_rounded, C.greenText, '${r.handlerName} took it', r));
+      }
+      if (r.resolvedAt != null) {
+        items.add((
+          r.resolvedAt!,
+          r.outcome == Outcome.notFound ? Icons.search_off_rounded : Icons.verified_rounded,
+          r.outcome == Outcome.notFound ? const Color(0xFFFFC46B) : C.greenText,
+          r.outcome == Outcome.notFound ? 'Closed as not found' : 'Marked safe · ${r.outcome!.short.toLowerCase()}',
+          r,
+        ));
+      }
+    }
+    items.sort((a, b) => b.$1.compareTo(a.$1));
+    return DarkPage(
+      header: const AppHeader('Notifications'),
+      body: items.isEmpty
+          ? Center(
+              child: Text('No notifications yet', style: ft(15, color: C.muted)),
+            )
+          : ListView.separated(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 30),
+              itemCount: items.length,
+              separatorBuilder: (_, _) => const SizedBox(height: 8),
+              itemBuilder: (context, i) {
+                final (at, icon, color, title, r) = items[i];
+                return Panel(
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SightingDetailScreen(report: r))),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(color: color.withValues(alpha: 0.14), shape: BoxShape.circle),
+                        child: Icon(icon, size: 19, color: color),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(title, style: ft(14.5, w: 600, height: 1.3)),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${r.title} · ${r.where}',
+                              style: ft(12.5, color: C.muted),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(ago(at), style: ft(12, color: C.faint)),
+                    ],
+                  ),
+                );
+              },
+            ),
     );
   }
 }

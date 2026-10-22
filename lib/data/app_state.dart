@@ -479,6 +479,14 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Shift times changed by the staff themselves (from the duty card's clock).
+  final _shifts = <String, String>{};
+  String shiftOf(Staff s) => _shifts[s.phone] ?? s.shift;
+  void setShift(String shift) {
+    _shifts[me.phone] = shift;
+    notifyListeners();
+  }
+
   /// Everyone on duty in a post (alerts go to all of them; the first to act takes it).
   List<Staff> onDutyIn(AdminRole post) => [
     for (final s in staffList)

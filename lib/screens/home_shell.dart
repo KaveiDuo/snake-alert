@@ -164,9 +164,10 @@ class _HomeTab extends StatelessWidget {
               RoundButton(
                 Icons.notifications_none_rounded,
                 size: 42,
-                onTap: admin
-                    ? () => openAdminSnakeAlert(context)
-                    : () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen())),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => admin ? const AdminNotificationsScreen() : const NotificationsScreen()),
+                ),
                 badge: Container(
                   width: 10,
                   height: 10,
@@ -530,41 +531,69 @@ class _AdminSnakeCard extends StatelessWidget {
   }
 }
 
-/// In place of the students' Time Table: the admin's shift and on-duty switch.
+/// In place of the students' Time Table: on/off duty with the shift times.
+/// Tapping the clock changes the shift.
 class _DutyCard extends StatelessWidget {
   const _DutyCard();
+
+  static String _fmt(TimeOfDay t) {
+    final h = t.hourOfPeriod == 0 ? 12 : t.hourOfPeriod;
+    final m = t.minute == 0 ? '' : ':${t.minute.toString().padLeft(2, '0')}';
+    return '$h$m ${t.period == DayPeriod.am ? 'AM' : 'PM'}';
+  }
+
+  Future<void> _editShift(BuildContext context) async {
+    final s = AppScope.read(context);
+    final start = await showTimePicker(
+      context: context,
+      initialTime: const TimeOfDay(hour: 6, minute: 0),
+      helpText: 'SHIFT STARTS',
+    );
+    if (start == null || !context.mounted) return;
+    final end = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: (start.hour + 8) % 24, minute: start.minute),
+      helpText: 'SHIFT ENDS',
+    );
+    if (end == null) return;
+    s.setShift('${_fmt(start)} – ${_fmt(end)}');
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = AppScope.of(context);
     final duty = s.onDuty(s.me);
     return Panel(
-      padding: const EdgeInsets.fromLTRB(16, 12, 10, 12),
+      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
       child: Row(
         children: [
+          Tooltip(
+            message: 'Change shift',
+            child: InkWell(
+              borderRadius: BorderRadius.circular(20),
+              onTap: () => _editShift(context),
+              child: const Padding(
+                padding: EdgeInsets.all(6),
+                child: Text('🕒', style: TextStyle(fontSize: 19)),
+              ),
+            ),
+          ),
+          const SizedBox(width: 6),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Text('🕒', style: TextStyle(fontSize: 17)),
-                    const SizedBox(width: 8),
-                    Text('My duty', style: ft(17, w: 700)),
-                    Flexible(
-                      child: Text(
-                        '  ·  ${s.me.shift.toUpperCase()}',
-                        style: ft(12, color: C.muted, ls: 0.6),
-                        overflow: TextOverflow.ellipsis,
-                      ),
+            child: GestureDetector(
+              onTap: () => _editShift(context),
+              child: Row(
+                children: [
+                  Text(duty ? 'On duty' : 'Off duty', style: ft(17, w: 700, color: duty ? C.greenText : C.text)),
+                  Flexible(
+                    child: Text(
+                      '  ·  ${s.shiftOf(s.me).toUpperCase()}',
+                      style: ft(12, color: C.muted, ls: 0.6),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  duty ? 'On duty' : 'Off duty',
-                  style: ft(15, color: duty ? C.greenText : C.muted),
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
           ),
           Switch(value: duty, activeThumbColor: C.green, onChanged: s.setOnDuty),
