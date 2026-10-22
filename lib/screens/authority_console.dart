@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -21,8 +24,66 @@ class AuthorityShell extends StatefulWidget {
 
 class _AuthorityShellState extends State<AuthorityShell> {
   int _tab = 0;
+  Timer? _poll;
+  OverlayEntry? _alert;
+
   @override
-  Widget build(BuildContext context) => Scaffold(
+  void initState() {
+    super.initState();
+    // Escalations reach the admin as an alert, wherever they are in the app
+    // (a real build would send a push notification with an alarm sound).
+    _poll = Timer.periodic(const Duration(seconds: 3), (_) => _check());
+  }
+
+  @override
+  void dispose() {
+    _poll?.cancel();
+    _alert?.remove();
+    super.dispose();
+  }
+
+  void _check() {
+    if (!mounted) return;
+    final s = AppScope.read(context);
+    final fresh = s.takeNewEscalations();
+    if (fresh.isEmpty) return;
+    HapticFeedback.heavyImpact();
+    _alert?.remove();
+    late final OverlayEntry entry;
+    entry = OverlayEntry(
+      builder: (ctx) => Positioned(
+        top: MediaQuery.paddingOf(ctx).top + 8,
+        left: 12,
+        right: 12,
+        child: _EscalationAlert(
+          reports: fresh,
+          role: s.adminRole,
+          onTap: () {
+            entry.remove();
+            if (_alert == entry) _alert = null;
+            setState(() => _tab = 0);
+          },
+        ),
+      ),
+    );
+    Overlay.of(context).insert(entry);
+    _alert = entry;
+    Timer(const Duration(seconds: 7), () {
+      if (_alert == entry) {
+        entry.remove();
+        _alert = null;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    AppScope.of(context); // re-check right away when the role changes
+    WidgetsBinding.instance.addPostFrameCallback((_) => _check());
+    return _scaffold();
+  }
+
+  Widget _scaffold() => Scaffold(
     backgroundColor: C.bg,
     body: IndexedStack(index: _tab, children: const [AuthorityConsole(), AuthorityProfile()]),
     bottomNavigationBar: AppTabBar(
@@ -69,6 +130,8 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
       // Open: flagged first, then oldest first. Resolved: newest first.
       ..sort((a, b) {
         if (resolvedTab) return b.time.compareTo(a.time);
+        final me = (a.needs(s.adminRole) ? 0 : 1).compareTo(b.needs(s.adminRole) ? 0 : 1);
+        if (me != 0) return me;
         final c = (a.flagged ? 0 : 1).compareTo(b.flagged ? 0 : 1);
         return c != 0 ? c : a.time.compareTo(b.time);
       });
@@ -90,6 +153,8 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
               child: Row(
                 children: [
                   Expanded(child: Text(s.authorityHostel, style: ft(23, w: 700))),
+                  // Who is signed in: the role decides which escalations alert you.
+                  _RolePill(s.adminRole, onTap: () => _pickRole(context)),
                   IconButton(
                     tooltip: 'How Snake Alert works for admins',
                     onPressed: () => _rulesSheet(context),
@@ -98,6 +163,11 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
                 ],
               ),
             ),
+            if (!resolvedTab && s.escalatedToMe.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                child: _EscalatedBanner(count: s.escalatedToMe.length, role: s.adminRole),
+              ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: _Segmented(
@@ -351,8 +421,8 @@ void _rulesSheet(BuildContext context) {
             ),
             rule(
               Icons.timer_off_outlined,
-              'Overdue',
-              'Reports not reached within ${respondWithin.inMinutes} min, or that the reporter says are still there, are flagged to the hostel security guard.',
+              'Who is alerted',
+              'New reports go to Housekeeping first. Not reached within ${escalateEvery.inMinutes} min, or the reporter says it’s still there: the security guard is alerted. After ${escalateEvery.inMinutes * 2} min: the warden too. Tap “On my way” to take a report, so the others see who has it.',
             ),
             const SizedBox(height: 4),
             Btn('Got it', kind: BtnKind.ghost, height: 48, onTap: () => Navigator.pop(ctx)),
@@ -426,7 +496,16 @@ class _ReportCardState extends State<_ReportCard> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Wrap(spacing: 6, runSpacing: 4, children: [_venomTag(r), StatusChip(r)]),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: [
+                          _venomTag(r),
+                          StatusChip(r),
+                          if (!r.safe && r.level != AdminRole.housekeeping)
+                            Tag(r.level == AdminRole.warden ? '→ WARDEN' : '→ SECURITY', fg: C.redText, bg: C.redSoft),
+                        ],
+                      ),
                       const SizedBox(height: 5),
                       Text(r.title, style: ft(17, w: 700)),
                       Text(r.where, style: ft(12.5, color: const Color(0xFFB0B0B0))),
@@ -596,12 +675,12 @@ class _Deadline extends StatelessWidget {
       _ when r.escalated && !r.safe => (
         Icons.report_rounded,
         C.redText,
-        '${r.reporter} says the snake is still there · flagged to the hostel security guard',
+        '${r.reporter} says the snake is still there · escalated to ${_ladder(r.level)}',
       ),
       _ when r.overdue => (
         Icons.timer_off_outlined,
         C.redText,
-        'Overdue by ${mins(-r.dueIn)} · flagged to the hostel security guard',
+        'Overdue by ${mins(-r.dueIn)} · escalated to ${_ladder(r.level)}',
       ),
       _ when r.stage == Stage.onTheWay && r.distanceLeft != null => (
         Icons.near_me_rounded,
@@ -628,7 +707,7 @@ class _Deadline extends StatelessWidget {
       ),
       _ => (Icons.timer_outlined, const Color(0xFFFFC46B), 'Reach the spot within ${mins(r.dueIn)}'),
     };
-    return Row(
+    final line = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(icon, size: 16, color: color),
@@ -637,6 +716,246 @@ class _Deadline extends StatelessWidget {
           child: Text(text, style: ft(12.5, w: 600, color: color, height: 1.35)),
         ),
       ],
+    );
+    // Once escalated: has anyone taken it yet?
+    if (r.safe || r.level == AdminRole.housekeeping) return line;
+    final taken = r.stage.index >= Stage.onTheWay.index;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        line,
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            Icon(taken ? Icons.how_to_reg_rounded : Icons.person_off_outlined, size: 16, color: taken ? C.greenText : C.sub),
+            const SizedBox(width: 7),
+            Expanded(
+              child: Text(
+                taken ? 'Taken by ${r.handlerName}' : 'Not taken yet · tap “On my way” to take it',
+                style: ft(12.5, w: 600, color: taken ? C.greenText : C.sub, height: 1.35),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  static String _ladder(AdminRole l) => l == AdminRole.warden ? 'the security guard and the warden' : 'the security guard';
+}
+
+IconData _roleIcon(AdminRole r) => switch (r) {
+  AdminRole.housekeeping => Icons.cleaning_services_outlined,
+  AdminRole.security => Icons.local_police_outlined,
+  AdminRole.warden => Icons.badge_outlined,
+};
+
+String _roleHelp(AdminRole r) => switch (r) {
+  AdminRole.housekeeping => 'Gets every new report first',
+  AdminRole.security =>
+    'Alerted if nobody reaches the spot in ${escalateEvery.inMinutes} min, or the reporter says it’s still there',
+  AdminRole.warden => 'Alerted if nobody reaches the spot in ${escalateEvery.inMinutes * 2} min',
+};
+
+/// Small pill next to the hostel name showing who is signed in.
+class _RolePill extends StatelessWidget {
+  final AdminRole role;
+  final VoidCallback onTap;
+  const _RolePill(this.role, {required this.onTap});
+  @override
+  Widget build(BuildContext context) => Material(
+    color: C.card,
+    shape: StadiumBorder(side: BorderSide(color: C.line2)),
+    child: InkWell(
+      customBorder: const StadiumBorder(),
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(10, 6, 8, 6),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(_roleIcon(role), size: 15, color: C.green),
+            const SizedBox(width: 6),
+            Text(role.label, style: ft(12.5, w: 600, color: C.sub)),
+            const Icon(Icons.expand_more_rounded, size: 18, color: C.muted),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+/// Demo: choose which admin you are, to see what each one is alerted about.
+void _pickRole(BuildContext context) {
+  final s = AppScope.read(context);
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: C.card,
+    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+    builder: (ctx) => SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(color: const Color(0xFF3A3A3A), borderRadius: BorderRadius.circular(2)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text('Signed in as', style: ft(20, w: 700)),
+            const SizedBox(height: 4),
+            Text(
+              'Everyone uses the same portal. Your role decides who is alerted, and when.',
+              style: ft(13, color: C.muted, height: 1.4),
+            ),
+            const SizedBox(height: 14),
+            for (final (i, r) in AdminRole.values.indexed) ...[
+              Material(
+                color: r == s.adminRole ? C.greenSoft : C.card2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(color: r == s.adminRole ? C.green : C.line2, width: r == s.adminRole ? 1.5 : 1),
+                ),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () {
+                    s.setAdminRole(r);
+                    Navigator.pop(ctx);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 14,
+                          backgroundColor: C.bg,
+                          child: Text('${i + 1}', style: ft(13, w: 700, color: C.green)),
+                        ),
+                        const SizedBox(width: 12),
+                        Icon(_roleIcon(r), size: 22, color: C.green),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('${r.label} · ${r.person}', style: ft(15, w: 700)),
+                              Text(_roleHelp(r), style: ft(12.5, color: C.muted, height: 1.35)),
+                            ],
+                          ),
+                        ),
+                        if (r == s.adminRole) const Icon(Icons.check_circle_rounded, color: C.green, size: 20),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+/// Red strip above the list: reports escalated to the signed-in admin.
+class _EscalatedBanner extends StatelessWidget {
+  final int count;
+  final AdminRole role;
+  const _EscalatedBanner({required this.count, required this.role});
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+    decoration: BoxDecoration(
+      color: C.redSoft,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: const Color(0xFF5A2424)),
+    ),
+    child: Row(
+      children: [
+        const Icon(Icons.notifications_active_rounded, color: C.redText, size: 22),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Escalated to you · $count', style: ft(15, w: 700, color: C.redText)),
+              const SizedBox(height: 2),
+              Text(
+                role == AdminRole.warden
+                    ? 'Nobody reached the spot in ${escalateEvery.inMinutes * 2} min. Make sure someone goes now.'
+                    : 'Nobody reached the spot in time. Take one and tap “On my way”.',
+                style: ft(12.5, color: const Color(0xFFF2B8B5), height: 1.35),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+/// Pops in at the top when a report is escalated to you (stands in for a push
+/// notification with an alarm in a real build).
+class _EscalationAlert extends StatelessWidget {
+  final List<Report> reports;
+  final AdminRole role;
+  final VoidCallback onTap;
+  const _EscalationAlert({required this.reports, required this.role, required this.onTap});
+  @override
+  Widget build(BuildContext context) {
+    final r = reports.first;
+    final why = r.escalated
+        ? '${r.reporter} says it’s still there'
+        : 'Not reached in ${r.level == AdminRole.warden ? escalateEvery.inMinutes * 2 : escalateEvery.inMinutes} min';
+    return Material(
+      color: const Color(0xFF2A1414),
+      elevation: 10,
+      shadowColor: Colors.black,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: const BorderSide(color: Color(0xFF7A2E2E)),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: const BoxDecoration(color: Color(0xFFE5484D), shape: BoxShape.circle),
+                child: const Icon(Icons.notifications_active_rounded, color: Colors.white, size: 22),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Escalated to you · ${role.label}', style: ft(12, w: 700, color: C.redText, ls: 0.3)),
+                    const SizedBox(height: 2),
+                    Text('${r.title} · ${r.where}', style: ft(14.5, w: 700), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text(
+                      '$why${reports.length > 1 ? ' · +${reports.length - 1} more' : ''}',
+                      style: ft(12.5, color: C.sub),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded, color: C.sub),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -863,7 +1182,11 @@ class _OutcomeTile extends StatelessWidget {
       Outcome.chased => ((c) => svg('chased_away', c), C.green, 'Into the forest, away from people'),
       Outcome.rescuer => ((c) => Icon(Icons.health_and_safety_outlined, size: 22, color: c), C.green, 'A snake rescuer took it'),
       Outcome.leftArea => ((c) => svg('went_away', c), C.green, 'Left on its own'),
-      Outcome.notFound => ((c) => Icon(Icons.search_off_rounded, size: 22, color: c), const Color(0xFFFFC46B), 'Searched, couldn’t find it'),
+      Outcome.notFound => (
+        (c) => Icon(Icons.search_off_rounded, size: 22, color: c),
+        const Color(0xFFFFC46B),
+        'Searched, couldn’t find it',
+      ),
     };
     return Material(
       color: selected ? Color.alphaBlend(color.withValues(alpha: 0.12), C.card2) : C.card2,
@@ -890,7 +1213,12 @@ class _OutcomeTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(o.short, style: ft(15, w: 700)),
-                    Text(help, style: ft(12.5, color: C.muted), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text(
+                      help,
+                      style: ft(12.5, color: C.muted),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ],
                 ),
               ),
@@ -955,11 +1283,16 @@ class _PhotoProof extends StatelessWidget {
       ),
       child: Row(
         children: [
-          ClipRRect(borderRadius: BorderRadius.circular(10), child: SizedBox(width: 56, height: 56, child: photoOf(photo!))),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: SizedBox(width: 56, height: 56, child: photoOf(photo!)),
+          ),
           const SizedBox(width: 12),
           const Icon(Icons.check_circle_rounded, size: 18, color: C.greenText),
           const SizedBox(width: 6),
-          Expanded(child: Text('Photo added', style: ft(14.5, w: 600, color: C.greenText))),
+          Expanded(
+            child: Text('Photo added', style: ft(14.5, w: 600, color: C.greenText)),
+          ),
           TextButton(
             onPressed: onAdd,
             child: Text('Retake', style: ft(13.5, w: 600, color: C.sub)),
@@ -997,9 +1330,16 @@ class AuthorityProfile extends StatelessWidget {
           Text('Profile', style: ft(24, w: 700)),
           const SizedBox(height: 16),
           IdCard(
-            avatar: ClipOval(child: Image.asset('assets/images/avatar_authority.jpg', width: 88, height: 88, fit: BoxFit.cover)),
-            name: AppState.kamengAuthority,
-            lines: ['Admin · ${s.authorityHostel}'],
+            avatar: s.adminRole == AdminRole.warden
+                ? ClipOval(child: Image.asset('assets/images/avatar_authority.jpg', width: 88, height: 88, fit: BoxFit.cover))
+                : Container(
+                    width: 88,
+                    height: 88,
+                    decoration: const BoxDecoration(color: Color(0xFF2A2A2A), shape: BoxShape.circle),
+                    child: Icon(_roleIcon(s.adminRole), color: C.muted, size: 40),
+                  ),
+            name: s.adminRole.person,
+            lines: ['${s.adminRole.label} · ${s.authorityHostel}'],
           ),
           const SizedBox(height: 22),
           Text('Snake Alert · ${s.authorityHostel}', style: ft(17, w: 600)),
@@ -1027,7 +1367,16 @@ class AuthorityProfile extends StatelessWidget {
               editable: false,
               trailing: const Tag('VERIFIED', fg: C.green, bg: C.greenSoft),
             ),
-            const InfoRow(Icons.person_outline_rounded, 'Role', 'Admin', editable: false),
+            InfoRow(
+              _roleIcon(s.adminRole),
+              'Role',
+              s.adminRole.label,
+              editable: false,
+              trailing: GestureDetector(
+                onTap: () => _pickRole(context),
+                child: Text('Switch', style: ft(14, w: 600, color: C.green)),
+              ),
+            ),
             InfoRow(Icons.apartment_outlined, 'Hostel', s.authorityHostel.replaceAll(' Hostel', ''), editable: false),
             const InfoRow(Icons.apartment_outlined, 'Office', 'Kameng Hostel · Ground floor'),
           ]),

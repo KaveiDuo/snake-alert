@@ -166,8 +166,8 @@ class _Response extends StatelessWidget {
                 Expanded(
                   child: Text(
                     r.escalated
-                        ? 'The reporter says the snake is still there. The hostel security guard has been alerted.'
-                        : 'Nobody has reached the spot within ${respondWithin.inMinutes} minutes. The hostel security guard has been alerted.',
+                        ? 'The reporter says the snake is still there. ${_cap(r.alertedText ?? 'the hostel security guard')} ${r.level == AdminRole.warden ? 'have' : 'has'} been alerted.'
+                        : 'Nobody has reached the spot within ${r.level == AdminRole.warden ? escalateEvery.inMinutes * 2 : respondWithin.inMinutes} minutes. ${_cap(r.alertedText ?? 'the hostel security guard')} ${r.level == AdminRole.warden ? 'have' : 'has'} been alerted.',
                     style: ft(13, color: const Color(0xFFF2B8B5), height: 1.4),
                   ),
                 ),
@@ -185,7 +185,10 @@ class _Response extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(r.outcome == Outcome.notFound ? 'Have you seen the snake again?' : 'Is the area clear now?', style: ft(15.5, w: 700)),
+                  Text(
+                    r.outcome == Outcome.notFound ? 'Have you seen the snake again?' : 'Is the area clear now?',
+                    style: ft(15.5, w: 700),
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     r.outcome == Outcome.notFound
@@ -294,3 +297,5 @@ class _Step extends StatelessWidget {
     ),
   );
 }
+
+String _cap(String s) => s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);

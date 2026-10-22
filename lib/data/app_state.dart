@@ -175,7 +175,15 @@ enum Outcome {
 }
 
 /// Places the authority can tap to say where they searched.
-const searchSpots = ['Drains', 'Bushes & grass', 'Under vehicles', 'Stairs & steps', 'Inside the building', 'Walls & holes', 'Garbage area'];
+const searchSpots = [
+  'Drains',
+  'Bushes & grass',
+  'Under vehicles',
+  'Stairs & steps',
+  'Inside the building',
+  'Walls & holes',
+  'Garbage area',
+];
 
 /// After "Not found", students are told to stay alert near the spot for this long.
 const cautionFor = Duration(hours: 24);
@@ -183,6 +191,22 @@ const cautionFor = Duration(hours: 24);
 /// Time the authority has to reach the spot before the report counts as
 /// overdue and is escalated to the hostel security guard.
 const respondWithin = Duration(minutes: 15);
+
+/// Admins all sign in to the same portal; their role decides who is alerted.
+/// A report goes to Housekeeping first. If nobody reaches the spot within
+/// [escalateEvery] (or the reporter says the snake is still there) it is
+/// escalated to the security guard, and after another [escalateEvery] to the
+/// warden too. Each step is a separate alert to that person.
+enum AdminRole {
+  housekeeping('Housekeeping', 'M. Kalita'),
+  security('Security guard', 'R. Das'),
+  warden('Warden', 'Dr. P. Saikia');
+
+  const AdminRole(this.label, this.person);
+  final String label, person;
+}
+
+const escalateEvery = Duration(minutes: 15);
 
 /// "At the spot" is location-verified when the authority's phone is this close
 /// to the reported pin.
@@ -223,6 +247,7 @@ class Report {
 
   /// Who is handling it; null means "The [place] authority".
   String? handler;
+  AdminRole? handlerRole;
 
   /// How far the authority's phone was from the pin when they marked arrival.
   double? onSiteMetres;
@@ -241,6 +266,9 @@ class Report {
 
   /// Escalated to the hostel security guard because the reporter said the snake is still there.
   bool escalated;
+
+  /// When the reporter said the snake is still there (starts the ladder at the security guard).
+  DateTime? escalatedAt;
 
   /// While on the way: how far the authority still is from the pin (live).
   double? distanceLeft;
@@ -267,6 +295,7 @@ class Report {
     this.onSiteAt,
     this.resolvedAt,
     this.handler,
+    this.handlerRole,
     this.onSiteMetres,
     this.outcome,
     this.proofPhoto,
@@ -275,6 +304,7 @@ class Report {
     this.rescuerCalledAt,
     this.reporterConfirmed,
     this.escalated = false,
+    this.escalatedAt,
   }) : time = time ?? DateTime.now();
 
   bool get safe => stage == Stage.resolved;
@@ -285,7 +315,8 @@ class Report {
 
   /// Time spent at the spot before closing, recorded automatically.
   Duration? get timeAtSpot => onSiteAt != null && resolvedAt != null ? resolvedAt!.difference(onSiteAt!) : null;
-  String get handlerName => handler ?? 'The $place admin';
+  String get handlerName =>
+      handler == null ? 'The $place admin' : (handlerRole == null ? handler! : '$handler (${handlerRole!.label})');
   bool get locationVerified => onSiteMetres != null && onSiteMetres! <= onSiteRadiusMetres;
 
   /// Not reached the spot within [respondWithin].
@@ -294,6 +325,30 @@ class Report {
 
   /// Time left to reach the spot (negative once overdue).
   Duration get dueIn => respondWithin - DateTime.now().difference(time);
+
+  /// Where the escalation ladder starts: the report time, or 15 min before the
+  /// reporter said it's still there, so that goes straight to the security guard.
+  DateTime get _ladderStart => escalatedAt != null ? escalatedAt!.subtract(escalateEvery) : time;
+
+  /// How far up the ladder the report has gone (see [AdminRole]). It stops
+  /// climbing once someone reaches the spot.
+  AdminRole get level {
+    if (!covered) return AdminRole.housekeeping;
+    final upTo = onSiteAt ?? resolvedAt ?? DateTime.now();
+    final steps = upTo.difference(_ladderStart).inSeconds ~/ escalateEvery.inSeconds;
+    return AdminRole.values[steps.clamp(0, AdminRole.values.length - 1)];
+  }
+
+  /// Escalated to [role] and still nobody at the spot.
+  bool needs(AdminRole role) =>
+      role != AdminRole.housekeeping && covered && !safe && stage.index < Stage.onSite.index && level.index >= role.index;
+
+  /// Who has been alerted beyond Housekeeping, for students: null if nobody yet.
+  String? get alertedText => switch (safe || !covered ? AdminRole.housekeeping : level) {
+    AdminRole.housekeeping => null,
+    AdminRole.security => 'the hostel security guard',
+    AdminRole.warden => 'the hostel security guard and the warden',
+  };
 
   /// One line for students on how the response is going.
   String get statusLine => switch (stage) {
@@ -351,7 +406,30 @@ class AppState extends ChangeNotifier {
   ConsoleTab consoleTab = ConsoleTab.open;
   ConsoleFilter consoleFilter = ConsoleFilter.all;
   final String authorityHostel = 'Kameng Hostel';
-  static const kamengAuthority = 'Dr. P. Saikia';
+
+  /// Who handles Kameng's reports first (Housekeeping), in the demo data.
+  static const kamengAuthority = 'M. Kalita';
+
+  // ---------- Admin roles & escalation alerts ----------
+  /// Which admin is signed in (demo: switched in the console or Profile).
+  /// Everyone sees the same reports; the role decides which escalations alert them.
+  AdminRole adminRole = AdminRole.housekeeping;
+  void setAdminRole(AdminRole r) {
+    adminRole = r;
+    notifyListeners();
+  }
+
+  /// Reports escalated to the signed-in admin and not reached yet, most urgent first.
+  List<Report> get escalatedToMe =>
+      hostelReports.where((r) => r.needs(adminRole)).toList()..sort((a, b) => a.time.compareTo(b.time));
+
+  final _alerted = <String>{};
+
+  /// Escalations the signed-in admin hasn't been alerted about yet (each once per role).
+  List<Report> takeNewEscalations() => [
+    for (final r in escalatedToMe)
+      if (_alerted.add('${r.id}:${adminRole.name}')) r,
+  ];
   final String studentName = 'Ananya Sharma';
   final String studentEmail = '210102043@iitg.ac.in';
 
@@ -379,8 +457,10 @@ class AppState extends ChangeNotifier {
         notifyListeners();
         return;
       }
-      _gpsSub = Geolocator.getPositionStream(locationSettings: const LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 5))
-          .listen(
+      _gpsSub =
+          Geolocator.getPositionStream(
+            locationSettings: const LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 5),
+          ).listen(
             _onPosition,
             onError: (_) {
               gps = GpsState.denied;
@@ -498,6 +578,7 @@ class AppState extends ChangeNotifier {
       covered: true,
       stage: Stage.onTheWay,
       handler: AppState.kamengAuthority,
+      handlerRole: AdminRole.housekeeping,
       seenAt: DateTime.now().subtract(const Duration(minutes: 8)),
       onTheWayAt: DateTime.now().subtract(const Duration(minutes: 6)),
     ),
@@ -515,6 +596,7 @@ class AppState extends ChangeNotifier {
       // Seen but nobody went: overdue, so it's flagged to the hostel security guard.
       stage: Stage.seen,
       handler: AppState.kamengAuthority,
+      handlerRole: AdminRole.housekeeping,
       seenAt: DateTime.now().subtract(const Duration(minutes: 29)),
     ),
     Report(
@@ -540,6 +622,7 @@ class AppState extends ChangeNotifier {
       covered: true,
       stage: Stage.resolved,
       handler: AppState.kamengAuthority,
+      handlerRole: AdminRole.housekeeping,
       seenAt: DateTime.now().subtract(const Duration(minutes: 58)),
       onTheWayAt: DateTime.now().subtract(const Duration(minutes: 56)),
       onSiteAt: DateTime.now().subtract(const Duration(minutes: 49)),
@@ -597,6 +680,7 @@ class AppState extends ChangeNotifier {
       pos: const LatLng(26.19055, 91.70205),
       covered: true,
       handler: AppState.kamengAuthority,
+      handlerRole: AdminRole.housekeeping,
     ),
     // Non-venomous · open, authority at the spot and rescuer called
     Report(
@@ -612,6 +696,7 @@ class AppState extends ChangeNotifier {
       covered: true,
       stage: Stage.onSite,
       handler: AppState.kamengAuthority,
+      handlerRole: AdminRole.housekeeping,
       seenAt: DateTime.now().subtract(const Duration(minutes: 20)),
       onTheWayAt: DateTime.now().subtract(const Duration(minutes: 18)),
       rescuerCalledAt: DateTime.now().subtract(const Duration(minutes: 17)),
@@ -631,6 +716,7 @@ class AppState extends ChangeNotifier {
       covered: true,
       stage: Stage.seen,
       handler: AppState.kamengAuthority,
+      handlerRole: AdminRole.housekeeping,
       seenAt: DateTime.now().subtract(const Duration(minutes: 6)),
     ),
     // Not sure · open, the reporter saw it again after it was closed: escalated
@@ -646,8 +732,10 @@ class AppState extends ChangeNotifier {
       covered: true,
       stage: Stage.seen,
       handler: AppState.kamengAuthority,
+      handlerRole: AdminRole.housekeeping,
       seenAt: DateTime.now().subtract(const Duration(minutes: 48)),
       escalated: true,
+      escalatedAt: DateTime.now().subtract(const Duration(minutes: 6)),
       reporterConfirmed: false,
     ),
     // Venomous · resolved by a rescuer, reporter confirmed
@@ -664,6 +752,7 @@ class AppState extends ChangeNotifier {
       covered: true,
       stage: Stage.resolved,
       handler: AppState.kamengAuthority,
+      handlerRole: AdminRole.housekeeping,
       seenAt: DateTime.now().subtract(const Duration(minutes: 178)),
       onTheWayAt: DateTime.now().subtract(const Duration(minutes: 175)),
       rescuerCalledAt: DateTime.now().subtract(const Duration(minutes: 174)),
@@ -689,6 +778,7 @@ class AppState extends ChangeNotifier {
       covered: true,
       stage: Stage.resolved,
       handler: AppState.kamengAuthority,
+      handlerRole: AdminRole.housekeeping,
       seenAt: DateTime.now().subtract(const Duration(minutes: 297)),
       onTheWayAt: DateTime.now().subtract(const Duration(minutes: 293)),
       rescuerCalledAt: DateTime.now().subtract(const Duration(minutes: 292)),
@@ -712,6 +802,7 @@ class AppState extends ChangeNotifier {
       covered: true,
       stage: Stage.resolved,
       handler: AppState.kamengAuthority,
+      handlerRole: AdminRole.housekeeping,
       seenAt: DateTime.now().subtract(const Duration(minutes: 1557)),
       onTheWayAt: DateTime.now().subtract(const Duration(minutes: 1553)),
       onSiteAt: DateTime.now().subtract(const Duration(minutes: 1546)),
@@ -734,6 +825,7 @@ class AppState extends ChangeNotifier {
       covered: true,
       stage: Stage.resolved,
       handler: AppState.kamengAuthority,
+      handlerRole: AdminRole.housekeeping,
       seenAt: DateTime.now().subtract(const Duration(minutes: 118)),
       onTheWayAt: DateTime.now().subtract(const Duration(minutes: 115)),
       onSiteAt: DateTime.now().subtract(const Duration(minutes: 108)),
@@ -755,6 +847,7 @@ class AppState extends ChangeNotifier {
       covered: true,
       stage: Stage.resolved,
       handler: AppState.kamengAuthority,
+      handlerRole: AdminRole.housekeeping,
       seenAt: DateTime.now().subtract(const Duration(minutes: 418)),
       onTheWayAt: DateTime.now().subtract(const Duration(minutes: 414)),
       onSiteAt: DateTime.now().subtract(const Duration(minutes: 405)),
@@ -792,6 +885,7 @@ class AppState extends ChangeNotifier {
     final total = arrived.fold<int>(0, (a, r) => a + r.onSiteAt!.difference(r.time).inSeconds);
     return Duration(seconds: total ~/ arrived.length);
   }
+
   int safeThisWeek = 5;
 
   void setRole(Role r) {
@@ -838,15 +932,25 @@ class AppState extends ChangeNotifier {
     r.seenAt ??= now;
     r.onTheWayAt = now;
     r.stage = Stage.onTheWay;
+    _takeBy(r);
     if (role == Role.authority) startGps(); // follow the authority's real position
     _followApproach(r);
     notifyListeners();
+  }
+
+  /// The admin signed in on this phone takes the report: students and the
+  /// other admins see who is handling it.
+  void _takeBy(Report r) {
+    if (role != Role.authority) return;
+    r.handler = adminRole.person;
+    r.handlerRole = adminRole;
   }
 
   /// Marks arrival and records how far the authority's phone is from the pin.
   /// [auto]: detected from their location rather than tapped.
   void arrive(Report r, {double? metres, bool auto = false}) {
     _walks.remove(r.id)?.cancel();
+    if (r.stage.index < Stage.onTheWay.index) _takeBy(r);
     final now = DateTime.now();
     r.seenAt ??= now;
     r.onTheWayAt ??= now;
@@ -891,6 +995,7 @@ class AppState extends ChangeNotifier {
     r.rescuerCalledAt = null;
     r.reporterConfirmed = byReporter ? false : null;
     r.escalated = r.escalated || byReporter;
+    if (byReporter) r.escalatedAt = DateTime.now();
     notifyListeners();
   }
 
@@ -1020,7 +1125,10 @@ class AppState extends ChangeNotifier {
   /// soon after. Reaching the spot and resolving are left to the authority
   /// console (sign in as hostel authority to try them).
   void _demoResponse(Report r) {
-    if (r.place == authorityHostel) r.handler = kamengAuthority;
+    if (r.place == authorityHostel) {
+      r.handler = kamengAuthority;
+      r.handlerRole = AdminRole.housekeeping;
+    }
     Timer(const Duration(seconds: 12), () {
       if (r.stage == Stage.reported) markSeen([r]);
     });
@@ -1037,7 +1145,10 @@ class AppState extends ChangeNotifier {
       pos = zoneCentre(place.zone!);
     } else {
       final rnd = Random(place.label.hashCode);
-      pos = LatLng(campusCenter.latitude + (rnd.nextDouble() - 0.5) * 0.008, campusCenter.longitude + (rnd.nextDouble() - 0.5) * 0.012);
+      pos = LatLng(
+        campusCenter.latitude + (rnd.nextDouble() - 0.5) * 0.008,
+        campusCenter.longitude + (rnd.nextDouble() - 0.5) * 0.012,
+      );
     }
     return Loc(place.label, 'Chosen from the list', covered: covered, pos: pos);
   }

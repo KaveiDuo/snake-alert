@@ -24,6 +24,49 @@ void main() {
     expect((await SharedPreferences.getInstance()).getBool('sign_in_as_authority'), isTrue); // remembered
   });
 
+  test('Escalation ladder: Housekeeping, then security guard at 15 min, then warden at 30 min', () {
+    final s = AppState();
+    Report open(int minutesAgo) => Report(
+      id: 't$minutesAgo',
+      venom: Venom.unsure,
+      place: 'Kameng Hostel',
+      pos: const LatLng(26.1902, 91.7018),
+      covered: true,
+      time: DateTime.now().subtract(Duration(minutes: minutesAgo)),
+    );
+    expect(open(5).level, AdminRole.housekeeping);
+    expect(open(20).level, AdminRole.security);
+    expect(open(40).level, AdminRole.warden);
+    // Reaching the spot stops the climb.
+    final reached = open(40)..stage = Stage.onSite..onSiteAt = DateTime.now().subtract(const Duration(minutes: 30));
+    expect(reached.level, AdminRole.housekeeping);
+    expect(reached.needs(AdminRole.security), isFalse);
+    // The reporter saying it's still there goes straight to the security guard.
+    final r = s.hostelReports.firstWhere((x) => x.stage == Stage.seen && !x.flagged);
+    s.setOnTheWay(r);
+    s.arrive(r);
+    s.resolve(r, outcome: Outcome.notFound, searched: const ['Drains']);
+    s.reopen(r, byReporter: true);
+    expect(r.level, AdminRole.security);
+    expect(r.needs(AdminRole.security), isTrue);
+    expect(r.needs(AdminRole.warden), isFalse);
+  });
+
+  test('Each admin is alerted once about reports escalated to their role; taking one shows who has it', () {
+    final s = AppState()..role = Role.authority;
+    expect(s.takeNewEscalations(), isEmpty); // Housekeeping gets new reports, not escalations
+    s.setAdminRole(AdminRole.security);
+    final first = s.takeNewEscalations();
+    expect(first, isNotEmpty);
+    expect(s.takeNewEscalations(), isEmpty); // not alerted twice
+    s.setAdminRole(AdminRole.warden);
+    expect(s.takeNewEscalations().every((r) => r.level == AdminRole.warden), isTrue);
+    s.setAdminRole(AdminRole.security);
+    final r = s.escalatedToMe.first;
+    s.setOnTheWay(r);
+    expect(r.handlerName, 'R. Das (Security guard)');
+  });
+
   testWidgets('On the way: "At the spot" fills in by itself when the admin gets there', (tester) async {
     final s = AppState()..role = Role.authority;
     final r = s.hostelReports.firstWhere((r) => r.stage == Stage.seen);

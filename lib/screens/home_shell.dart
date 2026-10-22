@@ -210,7 +210,11 @@ class _HomeTab extends StatelessWidget {
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
-                                      latest.flagged ? 'Hostel security guard alerted' : latest.statusLine,
+                                      latest.flagged
+                                          ? (latest.level == AdminRole.warden
+                                                ? 'Security guard and warden alerted'
+                                                : 'Hostel security guard alerted')
+                                          : latest.statusLine,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: ft(12.5, w: 600, color: latest.flagged ? C.redText : C.sub),
