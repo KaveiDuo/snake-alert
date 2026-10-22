@@ -129,7 +129,11 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
     // the ones escalated to them (and any they took).
     final mine = s.adminReports;
     final inTab = mine.where((r) => r.safe == resolvedTab).toList();
-    final shown = inTab.where(s.consoleFilter.matches).toList()
+    // The security guard and the warden only deal with overdue reports, so
+    // they get no type filters: just Overdue (and everything once resolved).
+    final focus = s.adminRole != AdminRole.housekeeping;
+    final filter = !focus ? s.consoleFilter : (resolvedTab ? ConsoleFilter.all : ConsoleFilter.overdue);
+    final shown = inTab.where(filter.matches).toList()
       // Open: flagged first, then oldest first. Resolved: newest first.
       ..sort((a, b) {
         if (resolvedTab) return b.time.compareTo(a.time);
@@ -139,13 +143,15 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
         return c != 0 ? c : a.time.compareTo(b.time);
       });
     final openCount = mine.where((r) => !r.safe).length;
-    final filters = [
-      ConsoleFilter.all,
-      ConsoleFilter.venomous,
-      ConsoleFilter.nonVenomous,
-      ConsoleFilter.unsure,
-      if (!resolvedTab && inTab.any((r) => r.flagged)) ConsoleFilter.overdue,
-    ];
+    final filters = focus
+        ? [if (!resolvedTab) ConsoleFilter.overdue]
+        : [
+            ConsoleFilter.all,
+            ConsoleFilter.venomous,
+            ConsoleFilter.nonVenomous,
+            ConsoleFilter.unsure,
+            if (!resolvedTab && inTab.any((r) => r.flagged)) ConsoleFilter.overdue,
+          ];
     return DarkPage(
       body: LiveClock(
         builder: (context) => Column(
@@ -192,8 +198,8 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
                       child: _FilterChip(
                         f,
                         count: inTab.where(f.matches).length,
-                        selected: s.consoleFilter == f,
-                        onTap: () => s.setConsoleFilter(f),
+                        selected: filter == f,
+                        onTap: focus ? () {} : () => s.setConsoleFilter(f),
                       ),
                     ),
                 ],
@@ -691,14 +697,16 @@ class _Deadline extends StatelessWidget {
       _ when r.escalated && !r.safe => (
         Icons.report_rounded,
         C.redText,
-        '${r.reporter} says the snake is still there · escalated to ${_ladder(r.level)}',
+        AppScope.read(context).adminRole == AdminRole.housekeeping
+            ? '${r.reporter} says the snake is still there · escalated to ${_ladder(r.level)}'
+            : '${r.reporter} says the snake is still there',
       ),
       _ when r.overdue => (
         Icons.timer_off_outlined,
         C.redText,
-        AppScope.read(context).adminRole == AdminRole.warden
-            ? 'Overdue by ${mins(-r.dueIn)} · nobody has reached the spot'
-            : 'Overdue by ${mins(-r.dueIn)} · escalated to ${_ladder(r.level)}',
+        AppScope.read(context).adminRole == AdminRole.housekeeping
+            ? 'Overdue by ${mins(-r.dueIn)} · escalated to ${_ladder(r.level)}'
+            : 'Overdue by ${mins(-r.dueIn)}',
       ),
       _ when r.stage == Stage.onTheWay && r.distanceLeft != null => (
         Icons.near_me_rounded,
@@ -744,7 +752,6 @@ class _Deadline extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         line,
-        if (role == AdminRole.security && r.stage.index < Stage.onSite.index) ...[const SizedBox(height: 6), _BeforeYou(r)],
         if (reminder) ...[
           const SizedBox(height: 6),
           Row(
@@ -760,25 +767,28 @@ class _Deadline extends StatelessWidget {
             ],
           ),
         ],
-        const SizedBox(height: 6),
-        Row(
-          children: [
-            Icon(taken ? Icons.how_to_reg_rounded : Icons.person_off_outlined, size: 16, color: taken ? C.greenText : C.sub),
-            const SizedBox(width: 7),
-            Expanded(
-              child: Text(
-                taken
-                    ? 'Taken by ${r.handlerName}'
-                    : switch (role) {
-                        AdminRole.warden => 'Not taken yet · call the team below',
-                        AdminRole.security => 'Not taken yet · call Housekeeping to get it done',
-                        AdminRole.housekeeping => 'Not taken yet · tap “On my way” to take it',
-                      },
-                style: ft(12.5, w: 600, color: taken ? C.greenText : C.sub, height: 1.35),
+        // Only who has it; the security guard and the warden don't need the "not taken" hint.
+        if (taken || role == AdminRole.housekeeping) ...[
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Icon(taken ? Icons.how_to_reg_rounded : Icons.person_off_outlined, size: 16, color: taken ? C.greenText : C.sub),
+              const SizedBox(width: 7),
+              Expanded(
+                child: Text(
+                  taken
+                      ? 'Taken by ${r.handlerName}'
+                      : switch (role) {
+                          AdminRole.warden => 'Not taken yet · call the team below',
+                          AdminRole.security => 'Not taken yet · call Housekeeping to get it done',
+                          AdminRole.housekeeping => 'Not taken yet · tap “On my way” to take it',
+                        },
+                  style: ft(12.5, w: 600, color: taken ? C.greenText : C.sub, height: 1.35),
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
       ],
     );
   }
@@ -1567,45 +1577,6 @@ String _response(Report r, AdminRole who) {
     return 'Hasn’t followed up yet';
   }
   return 'No response';
-}
-
-/// For the security guard: what Housekeeping did before the report reached
-/// them, and a quick call to check whether they're already going.
-class _BeforeYou extends StatelessWidget {
-  final Report r;
-  const _BeforeYou(this.r);
-  @override
-  Widget build(BuildContext context) {
-    const hk = AdminRole.housekeeping;
-    final going = r.handlerRole == hk && r.onTheWayAt != null;
-    final color = going ? C.greenText : const Color(0xFFFFC46B);
-    return Container(
-      padding: const EdgeInsets.fromLTRB(10, 8, 6, 8),
-      decoration: BoxDecoration(
-        color: C.card2,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: C.line2),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.cleaning_services_outlined, size: 16, color: color),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Before you · ${hk.label}', style: ft(12.5, w: 700)),
-                Text(
-                  '${hk.person} · ${_response(r, hk)[0].toLowerCase()}${_response(r, hk).substring(1)}',
-                  style: ft(12, w: 600, color: color, height: 1.3),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 /// The security guard's actions on an escalated report: they don't go to the
