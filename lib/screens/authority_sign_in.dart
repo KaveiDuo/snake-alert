@@ -20,7 +20,10 @@ class _Steps extends StatelessWidget {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             height: 3,
-            decoration: BoxDecoration(color: i < done ? C.green : const Color(0xFF2A2A2A), borderRadius: BorderRadius.circular(2)),
+            decoration: BoxDecoration(
+              color: i < done ? C.green : const Color(0xFF2A2A2A),
+              borderRadius: BorderRadius.circular(2),
+            ),
           ),
         ),
       ],
@@ -71,6 +74,7 @@ class _AuthorityPhoneScreenState extends State<AuthorityPhoneScreen> {
   }
 
   int get _digits => _ctrl.text.replaceAll(RegExp(r'\D'), '').length;
+  AdminRole? get _account => _digits == 10 ? AdminRole.byPhone(_ctrl.text) : null;
 
   @override
   Widget build(BuildContext context) {
@@ -122,15 +126,89 @@ class _AuthorityPhoneScreenState extends State<AuthorityPhoneScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
+          // The number decides whose account this is.
+          if (_digits == 10)
+            Row(
+              children: [
+                Icon(
+                  _account != null ? Icons.verified_user_outlined : Icons.error_outline_rounded,
+                  size: 16,
+                  color: _account != null ? C.greenText : C.redText,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    _account != null
+                        ? 'Registered: ${_account!.label} · ${_account!.person}'
+                        : 'This number isn’t registered as an admin. Ask the Hostel Affairs office to add it.',
+                    style: ft(12.5, w: 600, color: _account != null ? C.greenText : C.redText, height: 1.35),
+                  ),
+                ),
+              ],
+            ),
+          const SizedBox(height: 14),
           Btn(
             'Send code on SMS',
-            onTap: _digits == 10
-                ? () => Navigator.push(context, MaterialPageRoute(builder: (_) => AuthorityCodeScreen(phone: _ctrl.text)))
+            onTap: _account != null
+                ? () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => AuthorityCodeScreen(phone: _ctrl.text, account: _account!),
+                    ),
+                  )
                 : null,
           ),
           const SizedBox(height: 22),
           Text(_smallPrint, style: ft(11, color: C.faint, height: 1.6)),
+          const SizedBox(height: 22),
+          // Demo only: each admin has their own number; tap one to sign in as them.
+          Text('DEMO ACCOUNTS', style: ft(11, w: 700, color: C.muted, ls: 1.1)),
+          const SizedBox(height: 8),
+          for (final r in AdminRole.values)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Material(
+                color: C.card,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  side: BorderSide(color: _account == r ? C.green : C.line),
+                ),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(14),
+                  onTap: () {
+                    _userTyped = true;
+                    _typer?.cancel();
+                    _ctrl.value = TextEditingValue(
+                      text: r.phone,
+                      selection: TextSelection.collapsed(offset: r.phone.length),
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('${r.label} · ${r.person}', style: ft(14, w: 600)),
+                              Text('+91 ${r.phone}', style: ft(12.5, color: C.muted)),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          _account == r ? Icons.check_circle_rounded : Icons.chevron_right_rounded,
+                          color: _account == r ? C.green : C.muted,
+                          size: 20,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          const SizedBox(height: 20),
         ],
       ),
     );
@@ -140,7 +218,8 @@ class _AuthorityPhoneScreenState extends State<AuthorityPhoneScreen> {
 /// Step 2 — the SMS code fills itself in, turns green, then signs in.
 class AuthorityCodeScreen extends StatefulWidget {
   final String phone;
-  const AuthorityCodeScreen({super.key, required this.phone});
+  final AdminRole account;
+  const AuthorityCodeScreen({super.key, required this.phone, required this.account});
   @override
   State<AuthorityCodeScreen> createState() => _AuthorityCodeScreenState();
 }
@@ -177,7 +256,9 @@ class _AuthorityCodeScreenState extends State<AuthorityCodeScreen> {
 
   void _signIn() {
     if (!mounted) return;
-    AppScope.read(context).setRole(Role.authority);
+    final s = AppScope.read(context);
+    s.setAdminRole(widget.account); // signed in to this person's own account
+    s.setRole(Role.authority);
     Navigator.of(context).pushAndRemoveUntil(
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 400),
@@ -208,6 +289,8 @@ class _AuthorityCodeScreenState extends State<AuthorityCodeScreen> {
           Text('Enter the 6-digit code', style: ft(22, w: 700)),
           const SizedBox(height: 10),
           Text('Sent to +91 ${widget.phone} · valid 10 min', style: ft(13, color: C.muted)),
+          const SizedBox(height: 4),
+          Text('Signing in as ${widget.account.label} · ${widget.account.person}', style: ft(13, w: 600, color: C.greenText)),
           const SizedBox(height: 20),
           AnimatedContainer(
             duration: const Duration(milliseconds: 250),
@@ -215,7 +298,10 @@ class _AuthorityCodeScreenState extends State<AuthorityCodeScreen> {
             decoration: BoxDecoration(
               color: C.card,
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: _verified ? C.green : (_filled > 0 ? const Color(0xFF3A3A3A) : C.line), width: _verified ? 1.5 : 1),
+              border: Border.all(
+                color: _verified ? C.green : (_filled > 0 ? const Color(0xFF3A3A3A) : C.line),
+                width: _verified ? 1.5 : 1,
+              ),
             ),
             child: Stack(
               alignment: Alignment.center,

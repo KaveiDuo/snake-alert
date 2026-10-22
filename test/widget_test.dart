@@ -6,6 +6,7 @@ import 'package:snake_watch/data/app_state.dart';
 import 'package:snake_watch/data/scanner.dart';
 import 'package:snake_watch/data/species.dart';
 import 'package:snake_watch/main.dart';
+import 'package:snake_watch/screens/authority_sign_in.dart';
 import 'package:snake_watch/screens/notifications.dart';
 import 'package:snake_watch/screens/sighting_detail.dart';
 
@@ -97,6 +98,21 @@ void main() {
     expect(s.takeNewEscalations(), contains(r));
     expect(s.takeNewEscalations(), isEmpty); // once per reminder
     expect(r.alertedAt(AdminRole.warden).difference(r.alertedAt(AdminRole.security)), escalateEvery);
+  });
+
+  testWidgets('Admin sign-in: the phone number decides the account; unregistered numbers are refused', (t) async {
+    expect(AdminRole.byPhone('98765 43210'), AdminRole.housekeeping);
+    expect(AdminRole.byPhone('9876543211'), AdminRole.security);
+    expect(AdminRole.byPhone('+91 98765 43212'.substring(4)), AdminRole.warden);
+    expect(AdminRole.byPhone('91234 56780'), isNull);
+    final s = AppState();
+    await t.pumpWidget(AppScope(state: s, child: const MaterialApp(home: AuthorityPhoneScreen())));
+    await t.tap(find.text('Security guard · R. Das'));
+    await t.pump();
+    expect(find.text('Registered: Security guard · R. Das'), findsOneWidget);
+    await t.enterText(find.byType(TextField), '91234 56780');
+    await t.pump();
+    expect(find.textContaining('isn’t registered'), findsOneWidget);
   });
 
   testWidgets('On the way: "At the spot" fills in by itself when the admin gets there', (tester) async {

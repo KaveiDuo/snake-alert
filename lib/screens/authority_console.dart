@@ -163,7 +163,7 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
                 children: [
                   Expanded(child: Text(s.authorityHostel, style: ft(23, w: 700))),
                   // Who is signed in: the role decides which escalations alert you.
-                  _RolePill(s.adminRole, onTap: () => _pickRole(context)),
+                  _RolePill(s.adminRole),
                   IconButton(
                     tooltip: 'How Snake Alert works for admins',
                     onPressed: () => _rulesSheet(context),
@@ -814,115 +814,25 @@ IconData _roleIcon(AdminRole r) => switch (r) {
   AdminRole.warden => Icons.badge_outlined,
 };
 
-String _roleHelp(AdminRole r) => switch (r) {
-  AdminRole.housekeeping => 'Gets every new report first and sees all reports',
-  AdminRole.security =>
-    'Follows up: sees reports Housekeeping didn’t reach in ${escalateEvery.inMinutes} min, calls them, and calls the warden if they can’t',
-  AdminRole.warden => 'Oversees: sees reports nobody reached in ${escalateEvery.inMinutes * 2} min and follows up with the team',
-};
-
-/// Small pill next to the hostel name showing who is signed in.
+/// Small pill next to the hostel name: whose account is signed in. The role
+/// comes from the phone number they signed in with and can't be switched here.
 class _RolePill extends StatelessWidget {
   final AdminRole role;
-  final VoidCallback onTap;
-  const _RolePill(this.role, {required this.onTap});
+  const _RolePill(this.role);
   @override
-  Widget build(BuildContext context) => Material(
-    color: C.card,
-    shape: StadiumBorder(side: BorderSide(color: C.line2)),
-    child: InkWell(
-      customBorder: const StadiumBorder(),
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(10, 6, 8, 6),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(_roleIcon(role), size: 15, color: C.green),
-            const SizedBox(width: 6),
-            Text(role.label, style: ft(12.5, w: 600, color: C.sub)),
-            const Icon(Icons.expand_more_rounded, size: 18, color: C.muted),
-          ],
-        ),
-      ),
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.fromLTRB(10, 6, 12, 6),
+    decoration: ShapeDecoration(
+      color: C.card,
+      shape: StadiumBorder(side: BorderSide(color: C.line2)),
     ),
-  );
-}
-
-/// Demo: choose which admin you are, to see what each one is alerted about.
-void _pickRole(BuildContext context) {
-  final s = AppScope.read(context);
-  showModalBottomSheet<void>(
-    context: context,
-    backgroundColor: C.card,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-    builder: (ctx) => SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(color: const Color(0xFF3A3A3A), borderRadius: BorderRadius.circular(2)),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text('Signed in as', style: ft(20, w: 700)),
-            const SizedBox(height: 4),
-            Text(
-              'Everyone uses the same portal. Your role decides who is alerted, and when.',
-              style: ft(13, color: C.muted, height: 1.4),
-            ),
-            const SizedBox(height: 14),
-            for (final (i, r) in AdminRole.values.indexed) ...[
-              Material(
-                color: r == s.adminRole ? C.greenSoft : C.card2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(color: r == s.adminRole ? C.green : C.line2, width: r == s.adminRole ? 1.5 : 1),
-                ),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(16),
-                  onTap: () {
-                    s.setAdminRole(r);
-                    Navigator.pop(ctx);
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 14,
-                          backgroundColor: C.bg,
-                          child: Text('${i + 1}', style: ft(13, w: 700, color: C.green)),
-                        ),
-                        const SizedBox(width: 12),
-                        Icon(_roleIcon(r), size: 22, color: C.green),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('${r.label} · ${r.person}', style: ft(15, w: 700)),
-                              Text(_roleHelp(r), style: ft(12.5, color: C.muted, height: 1.35)),
-                            ],
-                          ),
-                        ),
-                        if (r == s.adminRole) const Icon(Icons.check_circle_rounded, color: C.green, size: 20),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-            ],
-          ],
-        ),
-      ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(_roleIcon(role), size: 15, color: C.green),
+        const SizedBox(width: 6),
+        Text(role.label, style: ft(12.5, w: 600, color: C.sub)),
+      ],
     ),
   );
 }
@@ -1384,11 +1294,16 @@ class AuthorityProfile extends StatelessWidget {
           const SizedBox(height: 16),
           IdCard(
             avatar: ClipOval(
-              child: Image.asset(switch (s.adminRole) {
-                AdminRole.housekeeping => 'assets/images/avatar_housekeeping.jpg',
-                AdminRole.security => 'assets/images/avatar_security.jpg',
-                AdminRole.warden => 'assets/images/avatar_authority.jpg',
-              }, width: 88, height: 88, fit: BoxFit.cover),
+              child: Image.asset(
+                switch (s.adminRole) {
+                  AdminRole.housekeeping => 'assets/images/avatar_housekeeping.jpg',
+                  AdminRole.security => 'assets/images/avatar_security.jpg',
+                  AdminRole.warden => 'assets/images/avatar_authority.jpg',
+                },
+                width: 88,
+                height: 88,
+                fit: BoxFit.cover,
+              ),
             ),
             name: s.adminRole.person,
             lines: ['${s.adminRole.label} · ${s.authorityHostel}'],
@@ -1400,20 +1315,11 @@ class AuthorityProfile extends StatelessWidget {
             InfoRow(
               Icons.call_outlined,
               'Registered phone',
-              '+91 98765 43210',
+              '+91 ${s.adminRole.phone}',
               editable: false,
               trailing: const Tag('VERIFIED', fg: C.green, bg: C.greenSoft),
             ),
-            InfoRow(
-              _roleIcon(s.adminRole),
-              'Role',
-              s.adminRole.label,
-              editable: false,
-              trailing: GestureDetector(
-                onTap: () => _pickRole(context),
-                child: Text('Switch', style: ft(14, w: 600, color: C.green)),
-              ),
-            ),
+            InfoRow(_roleIcon(s.adminRole), 'Role', s.adminRole.label, editable: false),
             InfoRow(Icons.apartment_outlined, 'Hostel', s.authorityHostel.replaceAll(' Hostel', ''), editable: false),
             const InfoRow(Icons.apartment_outlined, 'Office', 'Kameng Hostel · Ground floor'),
           ]),

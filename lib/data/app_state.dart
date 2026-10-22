@@ -197,13 +197,25 @@ const respondWithin = Duration(minutes: 15);
 /// [escalateEvery] (or the reporter says the snake is still there) it is
 /// escalated to the security guard, and after another [escalateEvery] to the
 /// warden too. Each step is a separate alert to that person.
+///
+/// Each admin has their own account: the phone number they sign in with
+/// (registered by the Hostel Affairs office) decides their role.
 enum AdminRole {
-  housekeeping('Housekeeping', 'M. Kalita'),
-  security('Security guard', 'R. Das'),
-  warden('Warden', 'Dr. P. Saikia');
+  housekeeping('Housekeeping', 'M. Kalita', '98765 43210'),
+  security('Security guard', 'R. Das', '98765 43211'),
+  warden('Warden', 'Dr. P. Saikia', '98765 43212');
 
-  const AdminRole(this.label, this.person);
-  final String label, person;
+  const AdminRole(this.label, this.person, this.phone);
+  final String label, person, phone;
+
+  /// The account registered to this number, if any.
+  static AdminRole? byPhone(String number) {
+    final digits = number.replaceAll(RegExp(r'\D'), '');
+    for (final r in values) {
+      if (r.phone.replaceAll(' ', '') == digits) return r;
+    }
+    return null;
+  }
 }
 
 const escalateEvery = Duration(minutes: 15);
