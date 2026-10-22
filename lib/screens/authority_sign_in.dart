@@ -54,15 +54,35 @@ class _AuthorityPhoneScreenState extends State<AuthorityPhoneScreen> {
   final _ctrl = TextEditingController();
   final _focus = FocusNode();
   late AdminRole _post = widget.post ?? AdminRole.housekeeping;
+  Timer? _typer;
+  bool _userTyped = false;
 
   @override
   void initState() {
     super.initState();
     _ctrl.addListener(() => setState(() {}));
+    _typeDemo();
+  }
+
+  /// Demo: the first registered number for the chosen post types itself in
+  /// after a short pause. Stops as soon as you tap the field or type.
+  void _typeDemo() {
+    _typer?.cancel();
+    if (_userTyped) return;
+    final number = staffList.firstWhere((s) => s.post == _post).phone;
+    var i = 0;
+    _typer = Timer.periodic(const Duration(milliseconds: 75), (t) {
+      if (_userTyped || !mounted) return t.cancel();
+      if (t.tick < 7) return; // ~0.5 s pause before "typing"
+      i++;
+      _ctrl.value = TextEditingValue(text: number.substring(0, i), selection: TextSelection.collapsed(offset: i));
+      if (i >= number.length) t.cancel();
+    });
   }
 
   @override
   void dispose() {
+    _typer?.cancel();
     _ctrl.dispose();
     _focus.dispose();
     super.dispose();
@@ -72,10 +92,13 @@ class _AuthorityPhoneScreenState extends State<AuthorityPhoneScreen> {
   Staff? get _who => _digits == 10 ? Staff.byPhone(_ctrl.text) : null;
   bool get _ok => _who != null && _who!.post == _post;
 
-  void _choose(AdminRole r) => setState(() {
-    _post = r;
-    _ctrl.clear();
-  });
+  void _choose(AdminRole r) {
+    setState(() {
+      _post = r;
+      _ctrl.clear();
+    });
+    _typeDemo();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -150,6 +173,11 @@ class _AuthorityPhoneScreenState extends State<AuthorityPhoneScreen> {
                   child: TextField(
                     controller: _ctrl,
                     focusNode: _focus,
+                    onTap: () {
+                      _userTyped = true;
+                      _typer?.cancel();
+                    },
+                    onChanged: (_) => _userTyped = true,
                     keyboardType: TextInputType.phone,
                     cursorColor: C.green,
                     style: ft(15),
