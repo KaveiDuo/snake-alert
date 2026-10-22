@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>body{margin:0;background:#f0eee9;font-family:Figtree,system-ui,sans-serif}a{color:#1f7a45}a:hover{color:#145630}.dv-turn{padding:40px 44px 32px;border-bottom:1px solid rgba(0,0,0,.08)}.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 20px}.dv-tid{font:600 10px "JetBrains Mono",monospace;padding:3px 7px;background:#1a1a1a;color:#fff;border-radius:4px;text-decoration:none}.dv-tname{font:600 13px/1.2 Figtree,sans-serif;color:#1a1a1a}.dv-opts{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}.dv-oid{font:600 10.5px "JetBrains Mono",monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#1a1a1a;border-radius:5px;text-decoration:none}.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 Figtree,sans-serif;color:rgba(0,0,0,.55)}.dv-opt:target .dv-oid{background:#1f7a45;color:#fff}.dv-next{margin:22px 0 0;font:12px/1.5 Figtree,sans-serif;color:rgba(0,0,0,.5)}.sc::-webkit-scrollbar{width:0;height:0}@keyframes swpulse{0%{transform:scale(1);opacity:.5}70%{transform:scale(2.6);opacity:0}100%{transform:scale(2.6);opacity:0}}@keyframes swscan{0%{top:0}100%{top:100%}}</style></helmet>
+
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#0F0F0F"/><circle cx="50" cy="50" r="26" fill="#1FA97A"/><path d="M38 58c6-6 4-12 10-12s8 6 14 0" stroke="#0F0F0F" stroke-width="4" fill="none" stroke-linecap="round"/></svg></template>
+
+<section class="dv-turn" id="t1">
+<div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Snake Watch, dropped into the live app shell — green accent, Quick Access tile, 4-tab nav untouched</span></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="1a">
+<div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>Interactive — student app and warden app in one prototype</div>
+<div class="dv-jump" style="display:flex;gap:7px;flex-wrap:wrap;margin:0 0 4px">
+<div onClick="{{ jumpStudent }}" style="cursor:pointer;padding:7px 13px;border-radius:20px;font:600 11px Figtree,sans-serif;background:{{ jStudentBg }};color:{{ jStudentFg }};border:1px solid rgba(0,0,0,.14)">Student app</div>
+<div onClick="{{ jumpSignin }}" style="cursor:pointer;padding:7px 13px;border-radius:20px;font:600 11px Figtree,sans-serif;background:{{ jSigninBg }};color:{{ jSigninFg }};border:1px solid rgba(0,0,0,.14)">Sign-in screen</div>
+<div onClick="{{ jumpWLogin }}" style="cursor:pointer;padding:7px 13px;border-radius:20px;font:600 11px Figtree,sans-serif;background:{{ jWLoginBg }};color:{{ jWLoginFg }};border:1px solid rgba(0,0,0,.14)">Warden login</div>
+<div onClick="{{ jumpWarden }}" style="cursor:pointer;padding:7px 13px;border-radius:20px;font:600 11px Figtree,sans-serif;background:{{ jWardenBg }};color:{{ jWardenFg }};border:1px solid rgba(0,0,0,.14)">Warden console</div>
+</div>
+
+<div class="pf" style="width:398px;height:840px;background:#000;border-radius:40px;padding:9px;box-shadow:0 18px 50px rgba(0,0,0,.28)">
+<div class="pfsc" style="width:100%;height:100%;background:#0F0F0F;border-radius:32px;overflow:hidden;display:flex;flex-direction:column;position:relative;isolation:isolate">
+<div style="position:absolute;left:0;right:0;top:0;height:150px;background:linear-gradient(180deg,#132A1C 0%,rgba(15,15,15,0) 100%);pointer-events:none;z-index:-1"></div>
+
+<div style="height:16px;flex:none"></div>
+
+<!-- ================= HOME ================= -->
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0;position:relative">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px 16px;flex:none;position:relative">
+<div style="font-size:28px;font-weight:700;color:#fff;letter-spacing:-.4px">One<span style="color:#2FD46B">.</span></div>
+<div onClick="{{ goNotifs }}" style="cursor:pointer;width:42px;height:42px;border-radius:50%;background:#1C1C1C;display:flex;align-items:center;justify-content:center;position:relative">
+<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="1.7" stroke-linecap="round"><path d="M18 15V10a6 6 0 1 0-12 0v5l-1.6 2.6h15.2z"></path><path d="M10 20.2h4"></path></svg>
+<span style="position:absolute;top:8px;right:9px;width:8px;height:8px;border-radius:50%;background:{{ bellDot }};border:2px solid #1C1C1C"></span>
+</div>
+</div>
+
+<div class="sc" style="flex:1;overflow-y:auto;padding:0 16px 152px;position:relative">
+
+<!-- NEW: snake sighting alert card -->
+<div onClick="{{ goWatch }}" style="cursor:pointer;background:#1B1B1B;border:1px solid #3A2E14;border-radius:20px;padding:15px 16px;margin-bottom:12px;position:relative;overflow:hidden">
+<span style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#FFB020"></span>
+<div style="display:flex;align-items:center;gap:9px">
+<span style="font-size:17px;line-height:1">&#128013;</span>
+<span style="font-size:16.5px;font-weight:700;color:#fff">Snake Watch</span>
+<span style="font-size:11px;color:#6E6E6E">&#8226;</span>
+<span style="font-size:11.5px;font-weight:600;color:#FFB020;letter-spacing:.5px">{{ activeLabel }}</span>
+<span style="flex:1"></span>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6E6E6E" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"></path></svg>
+</div>
+<div style="font-size:18px;font-weight:400;color:#D8D8D8;margin-top:9px;line-height:1.3">{{ latestHeadline }}</div>
+<div style="font-size:12.5px;color:#8A8A8A;margin-top:5px">{{ latestMeta }}</div>
+</div>
+
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:15px 16px">
+<div style="display:flex;align-items:center;gap:10px">
+<span style="font-size:19px;line-height:1">&#128197;</span>
+<span style="font-size:16.5px;font-weight:700;color:#fff">Time Table</span>
+<span style="font-size:11px;color:#6E6E6E">&#8226;</span>
+<span style="font-size:11.5px;color:#8A8A8A;letter-spacing:.4px">7TH SEPTEMBER</span>
+<span style="flex:1"></span>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6E6E6E" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"></path></svg>
+</div>
+<div style="font-size:19px;color:#8A8A8A;margin-top:10px">No upcoming classes</div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:11px">
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:14px 14px 16px">
+<div style="display:flex;align-items:center;gap:9px">
+<span style="font-size:19px;line-height:1">&#127858;</span>
+<span style="font-size:16px;font-weight:700;color:#fff">Food</span>
+<span style="flex:1"></span>
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6E6E6E" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"></path></svg>
+</div>
+<div style="font-size:10.5px;color:#8A8A8A;letter-spacing:.4px;margin-top:12px">DINNER &#8226; ENDS 9:30 PM</div>
+<div style="font-size:13px;color:#EDEDED;line-height:1.7;margin-top:6px">1. Veg Kofta / Egg curry<br>2. Alo pata gobi matar<br>3. Chana Dal fry<br>4. Rice<br>5. Roti<br>7. Mandatory iteams</div>
+</div>
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:14px 14px 16px">
+<div style="display:flex;align-items:center;gap:9px">
+<span style="font-size:19px;line-height:1">&#128682;</span>
+<span style="font-size:16px;font-weight:700;color:#fff">Gatelog</span>
+<span style="flex:1"></span>
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6E6E6E" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"></path></svg>
+</div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:16px">
+<div style="border:1px solid #303030;border-radius:22px;padding:10px;text-align:center;font-size:13.5px;font-weight:500;color:#2FD46B">To City</div>
+<div style="border:1px solid #303030;border-radius:22px;padding:10px;text-align:center;font-size:13.5px;font-weight:500;color:#2FD46B">To Khoka</div>
+<div style="border:1px solid #303030;border-radius:22px;padding:10px;text-align:center;font-size:13.5px;font-weight:500;color:#2FD46B">Others</div>
+</div>
+</div>
+</div>
+
+<div style="font-size:22px;font-weight:700;color:#fff;margin:22px 2px 16px">Quick Access</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);row-gap:22px;column-gap:6px">
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:76px;padding:6px 2px"><span style="font-size:31px;line-height:1">&#128682;</span><span style="font-size:12px;color:#EDEDED;text-align:center;line-height:1.3">GateLog</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:76px;padding:6px 2px"><span style="font-size:31px;line-height:1;position:relative">&#129689;<span style="position:absolute;top:-1px;right:-4px;width:9px;height:9px;border-radius:50%;background:#3B82F6"></span></span><span style="font-size:12px;color:#EDEDED;text-align:center;line-height:1.3">Library Token</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:76px;padding:6px 2px"><span style="font-size:31px;line-height:1">&#128100;</span><span style="font-size:12px;color:#EDEDED;text-align:center;line-height:1.3">Contacts</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:76px;padding:6px 2px"><span style="font-size:31px;line-height:1">&#128662;</span><span style="font-size:12px;color:#EDEDED;text-align:center;line-height:1.3">Cab Sharing</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:76px;padding:6px 2px"><span style="font-size:31px;line-height:1">&#127978;</span><span style="font-size:12px;color:#EDEDED;text-align:center;line-height:1.3">SAC Room Booking</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:76px;padding:6px 2px"><span style="font-size:31px;line-height:1">&#128235;</span><span style="font-size:12px;color:#EDEDED;text-align:center;line-height:1.3">Complaints</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:76px;padding:6px 2px"><span style="font-size:31px;line-height:1">&#129520;</span><span style="font-size:12px;color:#EDEDED;text-align:center;line-height:1.3">Lost and Found</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:76px;padding:6px 2px"><span style="font-size:31px;line-height:1">&#128717;</span><span style="font-size:12px;color:#EDEDED;text-align:center;line-height:1.3">Buy and Sell</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:76px;padding:6px 2px"><span style="font-size:31px;line-height:1">&#127942;</span><span style="font-size:12px;color:#EDEDED;text-align:center;line-height:1.3">GC Score Board</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:76px;padding:6px 2px"><span style="font-size:31px;line-height:1">&#128225;</span><span style="font-size:12px;color:#EDEDED;text-align:center;line-height:1.3">LAN</span></div>
+<div onClick="{{ goWatch }}" style="cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:76px;padding:6px 2px;border-radius:16px"><span style="font-size:31px;line-height:1;position:relative">&#128013;<span style="position:absolute;top:-1px;right:-4px;width:9px;height:9px;border-radius:50%;background:#FFB020"></span></span><span style="font-size:12px;color:#EDEDED;text-align:center;line-height:1.3">Snake Watch</span></div>
+<div onClick="{{ goSpecies }}" style="cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:76px;padding:6px 2px;border-radius:16px"><span style="font-size:31px;line-height:1">&#128218;</span><span style="font-size:12px;color:#EDEDED;text-align:center;line-height:1.3">Snake Guide</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:76px;padding:6px 2px"><span style="font-size:31px;line-height:1">&#127973;</span><span style="font-size:12px;color:#EDEDED;text-align:center;line-height:1.3">Medical Section</span></div>
+</div>
+
+<div style="font-size:22px;font-weight:700;color:#fff;margin:26px 2px 16px">Quick Links</div>
+<div style="display:flex;flex-direction:column;gap:11px">
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:19px 18px;display:flex;align-items:center"><span style="flex:1;font-size:16px;font-weight:600;color:#EDEDED">Bus Route</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4E4E4E" stroke-width="2" stroke-linecap="round"><path d="M7 17L17 7M9 7h8v8"></path></svg></div>
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:19px 18px;display:flex;align-items:center"><span style="flex:1;font-size:16px;font-weight:600;color:#EDEDED">GateLog Feedback</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4E4E4E" stroke-width="2" stroke-linecap="round"><path d="M7 17L17 7M9 7h8v8"></path></svg></div>
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:19px 18px;display:flex;align-items:center"><span style="flex:1;font-size:16px;font-weight:600;color:#EDEDED">Academic SSO</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4E4E4E" stroke-width="2" stroke-linecap="round"><path d="M7 17L17 7M9 7h8v8"></path></svg></div>
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:19px 18px;display:flex;align-items:center"><span style="flex:1;font-size:16px;font-weight:600;color:#EDEDED">Academic Calendar</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4E4E4E" stroke-width="2" stroke-linecap="round"><path d="M7 17L17 7M9 7h8v8"></path></svg></div>
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:19px 18px;display:flex;align-items:center"><span style="flex:1;font-size:16px;font-weight:600;color:#EDEDED">Placement Stats</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4E4E4E" stroke-width="2" stroke-linecap="round"><path d="M7 17L17 7M9 7h8v8"></path></svg></div>
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:19px 18px;display:flex;align-items:center"><span style="flex:1;font-size:16px;font-weight:600;color:#EDEDED">Guest House</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4E4E4E" stroke-width="2" stroke-linecap="round"><path d="M7 17L17 7M9 7h8v8"></path></svg></div>
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:19px 18px;display:flex;align-items:center"><span style="flex:1;font-size:16px;font-weight:600;color:#EDEDED">SWC Website</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4E4E4E" stroke-width="2" stroke-linecap="round"><path d="M7 17L17 7M9 7h8v8"></path></svg></div>
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:19px 18px;display:flex;align-items:center"><span style="flex:1;font-size:16px;font-weight:600;color:#EDEDED">QuickLink</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4E4E4E" stroke-width="2" stroke-linecap="round"><path d="M7 17L17 7M9 7h8v8"></path></svg></div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<!-- ================= SNAKE WATCH ================= -->
+<sc-if value="{{ isWatch }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0">
+<div style="display:flex;align-items:center;gap:13px;padding:12px 18px 14px;flex:none">
+<div onClick="{{ goHome }}" style="cursor:pointer;width:38px;height:38px;border-radius:50%;background:#1C1C1C;display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"></path></svg></div>
+<div style="flex:1"><div style="font-size:19px;font-weight:700;color:#fff;line-height:1.15">Snake Watch</div><div style="font-size:11.5px;color:#8A8A8A;margin-top:2px">{{ activeSubtitle }}</div></div>
+<div onClick="{{ goSpecies }}" style="cursor:pointer;width:38px;height:38px;border-radius:50%;background:#1C1C1C;display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="1.7"><path d="M4 5h7v15H4zM11 5h9v15h-9z"></path></svg></div>
+</div>
+
+<div class="sc" style="flex:1;overflow-y:auto;padding:0 16px 26px">
+<div style="height:250px;border-radius:20px;overflow:hidden;border:1px solid #262626;background:#141414">
+<iframe src="snake-map.html" title="IITG campus map" style="width:100%;height:100%;border:0;display:block"></iframe>
+</div>
+
+<div onClick="{{ goReport }}" style="cursor:pointer;margin-top:12px;background:#17301F;border:1px solid #235536;border-radius:20px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+<div style="flex:1"><div style="font-size:15px;font-weight:600;color:#B6F0CD">Report a sighting</div><div style="font-size:11.5px;color:#7FBF97;margin-top:2px">Or tap the map above to mark the exact spot</div></div>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7FBF97" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"></path></svg>
+</div>
+
+<div style="font-size:11.5px;font-weight:600;color:#8A8A8A;letter-spacing:.7px;margin:20px 2px 10px">RECENT REPORTS</div>
+<sc-for list="{{ sightings }}" as="s" hint-placeholder-count="3">
+<div onClick="{{ s.open }}" style="cursor:pointer;background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:12px;display:flex;gap:12px;margin-bottom:10px;align-items:center">
+<div style="width:64px;height:64px;border-radius:15px;overflow:hidden;flex:none;position:relative;background:repeating-linear-gradient(135deg,#242424 0 7px,#2C2C2C 7px 14px)">
+<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:600 20px Figtree,sans-serif;color:#5E5E5E">?</div>
+<div style="position:absolute;inset:0;background:{{ s.img }}"></div>
+</div>
+<div style="flex:1;min-width:0">
+<div style="display:flex;align-items:center;gap:7px">
+<span style="width:8px;height:8px;border-radius:50%;background:{{ s.color }};flex:none"></span>
+<span style="font-size:14.5px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.name }}</span>
+</div>
+<div style="font-size:12px;color:#B0B0B0;margin-top:3px;line-height:1.35">{{ s.location }}</div>
+<div style="font-size:11px;color:#7A7A7A;margin-top:5px">{{ s.meta }}</div>
+</div>
+<div style="flex:none;padding:5px 9px;border-radius:11px;background:{{ s.badgeBg }};color:{{ s.badgeFg }};font-size:9.5px;font-weight:700;letter-spacing:.3px">{{ s.badge }}</div>
+</div>
+</sc-for>
+
+</div>
+</div>
+</sc-if>
+
+<!-- ================= REPORT ================= -->
+<sc-if value="{{ isReport }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0">
+<div style="display:flex;align-items:center;gap:13px;padding:12px 18px 14px;flex:none">
+<div onClick="{{ goWatch }}" style="cursor:pointer;width:38px;height:38px;border-radius:50%;background:#1C1C1C;display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"></path></svg></div>
+<div style="font-size:19px;font-weight:700;color:#fff">Report a sighting</div>
+</div>
+<div class="sc" style="flex:1;overflow-y:auto;padding:0 16px 26px">
+<div style="font-size:12.5px;color:#8A8A8A;line-height:1.55;margin-bottom:18px">{{ reportIntro }}</div>
+
+<div style="font-size:11.5px;font-weight:600;color:#8A8A8A;letter-spacing:.6px;margin:0 2px 9px">WHERE DID YOU SEE IT?</div>
+<div onClick="{{ openLoc }}" style="cursor:pointer;background:#1B1B1B;border:1px solid {{ locBorder }};border-radius:18px;padding:15px 16px;display:flex;align-items:center;gap:12px">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="1.8"><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11z"></path><circle cx="12" cy="10" r="2.4"></circle></svg>
+<span style="flex:1;font-size:14.5px;color:{{ locColor }}">{{ locLabel }}</span>
+<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6E6E6E" stroke-width="2" stroke-linecap="round"><path d="M5 9l7 7 7-7"></path></svg>
+</div>
+<div style="height:230px;border-radius:18px;overflow:hidden;border:1px solid #262626;background:#141414;margin-top:10px">
+<iframe src="snake-map.html?mode=pick" title="Mark the sighting location on the IITG campus map" style="width:100%;height:100%;border:0;display:block"></iframe>
+</div>
+<div style="margin-top:8px;background:{{ pinBg }};border:1px solid {{ pinBorder }};border-radius:16px;padding:11px 14px;display:flex;align-items:center;gap:10px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{ pinIcon }}" stroke-width="1.9" style="flex:none"><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11z"></path><circle cx="12" cy="10" r="2.4"></circle></svg>
+<span style="flex:1;font-size:12px;color:{{ pinFg }};line-height:1.4">{{ pinText }}</span>
+</div>
+<input value="{{ spot }}" onChange="{{ onSpot }}" placeholder="Exact spot &#8212; e.g. near the cycle stand (optional)" style="width:100%;box-sizing:border-box;margin-top:10px;background:#1B1B1B;border:1px solid #262626;border-radius:18px;padding:14px 16px;font:400 13.5px Figtree,sans-serif;color:#fff;outline:none">
+
+<div style="margin-top:10px;background:{{ recipientBg }};border:1px solid {{ recipientBorder }};border-radius:16px;padding:11px 14px;display:flex;align-items:center;gap:10px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{ recipientIcon }}" stroke-width="1.9" style="flex:none"><path d="M4 5.5h16v13H4z"></path><path d="M4 6l8 6 8-6"></path></svg>
+<span style="flex:1;font-size:12px;color:{{ recipientFg }};line-height:1.4">{{ recipientLabel }}</span>
+</div>
+
+<div style="font-size:11.5px;font-weight:600;color:#8A8A8A;letter-spacing:.6px;margin:22px 2px 9px">IS IT VENOMOUS?</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+<div onClick="{{ pickVen }}" style="cursor:pointer;background:{{ venBg }};border:1px solid {{ venBorder }};border-radius:18px;padding:13px 6px;text-align:center"><div style="width:10px;height:10px;border-radius:50%;background:#FF453A;margin:0 auto 7px"></div><div style="font-size:12px;font-weight:500;color:{{ venFg }}">Venomous</div></div>
+<div onClick="{{ pickNon }}" style="cursor:pointer;background:{{ nonBg }};border:1px solid {{ nonBorder }};border-radius:18px;padding:13px 6px;text-align:center"><div style="width:10px;height:10px;border-radius:50%;background:#2FD46B;margin:0 auto 7px"></div><div style="font-size:12px;font-weight:500;color:{{ nonFg }}">Non&#8209;venomous</div></div>
+<div onClick="{{ pickUnsure }}" style="cursor:pointer;background:{{ unsBg }};border:1px solid {{ unsBorder }};border-radius:18px;padding:13px 6px;text-align:center"><div style="width:10px;height:10px;border-radius:50%;background:#FFB020;margin:0 auto 7px"></div><div style="font-size:12px;font-weight:500;color:{{ unsFg }}">Not sure</div></div>
+</div>
+<div style="font-size:11px;color:#7A7A7A;margin:9px 2px 0;line-height:1.5">If you are not sure, pick <span style="color:#FFB020">Not sure</span> &#8212; the alert goes out as venomous by default.</div>
+
+<div style="display:flex;align-items:baseline;justify-content:space-between;margin:22px 2px 9px">
+<span style="font-size:11.5px;font-weight:600;color:#8A8A8A;letter-spacing:.6px">WHICH SNAKE?</span>
+</div>
+<div class="sc" style="display:flex;gap:10px;overflow-x:auto;padding:2px 16px 6px;margin:0 -16px">
+<sc-for list="{{ pickable }}" as="sp" hint-placeholder-count="4">
+<div onClick="{{ sp.pick }}" style="cursor:pointer;flex:none;width:106px">
+<div style="height:86px;border-radius:15px;overflow:hidden;position:relative;background:repeating-linear-gradient(135deg,#242424 0 7px,#2C2C2C 7px 14px);border:2px solid {{ sp.ring }}">
+<div style="position:absolute;inset:0;background:{{ sp.img }}"></div>
+</div>
+<div style="font-size:11.5px;font-weight:500;color:{{ sp.fg }};margin-top:6px;line-height:1.3">{{ sp.common }}</div>
+<div style="font-size:9.5px;color:#6E6E6E;font-style:italic">{{ sp.sci }}</div>
+</div>
+</sc-for>
+<div onClick="{{ pickNoSpecies }}" style="cursor:pointer;flex:none;width:106px">
+<div style="height:86px;border-radius:15px;background:{{ noSpBg }};border:2px dashed {{ noSpRing }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px">
+<div style="font:600 22px Figtree,sans-serif;color:{{ noSpFg }}">?</div>
+<div style="font-size:9.5px;color:{{ noSpHint }};line-height:1.2;text-align:center;padding:0 8px">no photo needed</div>
+</div>
+<div style="font-size:11.5px;font-weight:500;color:{{ noSpFg }};margin-top:6px">Couldn't tell</div>
+</div>
+</div>
+
+<div onClick="{{ goScan }}" style="cursor:pointer;margin-top:18px;background:#1B1B1B;border:1px dashed #333;border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="1.8"><rect x="3" y="6" width="18" height="14" rx="2.5"></rect><circle cx="12" cy="13" r="3.4"></circle><path d="M8.5 6l1.4-2h4.2L15.5 6"></path></svg>
+<span style="flex:1;font-size:13.5px;color:#DCDCDC">{{ photoLabel }}</span>
+<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6E6E6E" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"></path></svg>
+</div>
+
+<div onClick="{{ submit }}" style="cursor:pointer;margin-top:20px;background:{{ submitBg }};border-radius:20px;padding:17px;text-align:center;font-size:15px;font-weight:700;color:{{ submitFg }}">Report sighting</div>
+<div style="font-size:10.5px;color:#6E6E6E;text-align:center;margin-top:10px">Posted as Ananya S. &#183; 210102043@iitg.ac.in</div>
+</div>
+</div>
+</sc-if>
+
+<!-- ================= SUBMITTED ================= -->
+<sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0">
+<div style="display:flex;align-items:center;gap:13px;padding:12px 18px 6px;flex:none">
+<div onClick="{{ goHome }}" style="cursor:pointer;width:38px;height:38px;border-radius:50%;background:#1C1C1C;display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"></path></svg></div>
+</div>
+<div class="sc" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;justify-content:center;padding:0 22px 26px">
+<div style="width:70px;height:70px;border-radius:50%;background:#17301F;display:flex;align-items:center;justify-content:center;margin-bottom:22px"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="2.2" stroke-linecap="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div>
+<div style="font-size:24px;font-weight:700;color:#fff;line-height:1.25">Sighting reported</div>
+<div style="font-size:13.5px;color:#A8A8A8;margin-top:10px;line-height:1.55">Everyone nearby can now see the {{ doneWhere }} pin in Snake Watch.</div>
+<div style="margin-top:24px;display:flex;flex-direction:column;gap:10px">
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="2"><path d="M5 12.5l4 4 9-9"></path></svg><span style="font-size:13px;color:#DCDCDC">Students nearby notified</span></div>
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="2"><path d="M5 12.5l4 4 9-9"></path></svg><span style="font-size:13px;color:#DCDCDC">{{ doneRecipientLine }}</span></div>
+</div>
+<sc-if value="{{ waNeeded }}" hint-placeholder-val="{{ true }}">
+<a href="{{ waLink }}" target="_blank" rel="noopener" onClick="{{ markWaSent }}" style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:22px;background:{{ waBtnBg }};border-radius:20px;padding:16px;text-decoration:none;font-size:15px;font-weight:700;color:{{ waBtnFg }}">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="{{ waBtnFg }}" style="flex:none"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.5 14.2c-.2.6-1.3 1.2-1.8 1.2-.5 0-1.9-.2-4-1.6-2.2-1.5-3.4-3.7-3.5-4-.2-.4-.6-1.3-.4-2 .2-.7.8-1.2 1.1-1.3.3-.1.8-.1 1 .1l.9 1.6c.1.3 0 .5-.1.7l-.4.5c-.1.2-.2.3 0 .6.3.5.8 1.2 1.4 1.7.7.6 1.3.9 1.6 1 .2.1.4.1.6-.1l.6-.7c.2-.2.4-.2.6-.1l1.6.8c.2.1.3.5.3.6z"></path></svg>
+{{ waBtnLabel }}
+</a>
+<div style="font-size:11px;color:#6E6E6E;text-align:center;margin-top:9px;line-height:1.5">{{ waCaption }}</div>
+</sc-if>
+<sc-if value="{{ isRoadReport }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:20px;background:#1B1B1B;border:1px solid #262626;border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFB020" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.6V12l3 1.8"></path></svg><span style="font-size:12.5px;color:#DCDCDC;line-height:1.45">No warden covers this spot, so this pin expires on its own in <b style="color:#fff">3 days</b>.</span></div>
+</sc-if>
+<div style="display:flex;gap:10px;margin-top:16px">
+<div onClick="{{ goHome }}" style="cursor:pointer;flex:1;background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:16px;text-align:center;font-size:14.5px;font-weight:600;color:#EDEDED">Home</div>
+<div onClick="{{ goWatch }}" style="cursor:pointer;flex:1;background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:16px;text-align:center;font-size:14.5px;font-weight:600;color:#EDEDED">Snake Watch</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<!-- ================= NOTIFICATIONS ================= -->
+<sc-if value="{{ isNotifs }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0;position:relative;z-index:1">
+<div style="display:flex;align-items:center;padding:14px 18px 16px;flex:none;border-bottom:1px solid #1F1F1F">
+<div onClick="{{ goHome }}" style="cursor:pointer;width:40px;height:40px;margin:-8px 0;display:flex;align-items:center;flex:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EDEDED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></div>
+<div style="flex:1;text-align:center;font-size:19px;font-weight:500;color:#fff">Notifications</div>
+<div style="width:40px;display:flex;justify-content:flex-end;flex:none"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#C8C8C8" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"></circle><path d="M17.4 12h2.8M3.8 12h2.8M12 6.6V3.8M12 17.4v2.8M15.82 8.18l1.98-1.98M6.2 17.8l1.98-1.98M15.82 15.82l1.98 1.98M6.2 6.2l1.98 1.98"></path></svg></div>
+</div>
+
+<div style="padding:16px 18px 0;flex:none">
+<div style="display:flex;background:#1C1C1C;border-radius:24px;padding:3px">
+<div onClick="{{ tabFocused }}" style="cursor:pointer;flex:1;text-align:center;padding:11px 0;border-radius:22px;background:{{ focBg }};font-size:14.5px;font-weight:{{ focWeight }};color:{{ focFg }}">Focused</div>
+<div onClick="{{ tabGeneral }}" style="cursor:pointer;flex:1;text-align:center;padding:11px 0;border-radius:22px;background:{{ genBg }};font-size:14.5px;font-weight:{{ genWeight }};color:{{ genFg }}">General</div>
+</div>
+</div>
+
+<div class="sc" style="display:flex;gap:9px;overflow-x:auto;padding:14px 18px 4px;flex:none">
+<sc-for list="{{ cats }}" as="c" hint-placeholder-count="5">
+<div onClick="{{ c.pick }}" style="cursor:pointer;flex:none;padding:9px 17px;border-radius:20px;background:{{ c.bg }};border:1px solid {{ c.border }};font-size:13.5px;font-weight:{{ c.weight }};color:{{ c.fg }};white-space:nowrap">{{ c.label }}</div>
+</sc-for>
+</div>
+
+<div class="sc" style="flex:1;overflow-y:auto;padding:12px 16px 26px">
+<sc-if value="{{ notifsEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="padding:120px 0 0;display:flex;flex-direction:column;align-items:center;gap:16px">
+<svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="#4E4E4E" stroke-width="1.5" stroke-linecap="round"><path d="M18 15V10a6 6 0 0 0-9.3-5"></path><path d="M6 9.6V15l-1.6 2.6h13"></path><path d="M10 20.2h4"></path><path d="M3.5 3.5l17 17"></path></svg>
+<div style="font-size:16px;color:#7A7A7A">No notifications found</div>
+</div>
+</sc-if>
+<sc-for list="{{ notifs }}" as="n" hint-placeholder-count="5">
+<div onClick="{{ n.open }}" style="cursor:pointer;background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:13px 15px;margin-bottom:10px;position:relative;overflow:hidden">
+<span style="position:absolute;left:0;top:0;bottom:0;width:3px;background:{{ n.accent }}"></span>
+<div style="display:flex;align-items:center;gap:8px">
+<span style="font-size:11px;font-weight:700;color:{{ n.accent }};letter-spacing:.4px">{{ n.tag }}</span>
+<span style="font-size:10.5px;color:#6E6E6E">&#183;</span>
+<span style="font-size:10.5px;color:#7A7A7A">{{ n.time }}</span>
+<span style="flex:1"></span>
+<sc-if value="{{ n.unread }}" hint-placeholder-val="{{ false }}"><span style="width:7px;height:7px;border-radius:50%;background:#FF453A"></span></sc-if>
+</div>
+<div style="font-size:14.5px;font-weight:700;color:#fff;margin-top:7px;line-height:1.3">{{ n.title }}</div>
+<div style="font-size:12.5px;color:#B0B0B0;margin-top:4px;line-height:1.5">{{ n.body }}</div>
+</div>
+</sc-for>
+<sc-if value="{{ notifsAny }}" hint-placeholder-val="{{ true }}"><div style="font-size:11px;color:#6E6E6E;line-height:1.55;margin:6px 2px">Snake Watch alerts can be turned off in Profile &#8250; Notification preferences.</div></sc-if>
+</div>
+</div>
+</sc-if>
+
+<!-- ================= SPECIES GUIDE ================= -->
+<sc-if value="{{ isSpecies }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0">
+<div style="display:flex;align-items:center;gap:13px;padding:12px 18px 14px;flex:none">
+<div onClick="{{ goHome }}" style="cursor:pointer;width:38px;height:38px;border-radius:50%;background:#1C1C1C;display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"></path></svg></div>
+<div><div style="font-size:19px;font-weight:700;color:#fff;line-height:1.15">Snake Guide</div><div style="font-size:11.5px;color:#8A8A8A;margin-top:2px">8 species recorded on campus</div></div>
+</div>
+<div class="sc" style="flex:1;overflow-y:auto;padding:0 16px 26px">
+<div style="background:#1B1B1B;border:1px solid #3A2E14;border-radius:18px;padding:12px 14px;font-size:11.5px;color:#C9A778;line-height:1.55;margin-bottom:14px">Reference photos only &#8212; never handle a snake to identify it. Treat every unidentified snake as venomous.</div>
+<sc-for list="{{ speciesList }}" as="sp" hint-placeholder-count="8">
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:20px;overflow:hidden;margin-bottom:12px">
+<div style="height:148px;position:relative;background:repeating-linear-gradient(135deg,#242424 0 8px,#2C2C2C 8px 16px)">
+<div style="position:absolute;inset:0;background:{{ sp.img }}"></div>
+<div style="position:absolute;top:10px;left:10px;padding:5px 10px;border-radius:13px;background:{{ sp.badgeBg }};color:{{ sp.badgeFg }};font-size:10px;font-weight:700;letter-spacing:.3px">{{ sp.venomLabel }}</div>
+</div>
+<div style="padding:13px 15px 15px">
+<div style="font-size:15.5px;font-weight:700;color:#fff">{{ sp.common }}</div>
+<div style="font-size:11px;color:#7A7A7A;font-style:italic;margin-top:2px">{{ sp.sci }}</div>
+<div style="font-size:12.5px;color:#B0B0B0;line-height:1.55;margin-top:8px">{{ sp.blurb }}</div>
+<div style="font-size:9.5px;color:#5E5E5E;margin-top:9px">Photo: Wikimedia Commons</div>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<!-- ================= SCAN ================= -->
+<sc-if value="{{ isScan }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0">
+<div style="display:flex;align-items:center;gap:13px;padding:12px 18px 14px;flex:none">
+<div onClick="{{ goReport }}" style="cursor:pointer;width:38px;height:38px;border-radius:50%;background:#1C1C1C;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EDEDED" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></div>
+<div style="font-size:18px;font-weight:700;color:#fff">Identify snake</div>
+</div>
+
+<div style="flex:1;margin:0 16px;border-radius:20px;overflow:hidden;position:relative;background:repeating-linear-gradient(135deg,#181818 0 8px,#202020 8px 16px);border:1px solid #262626">
+<div style="position:absolute;inset:0;background:{{ scanImg }};opacity:{{ scanImgOpacity }}"></div>
+<div style="position:absolute;left:0;right:0;top:52px;text-align:center;opacity:{{ camHintOpacity }}"><span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#6E6E6E">camera viewfinder</span></div>
+<div style="position:absolute;left:26px;right:26px;top:86px;bottom:86px;border-radius:16px;box-shadow:0 0 0 2000px rgba(0,0,0,.35);overflow:hidden">
+<span style="position:absolute;left:0;top:0;width:26px;height:26px;border-top:3px solid #2FD46B;border-left:3px solid #2FD46B;border-radius:8px 0 0 0"></span>
+<span style="position:absolute;right:0;top:0;width:26px;height:26px;border-top:3px solid #2FD46B;border-right:3px solid #2FD46B;border-radius:0 8px 0 0"></span>
+<span style="position:absolute;left:0;bottom:0;width:26px;height:26px;border-bottom:3px solid #2FD46B;border-left:3px solid #2FD46B;border-radius:0 0 0 8px"></span>
+<span style="position:absolute;right:0;bottom:0;width:26px;height:26px;border-bottom:3px solid #2FD46B;border-right:3px solid #2FD46B;border-radius:0 0 8px 0"></span>
+<sc-if value="{{ isScanning }}" hint-placeholder-val="{{ false }}">
+<span style="position:absolute;left:0;right:0;height:2px;background:#2FD46B;box-shadow:0 0 18px 4px rgba(47,212,107,.55);animation:swscan 1.1s linear infinite"></span>
+</sc-if>
+</div>
+<sc-if value="{{ isScanning }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;right:0;bottom:22px;text-align:center;font-size:12.5px;color:#B6F0CD;font-weight:600">Matching against 8 campus species&#8230;</div>
+</sc-if>
+</div>
+
+<sc-if value="{{ scanCam }}" hint-placeholder-val="{{ true }}">
+<div style="flex:none;padding:18px 16px 22px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+<label style="cursor:pointer;width:76px;display:flex;flex-direction:column;align-items:center;gap:6px">
+<div style="width:48px;height:48px;border-radius:14px;background:#1B1B1B;border:1px solid #2E2E2E;display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"></rect><path d="M3 16l4.5-4.5 4 4 3-3L21 17"></path><circle cx="8.5" cy="8.5" r="1.4"></circle></svg></div>
+<span style="font-size:11px;font-weight:600;color:#B0B0B0;text-align:center">Gallery</span>
+<input type="file" accept="image/*" onChange="{{ onPickFile }}" style="display:none">
+</label>
+<label style="cursor:pointer;width:68px;height:68px;border-radius:50%;border:3px solid #fff;padding:4px;box-sizing:border-box;flex:none;display:block"><div style="width:100%;height:100%;border-radius:50%;background:#fff"></div><input type="file" accept="image/*" capture="environment" onChange="{{ onPickFile }}" style="display:none"></label>
+<div style="font-size:11px;color:#7A7A7A;width:76px;line-height:1.4;text-align:center">Keep 3 m back &#8212; zoom in instead</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ scanResult }}" hint-placeholder-val="{{ false }}">
+<div class="sc" style="flex:none;max-height:342px;overflow-y:auto;padding:14px 16px 24px">
+<div style="background:#1B1B1B;border:1px solid #303030;border-radius:20px;padding:13px;display:flex;gap:12px;align-items:center">
+<div style="width:68px;height:68px;border-radius:15px;overflow:hidden;flex:none;position:relative;background:repeating-linear-gradient(135deg,#242424 0 7px,#2C2C2C 7px 14px)"><div style="position:absolute;inset:0;background:{{ topImg }}"></div></div>
+<div style="flex:1;min-width:0">
+<div style="display:inline-block;padding:4px 9px;border-radius:11px;background:{{ topBadgeBg }};color:{{ topBadgeFg }};font-size:9.5px;font-weight:700;letter-spacing:.3px">{{ topVenom }}</div>
+<div style="font-size:15.5px;font-weight:700;color:#fff;margin-top:6px">{{ topCommon }}</div>
+<div style="font-size:11px;color:#7A7A7A;font-style:italic">{{ topSci }}</div>
+<div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+<div style="flex:1;height:5px;border-radius:3px;background:#2E2E2E;overflow:hidden"><div style="height:100%;width:{{ topConfidence }};background:#2FD46B"></div></div>
+<span style="font-size:11.5px;font-weight:700;color:#2FD46B">{{ topConfidence }}</span>
+</div>
+</div>
+</div>
+<div style="font-size:11px;color:#7A7A7A;line-height:1.5;margin:11px 2px">On-device match, not a diagnosis. If it doesn't look right, pick an alternative or report as <span style="color:#FFB020">Not sure</span>.</div>
+<div style="font-size:11px;font-weight:600;color:#8A8A8A;letter-spacing:.6px;margin:12px 2px 8px">OTHER POSSIBLE MATCHES</div>
+<sc-for list="{{ alternates }}" as="a" hint-placeholder-count="2">
+<div onClick="{{ a.pick }}" style="cursor:pointer;background:#1B1B1B;border:1px solid #262626;border-radius:16px;padding:10px;display:flex;gap:11px;align-items:center;margin-bottom:9px">
+<div style="width:46px;height:46px;border-radius:12px;overflow:hidden;flex:none;position:relative;background:repeating-linear-gradient(135deg,#242424 0 7px,#2C2C2C 7px 14px)"><div style="position:absolute;inset:0;background:{{ a.img }}"></div></div>
+<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:#fff">{{ a.common }}</div><div style="font-size:10.5px;color:#7A7A7A">{{ a.venomLabel }}</div></div>
+<span style="font-size:11.5px;font-weight:700;color:#7A7A7A">{{ a.conf }}</span>
+</div>
+</sc-for>
+<div onClick="{{ confirmTop }}" style="cursor:pointer;margin-top:8px;background:#2FD46B;border-radius:20px;padding:16px;text-align:center;font-size:14.5px;font-weight:700;color:#06210F">Use this in my report</div>
+<div onClick="{{ retake }}" style="cursor:pointer;margin-top:8px;padding:13px;text-align:center;font-size:13.5px;font-weight:600;color:#7A7A7A">Retake photo</div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<!-- ================= DETAIL ================= -->
+<sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+<div class="sc" style="flex:1;overflow-y:auto;min-height:0;padding-bottom:26px">
+<div style="height:226px;position:relative;background:repeating-linear-gradient(135deg,#242424 0 8px,#2C2C2C 8px 16px)">
+<sc-if value="{{ selNoPhoto }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:0;right:0;top:0;bottom:112px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px"><span style="font:600 28px Figtree,sans-serif;color:#5E5E5E">?</span><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#6E6E6E">no photo &#183; species not identified</span></div></sc-if>
+<div style="position:absolute;inset:0;background:{{ selImg }}"></div>
+<div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.55) 0,rgba(0,0,0,0) 38%,rgba(15,15,15,.96) 100%)"></div>
+<div onClick="{{ goDetailBack }}" style="cursor:pointer;position:absolute;top:14px;left:16px;width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"></path></svg></div>
+<div style="position:absolute;left:18px;right:18px;bottom:14px">
+<div style="display:inline-block;padding:5px 10px;border-radius:13px;background:{{ selBadgeBg }};color:{{ selBadgeFg }};font-size:10px;font-weight:700;letter-spacing:.3px">{{ selBadge }}</div>
+<div style="font-size:21px;font-weight:700;color:#fff;margin-top:8px;line-height:1.2">{{ selName }}</div>
+<div style="font-size:12px;color:#C0C0C0;margin-top:3px">{{ selLocation }}</div>
+</div>
+</div>
+
+<div style="padding:16px 16px 0">
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:15px 16px">
+<div style="font-size:13px;color:#DCDCDC;line-height:1.6">&ldquo;{{ selNote }}&rdquo;</div>
+<div style="font-size:11px;color:#7A7A7A;margin-top:10px">{{ selReporter }} &#183; {{ selTime }}</div>
+</div>
+
+<div style="font-size:11.5px;font-weight:600;color:#8A8A8A;letter-spacing:.6px;margin:22px 2px 12px">STATUS</div>
+<sc-for list="{{ selTimeline }}" as="t" hint-placeholder-count="3">
+<div style="display:flex;gap:13px">
+<div style="flex:none;display:flex;flex-direction:column;align-items:center;width:18px">
+<span style="width:11px;height:11px;border-radius:50%;background:{{ t.dot }};margin-top:4px"></span>
+<span style="flex:1;width:2px;background:{{ t.line }};min-height:{{ t.lineH }}"></span>
+</div>
+<div style="flex:1;padding-bottom:16px">
+<div style="font-size:13.5px;font-weight:600;color:{{ t.fg }}">{{ t.title }}</div>
+<div style="font-size:11px;color:#7A7A7A;margin-top:3px;line-height:1.45">{{ t.sub }}</div>
+</div>
+</div>
+</sc-for>
+
+<div style="background:#1B1B1B;border:1px solid #3A2E14;border-radius:18px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;margin-top:4px">
+<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#FFB020" stroke-width="1.9" stroke-linecap="round" style="flex:none;margin-top:1px"><path d="M12 4 2.5 20h19z"></path><path d="M12 10v4.5M12 17.3h.01"></path></svg>
+<div style="font-size:12.5px;color:#C9A778;line-height:1.55">{{ selAdvice }}</div>
+</div>
+
+<div onClick="{{ goSos }}" style="cursor:pointer;margin-top:12px;background:#1B1414;border:1px solid #4C1F20;border-radius:18px;padding:15px 16px;display:flex;align-items:center;gap:12px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF8A8E" stroke-width="1.9" stroke-linecap="round"><path d="M6.5 4h3l1.5 4-2 1.5a10 10 0 0 0 5.5 5.5L16 13l4 1.5v3a2 2 0 0 1-2.2 2A15 15 0 0 1 4.5 6.2 2 2 0 0 1 6.5 4z"></path></svg>
+<div style="flex:1"><div style="font-size:13.5px;font-weight:700;color:#FFD9DA">Someone was bitten?</div><div style="font-size:11px;color:#C9989A;margin-top:2px">Open emergency SOS</div></div>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9989A" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"></path></svg>
+</div>
+</div>
+</div>
+</sc-if>
+
+<!-- ================= SOS ================= -->
+<sc-if value="{{ isSos }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0;background:#150808;position:relative;z-index:2">
+<div style="display:flex;align-items:center;gap:13px;padding:12px 18px 10px;flex:none">
+<div onClick="{{ goRoot }}" style="cursor:pointer;width:38px;height:38px;border-radius:50%;background:#26100F;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF8A8E" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></div>
+<div style="font-size:19px;font-weight:700;color:#FFD9DA">Emergency SOS</div>
+</div>
+
+<sc-if value="{{ sosIdle }}" hint-placeholder-val="{{ true }}">
+<div class="sc" style="flex:1;overflow-y:auto;padding:6px 22px 24px;display:flex;flex-direction:column;align-items:center">
+<div style="font-size:13px;color:#DFB4B6;text-align:center;line-height:1.55;margin-bottom:24px">Hold the button to call IITG Hospital. Your location and the latest snake report go to the hospital and campus security at the same time.</div>
+<div onPointerDown="{{ holdStart }}" onPointerUp="{{ holdEnd }}" onPointerLeave="{{ holdEnd }}" style="cursor:pointer;width:200px;height:200px;border-radius:50%;background:conic-gradient(#FF453A {{ sosDeg }},#3A1415 0);display:flex;align-items:center;justify-content:center;flex:none;touch-action:none">
+<div style="width:172px;height:172px;border-radius:50%;background:#FF453A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;box-shadow:0 0 44px rgba(255,69,58,.38)">
+<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><path d="M6.5 4h3l1.5 4-2 1.5a10 10 0 0 0 5.5 5.5L16 13l4 1.5v3a2 2 0 0 1-2.2 2A15 15 0 0 1 4.5 6.2 2 2 0 0 1 6.5 4z"></path></svg>
+<div style="font-size:20px;font-weight:700;color:#fff;letter-spacing:.5px">SOS</div>
+<div style="font-size:11px;color:rgba(255,255,255,.9)">{{ sosHint }}</div>
+</div>
+</div>
+<div style="width:100%;margin-top:26px;display:flex;flex-direction:column;gap:10px">
+<div style="background:#20100F;border:1px solid #3A1B1A;border-radius:18px;padding:13px 15px;display:flex;align-items:center;gap:12px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FF8A8E" stroke-width="1.8" style="flex:none"><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11z"></path><circle cx="12" cy="10" r="2.4"></circle></svg><div><div style="font-size:12.5px;color:#FFD9DA">Kameng Hostel back gate</div><div style="font-size:10.5px;color:#B08688;margin-top:1px">Location shared automatically</div></div></div>
+<div style="background:#20100F;border:1px solid #3A1B1A;border-radius:18px;padding:13px 15px;display:flex;align-items:center;gap:12px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FF8A8E" stroke-width="1.8" style="flex:none"><rect x="4" y="4" width="16" height="16" rx="3"></rect><path d="M9 12h6"></path></svg><div><div style="font-size:12.5px;color:#FFD9DA">IITG Hospital &#183; 0361&nbsp;258&nbsp;2100</div><div style="font-size:10.5px;color:#B08688;margin-top:1px">24&#215;7 emergency line</div></div></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ sosCalling }}" hint-placeholder-val="{{ false }}">
+<div class="sc" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;padding:16px 22px 26px;min-height:0">
+<div style="width:112px;height:112px;border-radius:50%;background:#FF453A;display:flex;align-items:center;justify-content:center;position:relative;flex:none">
+<span style="position:absolute;inset:0;border-radius:50%;background:#FF453A;animation:swpulse 2s ease-out infinite"></span>
+<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" style="position:relative"><path d="M6.5 4h3l1.5 4-2 1.5a10 10 0 0 0 5.5 5.5L16 13l4 1.5v3a2 2 0 0 1-2.2 2A15 15 0 0 1 4.5 6.2 2 2 0 0 1 6.5 4z"></path></svg>
+</div>
+<div style="font-size:21px;font-weight:700;color:#fff;margin-top:20px">Calling IITG Hospital</div>
+<div style="font-size:12.5px;color:#DFB4B6;margin-top:5px">Emergency line &#183; connecting&#8230;</div>
+<div style="width:100%;margin-top:20px;display:flex;flex-direction:column;gap:8px">
+<div style="background:#20100F;border:1px solid #3A1B1A;border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:11px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="2" style="flex:none"><path d="M5 12.5l4 4 9-9"></path></svg><span style="font-size:12px;color:#EFD5D6">Hospital alerted with your location</span></div>
+<div style="background:#20100F;border:1px solid #3A1B1A;border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:11px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="2" style="flex:none"><path d="M5 12.5l4 4 9-9"></path></svg><span style="font-size:12px;color:#EFD5D6">Security control room alerted</span></div>
+<div style="background:#20100F;border:1px solid #3A1B1A;border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:11px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="2" style="flex:none"><path d="M5 12.5l4 4 9-9"></path></svg><span style="font-size:12px;color:#EFD5D6">Last report attached: Common Krait, Kameng</span></div>
+</div>
+<div style="width:100%;box-sizing:border-box;background:#1B1B1B;border:1px solid #3A2E14;border-radius:18px;padding:14px 16px;margin-top:14px">
+<div style="font-size:11px;font-weight:700;color:#FFB020;letter-spacing:.5px;margin-bottom:8px">WHILE YOU WAIT</div>
+<div style="font-size:12px;color:#C0C0C0;line-height:1.65">Keep the person still and calm &#183; Remove rings and tight clothing &#183; Keep the bitten limb below heart level &#183; Do <span style="color:#FF8A8E">not</span> cut, suck, or apply a tourniquet</div>
+</div>
+<div onClick="{{ sosReset }}" style="cursor:pointer;width:100%;box-sizing:border-box;margin-top:14px;background:#26100F;border-radius:18px;padding:15px;text-align:center;font-size:14px;font-weight:700;color:#FF8A8E">End call</div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<!-- ================= APP SIGN-IN (pre-identity) ================= -->
+<sc-if value="{{ isSignin }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0;position:relative;z-index:1;padding:0 22px">
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+<div style="font-size:44px;font-weight:700;color:#fff;letter-spacing:-.8px">One<span style="color:#2FD46B">.</span></div>
+<div style="font-size:14px;color:#8A8A8A;margin-top:8px;line-height:1.5">One app for everything at IIT Guwahati.</div>
+
+<div onClick="{{ signinStudent }}" style="cursor:pointer;margin-top:32px;background:#2FD46B;border-radius:20px;padding:17px;text-align:center;font-size:15px;font-weight:700;color:#06210F">Sign in with Outlook</div>
+<div style="font-size:11.5px;color:#6E6E6E;text-align:center;margin-top:9px">For students and faculty with an @iitg.ac.in ID</div>
+
+<div style="display:flex;align-items:center;gap:12px;margin:26px 0"><span style="flex:1;height:1px;background:#262626"></span><span style="font-size:11px;color:#6E6E6E">STAFF</span><span style="flex:1;height:1px;background:#262626"></span></div>
+
+<div onClick="{{ goWLogin }}" style="cursor:pointer;background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:16px;display:flex;align-items:center;gap:12px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="1.8" style="flex:none"><rect x="2.5" y="5" width="19" height="14" rx="2.5"></rect><circle cx="8.5" cy="11" r="2.2"></circle><path d="M13 10h6M13 14h4"></path></svg>
+<div style="flex:1"><div style="font-size:14.5px;font-weight:600;color:#EDEDED">{{ wEntryTitle }}</div><div style="font-size:11.5px;color:#7A7A7A;margin-top:2px">{{ wEntrySub }}</div></div>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"></path></svg>
+</div>
+</div>
+</div>
+</sc-if>
+
+<!-- ================= PROFILE ================= -->
+<sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0;position:relative;z-index:1">
+<div style="display:flex;align-items:center;gap:13px;padding:12px 18px 14px;flex:none">
+<div onClick="{{ goHome }}" style="cursor:pointer;width:38px;height:38px;border-radius:50%;background:#1C1C1C;display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"></path></svg></div>
+<div style="font-size:19px;font-weight:700;color:#fff">Profile</div>
+</div>
+<div class="sc" style="flex:1;overflow-y:auto;padding:0 16px 26px">
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:16px;display:flex;align-items:center;gap:13px">
+<div style="width:52px;height:52px;border-radius:50%;background:#17301F;display:flex;align-items:center;justify-content:center;flex:none;font:700 16px Figtree,sans-serif;color:#2FD46B">AS</div>
+<div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:700;color:#fff">Ananya Sharma</div><div style="font-size:12px;color:#8A8A8A;margin-top:2px">210102043@iitg.ac.in</div><div style="font-size:11.5px;color:#7A7A7A;margin-top:2px">Kameng Hostel &#183; B.Tech ECE</div></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:18px;padding:16px 17px;display:flex;align-items:center"><span style="flex:1;font-size:14.5px;font-weight:500;color:#EDEDED">Notification preferences</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4E4E4E" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"></path></svg></div>
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:18px;padding:16px 17px;display:flex;align-items:center"><span style="flex:1;font-size:14.5px;font-weight:500;color:#EDEDED">Hostel &amp; mess details</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4E4E4E" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"></path></svg></div>
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:18px;padding:16px 17px;display:flex;align-items:center"><span style="flex:1;font-size:14.5px;font-weight:500;color:#EDEDED">Help &amp; feedback</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4E4E4E" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"></path></svg></div>
+</div>
+<div onClick="{{ goSignin }}" style="cursor:pointer;margin-top:16px;background:#1B1B1B;border:1px solid #4C1F20;border-radius:18px;padding:16px;text-align:center;font-size:14.5px;font-weight:600;color:#FF8A8E">Sign out</div>
+</div>
+</div>
+</sc-if>
+
+<!-- ================= WARDEN SIGN-IN ================= -->
+<sc-if value="{{ isWLogin }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0;position:relative;z-index:1">
+<div style="display:flex;align-items:center;gap:13px;padding:12px 18px 14px;flex:none">
+<div onClick="{{ goSignin }}" style="cursor:pointer;width:38px;height:38px;border-radius:50%;background:#1C1C1C;display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"></path></svg></div>
+<div style="font-size:19px;font-weight:700;color:#fff">Warden sign-in</div>
+</div>
+<div class="sc" style="flex:1;overflow-y:auto;padding:0 18px 26px">
+
+<div style="display:flex;gap:7px;margin-bottom:20px">
+<span style="flex:1;height:3px;border-radius:2px;background:#2FD46B"></span>
+<span style="flex:1;height:3px;border-radius:2px;background:{{ step2Bg }}"></span>
+<span style="flex:1;height:3px;border-radius:2px;background:{{ step3Bg }}"></span>
+</div>
+
+<sc-if value="{{ wPhoneStep }}" hint-placeholder-val="{{ true }}">
+<div style="font-size:22px;font-weight:700;color:#fff;line-height:1.3">What's your phone number?</div>
+<div style="font-size:13px;color:#8A8A8A;line-height:1.55;margin-top:10px">Use the number the Hostel Affairs office has on record for you. Wardens don't need an Outlook ID.</div>
+<div style="display:flex;align-items:center;gap:0;margin-top:20px;background:#1B1B1B;border:1px solid #262626;border-radius:18px;overflow:hidden">
+<span style="padding:16px 4px 16px 16px;font-size:15px;color:#8A8A8A;flex:none">+91</span>
+<input value="{{ wPhone }}" onChange="{{ onWPhone }}" inputmode="numeric" placeholder="98765 43210" style="flex:1;min-width:0;background:transparent;border:0;padding:16px 16px 16px 8px;font:400 15px Figtree,sans-serif;color:#fff;outline:none">
+</div>
+<div onClick="{{ sendOtp }}" style="cursor:pointer;margin-top:16px;background:#2FD46B;border-radius:20px;padding:17px;text-align:center;font-size:15px;font-weight:700;color:#06210F">Send code on SMS</div>
+</sc-if>
+
+<sc-if value="{{ wOtpStep }}" hint-placeholder-val="{{ false }}">
+<div style="font-size:22px;font-weight:700;color:#fff;line-height:1.3">Enter the 6-digit code</div>
+<div style="font-size:13px;color:#8A8A8A;line-height:1.55;margin-top:10px">{{ wOtpTo }}</div>
+<input value="{{ wOtp }}" onChange="{{ onWOtp }}" inputmode="numeric" placeholder="- - - - - -" style="width:100%;box-sizing:border-box;margin-top:20px;background:#1B1B1B;border:1px solid #262626;border-radius:18px;padding:17px 16px;font:600 22px 'JetBrains Mono',monospace;letter-spacing:6px;text-align:center;color:#fff;outline:none">
+<div onClick="{{ verifyOtp }}" style="cursor:pointer;margin-top:16px;background:#2FD46B;border-radius:20px;padding:17px;text-align:center;font-size:15px;font-weight:700;color:#06210F">Verify</div>
+<div onClick="{{ backToPhone }}" style="cursor:pointer;margin-top:10px;padding:13px;text-align:center;font-size:13.5px;font-weight:600;color:#8A8A8A">Change number</div>
+</sc-if>
+
+<sc-if value="{{ wIdStep }}" hint-placeholder-val="{{ false }}">
+<div style="font-size:22px;font-weight:700;color:#fff;line-height:1.3">Verify your identity card</div>
+<div style="font-size:13px;color:#8A8A8A;line-height:1.55;margin-top:10px">Checked once against the staff record, then kept on file. You won't be asked again on this phone.</div>
+<div onClick="{{ attachId }}" style="cursor:pointer;margin-top:20px;background:#1B1B1B;border:1px dashed {{ wIdBorder }};border-radius:18px;padding:22px 16px;display:flex;flex-direction:column;align-items:center;gap:10px">
+<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="1.7"><rect x="2.5" y="5" width="19" height="14" rx="2.5"></rect><circle cx="8.5" cy="11" r="2.2"></circle><path d="M13 10h6M13 14h4M5.5 16c.8-1.4 2-2 3-2s2.2.6 3 2"></path></svg>
+<div style="font-size:14.5px;font-weight:600;color:#EDEDED;text-align:center">{{ wIdLabel }}</div>
+<div style="font-size:11.5px;color:#7A7A7A;text-align:center;line-height:1.45">{{ wIdSubLabel }}</div>
+</div>
+<div onClick="{{ finishLogin }}" style="cursor:pointer;margin-top:16px;background:{{ wFinishBg }};border-radius:20px;padding:17px;text-align:center;font-size:15px;font-weight:700;color:{{ wFinishFg }}">Sign in as warden</div>
+</sc-if>
+
+<sc-if value="{{ wHasErr }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:14px;background:#26100F;border:1px solid #4C1F20;border-radius:16px;padding:13px 15px;font-size:12.5px;color:#FFD9DA;line-height:1.5">{{ wErr }}</div>
+</sc-if>
+
+<div style="font-size:11px;color:#6E6E6E;line-height:1.6;margin-top:22px">Only staff registered as a hostel warden can sign in. Students use their Outlook ID as usual.</div>
+</div>
+</div>
+</sc-if>
+
+<!-- ================= WARDEN CONSOLE ================= -->
+<sc-if value="{{ isWarden }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0;position:relative;z-index:1">
+<div style="display:flex;align-items:center;gap:12px;padding:12px 18px 14px;flex:none">
+<div style="width:40px;height:40px;border-radius:13px;background:#17301F;display:flex;align-items:center;justify-content:center;flex:none;font:700 13px Figtree,sans-serif;color:#2FD46B">{{ wardenInitials }}</div>
+<div style="flex:1;min-width:0"><div style="font-size:17px;font-weight:700;color:#fff;line-height:1.15">{{ wardenHostel }}</div><div style="font-size:11px;color:#8A8A8A;margin-top:2px">{{ wardenName }} &#183; Warden</div></div>
+<div style="padding:6px 10px;border-radius:13px;background:#26100F;color:#FF8A8E;font-size:10px;font-weight:700;letter-spacing:.3px;flex:none">{{ wardenOpenLabel }}</div>
+</div>
+<div class="sc" style="flex:1;overflow-y:auto;padding:0 16px 26px">
+
+<sc-if value="{{ wardenQueueEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="padding:90px 20px 0;display:flex;flex-direction:column;align-items:center;gap:14px">
+<svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="1.6" stroke-linecap="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+<div style="font-size:16px;color:#EDEDED;text-align:center">No snake reports for your hostel</div>
+<div style="font-size:12.5px;color:#7A7A7A;text-align:center;line-height:1.5">You'll get a WhatsApp and a notification here the moment a student reports one.</div>
+</div>
+</sc-if>
+
+<sc-for list="{{ wardenQueue }}" as="w" hint-placeholder-count="1">
+<div style="background:#1B1B1B;border:1px solid {{ w.border }};border-radius:20px;padding:13px;margin-bottom:12px">
+<div onClick="{{ w.open }}" style="cursor:pointer;display:flex;gap:12px;align-items:center">
+<div style="width:58px;height:58px;border-radius:14px;overflow:hidden;flex:none;position:relative;background:repeating-linear-gradient(135deg,#242424 0 7px,#2C2C2C 7px 14px)"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:600 18px Figtree,sans-serif;color:#5E5E5E">?</div><div style="position:absolute;inset:0;background:{{ w.img }}"></div></div>
+<div style="flex:1;min-width:0">
+<div style="display:inline-block;padding:3px 8px;border-radius:10px;background:{{ w.badgeBg }};color:{{ w.badgeFg }};font-size:9px;font-weight:700;letter-spacing:.3px">{{ w.badge }}</div>
+<div style="font-size:14.5px;font-weight:700;color:#fff;margin-top:5px">{{ w.name }}</div>
+<div style="font-size:11.5px;color:#B0B0B0;margin-top:2px">{{ w.location }}</div>
+</div>
+</div>
+<div style="font-size:12.5px;color:#DCDCDC;margin-top:11px;line-height:1.55">{{ w.note }}</div>
+<div style="font-size:11px;color:#7A7A7A;margin-top:7px">{{ w.meta }}</div>
+<div style="display:flex;gap:9px;margin-top:12px">
+<div onClick="{{ w.clear }}" style="cursor:pointer;flex:1;background:{{ w.actBg }};border-radius:14px;padding:13px;text-align:center;font-size:12.5px;font-weight:700;color:{{ w.actFg }}">{{ w.actLabel }}</div>
+<a href="{{ w.mapHref }}" target="_blank" rel="noopener" style="flex:none;padding:13px 15px;border-radius:14px;background:#262626;display:flex;align-items:center;justify-content:center;text-decoration:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#DCDCDC" stroke-width="1.9" stroke-linecap="round"><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11z"></path><circle cx="12" cy="10" r="2.4"></circle></svg></a>
+</div>
+</div>
+</sc-for>
+
+<div style="font-size:11px;color:#6E6E6E;line-height:1.6;margin:6px 2px 0">{{ wardenScopeNote }} Marking an area cleared removes the pin for every student and notifies the person who reported it.</div>
+<div onClick="{{ wardenSignOut }}" style="cursor:pointer;margin-top:18px;background:#1B1B1B;border:1px solid #262626;border-radius:18px;padding:15px;text-align:center;font-size:14px;font-weight:600;color:#8A8A8A">Sign out</div>
+</div>
+</div>
+</sc-if>
+
+<!-- ================= LOCATION SHEET ================= -->
+<sc-if value="{{ locOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;justify-content:flex-end">
+<div onClick="{{ closeLoc }}" style="position:absolute;inset:0;background:rgba(0,0,0,.62)"></div>
+<div style="position:relative;background:#161616;border-radius:26px 26px 0 0;max-height:620px;display:flex;flex-direction:column;border-top:1px solid #262626">
+<div style="padding:12px 0 6px;display:flex;justify-content:center;flex:none"><span style="width:36px;height:4px;border-radius:2px;background:#333"></span></div>
+<div style="padding:4px 18px 12px;flex:none">
+<div style="font-size:16.5px;font-weight:700;color:#fff">Select location</div>
+<input value="{{ locQuery }}" onChange="{{ onLocQuery }}" placeholder="Search hostels and campus places" style="width:100%;box-sizing:border-box;margin-top:11px;background:#212121;border:none;border-radius:14px;padding:12px 14px;font:400 13px Figtree,sans-serif;color:#fff;outline:none">
+<div onClick="{{ useGps }}" style="cursor:pointer;margin-top:9px;display:flex;align-items:center;gap:10px;background:#152A1D;border:1px solid #235536;border-radius:14px;padding:11px 13px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="1.9" stroke-linecap="round" style="flex:none"><circle cx="12" cy="12" r="3.2"></circle><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"></path></svg>
+<span style="flex:1;font-size:13px;font-weight:600;color:#B6F0CD">Use my current location</span>
+</div>
+<sc-if value="{{ gpsShow }}" hint-placeholder-val="{{ false }}"><div style="margin-top:7px;font-size:11.5px;color:{{ gpsColor }};line-height:1.45">{{ gpsLabel }}</div></sc-if>
+</div>
+<div class="sc" style="flex:1;overflow-y:auto;padding:0 10px 22px">
+<sc-for list="{{ locGroups }}" as="grp" hint-placeholder-count="4">
+<div>
+<div style="font-size:10.5px;font-weight:700;color:#7A7A7A;letter-spacing:.8px;padding:12px 10px 6px">{{ grp.label }}</div>
+<sc-for list="{{ grp.items }}" as="it" hint-placeholder-count="4">
+<div onClick="{{ it.pick }}" style="cursor:pointer;display:flex;align-items:center;gap:11px;padding:12px 10px;border-radius:14px;background:{{ it.bg }}">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{ it.icon }}" stroke-width="1.8" style="flex:none"><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11z"></path><circle cx="12" cy="10" r="2.4"></circle></svg>
+<span style="flex:1;font-size:13.5px;color:{{ it.fg }}">{{ it.name }}</span>
+<sc-if value="{{ it.on }}" hint-placeholder-val="{{ false }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="2.2"><path d="M5 12.5l4 4 9-9"></path></svg></sc-if>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+
+<!-- ================= SOS FAB + BOTTOM NAV (home only) ================= -->
+<sc-if value="{{ showChrome }}" hint-placeholder-val="{{ true }}">
+<div style="position:absolute;left:0;right:0;bottom:0;z-index:10">
+<div style="display:flex;justify-content:flex-end;padding:0 18px 12px">
+<div onClick="{{ goSos }}" style="cursor:pointer;width:56px;height:56px;border-radius:50%;background:#FF453A;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(255,69,58,.42)">
+<div style="font:700 14px Figtree,sans-serif;color:#fff;letter-spacing:.4px">SOS</div>
+</div>
+</div>
+<div style="background:#161616;border-top:1px solid #232323;padding:8px 12px 12px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+<div style="display:flex;flex-direction:column;align-items:center;gap:3px;background:#17301F;border-radius:16px;padding:7px 0 6px">
+<svg width="21" height="21" viewBox="0 0 24 24" fill="#2FD46B" stroke="#2FD46B" stroke-width="1.6"><path d="M4 10.8 12 4.4l8 6.4V20h-5.2v-5.6H9.2V20H4z"></path></svg>
+<span style="font-size:11px;font-weight:600;color:#2FD46B">Home</span>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0 6px">
+<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#C8C8C8" stroke-width="1.7" stroke-linecap="round"><path d="M7 4v7a2 2 0 0 0 4 0V4M9 11v9"></path><path d="M16 4c-1.4 1.5-1.4 4 0 5.5V20"></path></svg>
+<span style="font-size:11px;color:#C8C8C8">Food</span>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0 6px">
+<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#C8C8C8" stroke-width="1.7"><rect x="4" y="4" width="16" height="12" rx="2"></rect><path d="M4 11h16"></path><circle cx="8" cy="18.5" r="1.4"></circle><circle cx="16" cy="18.5" r="1.4"></circle></svg>
+<span style="font-size:11px;color:#C8C8C8">Travel</span>
+</div>
+<div onClick="{{ goProfile }}" style="cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0 6px">
+<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#C8C8C8" stroke-width="1.7"><circle cx="12" cy="8" r="3.4"></circle><path d="M5.5 20c1.4-3.2 4-4.6 6.5-4.6s5.1 1.4 6.5 4.6"></path></svg>
+<span style="font-size:11px;color:#C8C8C8">Profile</span>
+</div>
+</div>
+</div>
+</sc-if>
+
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1b">
+<div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>Notification states — nearby student, reporter, SOS</div>
+<div style="width:398px;height:840px;background:#000;border-radius:40px;padding:9px;box-shadow:0 18px 50px rgba(0,0,0,.28)">
+<div class="sc" style="width:100%;height:100%;border-radius:32px;overflow:hidden;background:#0B0F0C;background-image:repeating-linear-gradient(135deg,#0B0F0C 0 10px,#101610 10px 20px);display:flex;flex-direction:column">
+<div style="text-align:center;padding:46px 0 0;flex:none">
+<div style="font-size:14.5px;color:rgba(255,255,255,.68)">Sunday, 7 September</div>
+<div style="font-size:64px;font-weight:400;color:#fff;line-height:1.05;letter-spacing:-1px">11:41</div>
+</div>
+<div class="sc" style="flex:1;overflow-y:auto;padding:26px 12px 20px;display:flex;flex-direction:column;gap:11px">
+
+<div style="background:rgba(27,27,27,.86);border-radius:22px;padding:13px 15px;border-left:3px solid #FF453A">
+<div style="display:flex;align-items:center;gap:8px"><span style="font:700 11px Figtree,sans-serif;color:#fff">One<span style="color:#2FD46B">.</span></span><span style="font-size:10.5px;color:#7A7A7A">Snake Watch &#183; now</span></div>
+<div style="font-size:14px;font-weight:700;color:#fff;margin-top:7px;line-height:1.3">Venomous snake reported</div>
+<div style="font-size:12px;color:#BDBDBD;margin-top:3px;line-height:1.45">Common Krait spotted near Kameng Hostel (back gate). Avoid the area until security clears it.</div>
+</div>
+
+<div style="background:rgba(27,27,27,.86);border-radius:22px;padding:13px 15px;border-left:3px solid #FFB020">
+<div style="display:flex;align-items:center;gap:8px"><span style="font:700 11px Figtree,sans-serif;color:#fff">One<span style="color:#2FD46B">.</span></span><span style="font-size:10.5px;color:#7A7A7A">Snake Watch &#183; 41 min ago</span></div>
+<div style="font-size:14px;font-weight:700;color:#fff;margin-top:7px;line-height:1.3">Snake sighting reported</div>
+<div style="font-size:12px;color:#BDBDBD;margin-top:3px;line-height:1.45">An unidentified snake spotted near Lake-side Path. Avoid the area until security clears it.</div>
+</div>
+
+<div style="background:rgba(27,27,27,.86);border-radius:22px;padding:13px 15px;border-left:3px solid #2FD46B">
+<div style="display:flex;align-items:center;gap:8px"><span style="font:700 11px Figtree,sans-serif;color:#fff">One<span style="color:#2FD46B">.</span></span><span style="font-size:10.5px;color:#7A7A7A">Your report &#183; 8 min ago</span></div>
+<div style="font-size:14px;font-weight:700;color:#fff;margin-top:7px;line-height:1.3">Security notified on WhatsApp</div>
+<div style="font-size:12px;color:#BDBDBD;margin-top:3px;line-height:1.45">Your Kameng report was delivered to the security control room at 11:33. You'll be told the moment a guard clears the area.</div>
+</div>
+
+<div style="background:rgba(27,27,27,.86);border-radius:22px;padding:13px 15px;border-left:3px solid #2FD46B">
+<div style="display:flex;align-items:center;gap:8px"><span style="font:700 11px Figtree,sans-serif;color:#fff">One<span style="color:#2FD46B">.</span></span><span style="font-size:10.5px;color:#7A7A7A">Snake Watch &#183; 1 hr ago</span></div>
+<div style="font-size:14px;font-weight:700;color:#fff;margin-top:7px;line-height:1.3">Area cleared</div>
+<div style="font-size:12px;color:#BDBDBD;margin-top:3px;line-height:1.45">Core 3 (rear stairs) has been checked and cleared by security. Safe to pass.</div>
+</div>
+
+<div style="background:rgba(255,69,58,.16);border-radius:22px;padding:13px 15px;border-left:3px solid #FF453A">
+<div style="display:flex;align-items:center;gap:8px"><span style="font:700 11px Figtree,sans-serif;color:#FF8A8E">One. SOS</span><span style="font-size:10.5px;color:#C29B9C">Hospital &#183; 2 hr ago</span></div>
+<div style="font-size:14px;font-weight:700;color:#fff;margin-top:7px;line-height:1.3">SOS received &#8212; help dispatched</div>
+<div style="font-size:12px;color:#E8C6C7;margin-top:3px;line-height:1.45">Ambulance leaving IITG Hospital for Kameng Hostel back gate. Stay where you are.</div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1c">
+<div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>Guard's side — WhatsApp template with CTA buttons (production shape)</div>
+<div style="width:398px;height:840px;background:#000;border-radius:40px;padding:9px;box-shadow:0 18px 50px rgba(0,0,0,.28)">
+<div style="width:100%;height:100%;border-radius:32px;overflow:hidden;display:flex;flex-direction:column;background:#0B141A">
+<div style="flex:none;background:#1F2C33;padding:14px 14px 12px;display:flex;align-items:center;gap:11px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E9EDEF" stroke-width="2" stroke-linecap="round" style="flex:none"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+<div style="width:38px;height:38px;border-radius:50%;background:#2FD46B;display:flex;align-items:center;justify-content:center;flex:none;font:700 13px Figtree,sans-serif;color:#06210F">O.</div>
+<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:600;color:#E9EDEF">OneStop Campus Alerts</div><div style="font-size:11px;color:#8696A0;margin-top:1px">Business account &#183; IIT Guwahati</div></div>
+</div>
+<div class="sc" style="flex:1;overflow-y:auto;padding:16px 12px;display:flex;flex-direction:column;gap:10px">
+<div style="align-self:center;background:#182229;border-radius:8px;padding:5px 11px;font-size:10.5px;color:#8696A0">TODAY</div>
+
+<div style="align-self:flex-start;max-width:88%;background:#1F2C33;border-radius:10px 10px 10px 2px;overflow:hidden">
+<div style="height:132px;background:repeating-linear-gradient(135deg,#243239 0 8px,#2A383F 8px 16px);position:relative;margin:4px 4px 0;border-radius:7px;overflow:hidden"><div style="position:absolute;inset:0;background:url(&quot;assets/snakes/krait.png&quot;) center/cover no-repeat"></div></div>
+<div style="padding:9px 11px 6px">
+<div style="font-size:12px;font-weight:600;color:#2FD46B;margin-bottom:5px">SNAKE REPORT &#183; VENOMOUS</div>
+<div style="font-size:13.5px;color:#E9EDEF;line-height:1.55">Common Krait reported at <b>Kameng Hostel &#183; back gate</b>.<br><br>Note: &ldquo;Went under the parked cycles near the back gate, hasn't come out.&rdquo;<br><br>Reported by a student 2 min ago.</div>
+<div style="font-size:12px;color:#8696A0;margin-top:7px">OneStop Campus Alerts &#183; IIT Guwahati</div>
+<div style="text-align:right;font-size:10px;color:#8696A0;margin-top:4px">11:33</div>
+</div>
+<div style="border-top:1px solid #2A3942;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;color:#53BDEB;font-size:14.5px;font-weight:500">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#53BDEB" stroke-width="2" stroke-linecap="round"><path d="M7 17L17 7M9 7h8v8"></path></svg>
+Open &amp; clear the area
+</div>
+<div style="border-top:1px solid #2A3942;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;color:#53BDEB;font-size:14.5px;font-weight:500">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#53BDEB" stroke-width="2"><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11z"></path><circle cx="12" cy="10" r="2.4"></circle></svg>
+Directions on Google Maps
+</div>
+</div>
+<div style="align-self:flex-start;font-size:10.5px;color:#8696A0;max-width:88%;padding:0 4px;line-height:1.5">Sent as a WhatsApp Business template with call-to-action buttons &#8212; no raw link, nothing to copy.</div>
+
+<div style="align-self:flex-end;max-width:80%;background:#005C4B;border-radius:10px 10px 2px 10px;padding:10px 11px 8px">
+<div style="font-size:13.5px;color:#E9EDEF;line-height:1.5">On the way from Gate 2</div>
+<div style="text-align:right;font-size:10px;color:#8FC8B8;margin-top:5px">11:34 &#10003;&#10003;</div>
+</div>
+
+<div style="align-self:flex-start;max-width:86%;background:#1F2C33;border-radius:10px 10px 10px 2px;padding:10px 11px 8px">
+<div style="font-size:13.5px;color:#E9EDEF;line-height:1.55">Thanks. Tap <b>Open &amp; clear the area</b> above once it's safe &#8212; students get told automatically.</div>
+<div style="text-align:right;font-size:10px;color:#8696A0;margin-top:6px">11:34</div>
+</div>
+</div>
+<div style="flex:none;background:#0B141A;padding:10px 12px 16px;display:flex;align-items:center;gap:9px">
+<div style="flex:1;background:#1F2C33;border-radius:22px;padding:11px 15px;font-size:13.5px;color:#8696A0">Message</div>
+<div style="width:42px;height:42px;border-radius:50%;background:#2FD46B;display:flex;align-items:center;justify-content:center;flex:none"><svg width="19" height="19" viewBox="0 0 24 24" fill="#06210F"><path d="M3.5 20.5 21 12 3.5 3.5 3.5 10l12 2-12 2z"></path></svg></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1d">
+<div class="dv-olabel"><a class="dv-oid" href="#1d">1d</a>Where the button opens — one page, no login</div>
+<div style="width:398px;height:840px;background:#000;border-radius:40px;padding:9px;box-shadow:0 18px 50px rgba(0,0,0,.28)">
+<div style="width:100%;height:100%;border-radius:32px;overflow:hidden;display:flex;flex-direction:column;background:#0F0F0F">
+<div style="flex:none;background:#1C1C1C;border-bottom:1px solid #262626;padding:14px 16px;display:flex;align-items:center;gap:10px">
+<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="1.9" style="flex:none"><rect x="5" y="10.5" width="14" height="9.5" rx="2"></rect><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"></path></svg>
+<span style="font-size:12px;color:#8A8A8A;font-family:'JetBrains Mono',monospace">onestop.iitg.ac.in/s/7QK2M</span>
+</div>
+<div class="sc" style="flex:1;overflow-y:auto;padding:20px 18px 26px">
+<div style="font-size:11px;font-weight:700;color:#8A8A8A;letter-spacing:.7px">SECURITY CLEARANCE</div>
+<div style="font-size:24px;font-weight:700;color:#fff;line-height:1.25;margin-top:8px">Snake report<br>#7QK2M</div>
+<div style="display:inline-block;margin-top:12px;padding:5px 11px;border-radius:13px;background:{{ linkBadgeBg }};color:{{ linkBadgeFg }};font-size:10.5px;font-weight:700;letter-spacing:.3px">{{ linkBadge }}</div>
+
+<div style="margin-top:16px;height:150px;border-radius:18px;overflow:hidden;background:repeating-linear-gradient(135deg,#242424 0 8px,#2C2C2C 8px 16px);position:relative"><div style="position:absolute;inset:0;background:url(&quot;assets/snakes/krait.png&quot;) center/cover no-repeat"></div></div>
+
+<div style="margin-top:12px;background:#1B1B1B;border:1px solid #262626;border-radius:18px;padding:14px 16px">
+<div style="font-size:16px;font-weight:700;color:#fff">Common Krait</div>
+<div style="font-size:12.5px;color:#B0B0B0;margin-top:4px;line-height:1.5">Kameng Hostel &#183; back gate<br>26.19005, 91.70190</div>
+<div style="font-size:12.5px;color:#DCDCDC;margin-top:10px;line-height:1.6">&ldquo;Went under the parked cycles near the back gate, hasn't come out.&rdquo;</div>
+<div style="font-size:11px;color:#7A7A7A;margin-top:9px">Reported 11:33 &#183; 412 students alerted</div>
+</div>
+
+<div style="margin-top:10px;background:#17301F;border:1px solid #235536;border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:11px">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="1.9" style="flex:none"><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11z"></path><circle cx="12" cy="10" r="2.4"></circle></svg>
+<span style="flex:1;font-size:13.5px;font-weight:600;color:#B6F0CD">Open in Google Maps</span>
+<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7FBF97" stroke-width="2" stroke-linecap="round"><path d="M7 17L17 7M9 7h8v8"></path></svg>
+</div>
+
+<div onClick="{{ clearS1 }}" style="cursor:pointer;margin-top:20px;background:{{ clearBtnBg }};border-radius:20px;padding:19px;text-align:center;font-size:16px;font-weight:700;color:{{ clearBtnFg }}">{{ clearBtnLabel }}</div>
+<div onClick="{{ unclearS1 }}" style="cursor:pointer;margin-top:10px;background:#1B1B1B;border:1px solid #3A2E14;border-radius:20px;padding:17px;text-align:center;font-size:14.5px;font-weight:600;color:#FFB020">Still here &#8212; need help</div>
+<div style="font-size:11px;color:#6E6E6E;line-height:1.6;margin:14px 2px 0">One-time link, valid 12 hours, tied to this report. No login or app needed &#8212; tapping <b style="color:#8A8A8A">Area cleared</b> removes the pin for every student and notifies the person who reported it. Try it, then look at <a class="dv-oid" href="#1a">1a</a>.</div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+<p class="dv-next">Try next: "add Snake Watch as a 5th nav tab after all" · "drop the SOS floating button, keep it inside Snake Watch" · "make the alert card collapse after 30 min"</p>
+</section>
+
+<section class="dv-turn" id="t0">
+<div class="dv-thd"><a class="dv-tid" href="#t0">0</a><span class="dv-tname">Baseline — the live app, recreated from your two screenshots</span></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="0a">
+<div class="dv-olabel"><a class="dv-oid" href="#0a">0a</a>Home, before Snake Watch</div>
+<div style="width:398px;height:840px;background:#000;border-radius:40px;padding:9px;box-shadow:0 18px 50px rgba(0,0,0,.28)">
+<div style="width:100%;height:100%;background:#0F0F0F;border-radius:32px;overflow:hidden;display:flex;flex-direction:column;position:relative;isolation:isolate">
+<div style="position:absolute;left:0;right:0;top:0;height:150px;background:linear-gradient(180deg,#132A1C 0%,rgba(15,15,15,0) 100%);pointer-events:none;z-index:-1"></div>
+<div style="height:16px;flex:none"></div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px 16px;flex:none;position:relative">
+<div style="font-size:28px;font-weight:700;color:#fff;letter-spacing:-.4px">One<span style="color:#2FD46B">.</span></div>
+<div style="width:42px;height:42px;border-radius:50%;background:#1C1C1C;display:flex;align-items:center;justify-content:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="1.7" stroke-linecap="round"><path d="M18 15V10a6 6 0 1 0-12 0v5l-1.6 2.6h15.2z"></path><path d="M10 20.2h4"></path></svg></div>
+</div>
+<div class="sc" style="flex:1;overflow-y:auto;padding:0 16px 20px;position:relative">
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:15px 16px">
+<div style="display:flex;align-items:center;gap:10px">
+<span style="font-size:19px;line-height:1">&#128197;</span>
+<span style="font-size:16.5px;font-weight:700;color:#fff">Time Table</span>
+<span style="font-size:11px;color:#6E6E6E">&#8226;</span>
+<span style="font-size:11.5px;color:#8A8A8A;letter-spacing:.4px">7TH SEPTEMBER</span>
+<span style="flex:1"></span>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6E6E6E" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"></path></svg>
+</div>
+<div style="font-size:19px;color:#8A8A8A;margin-top:10px">No upcoming classes</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:11px">
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:14px 14px 16px">
+<div style="display:flex;align-items:center;gap:9px"><span style="font-size:19px;line-height:1">&#127858;</span><span style="font-size:16px;font-weight:700;color:#fff">Food</span><span style="flex:1"></span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6E6E6E" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"></path></svg></div>
+<div style="font-size:10.5px;color:#8A8A8A;letter-spacing:.4px;margin-top:12px">DINNER &#8226; ENDS 9:30 PM</div>
+<div style="font-size:13px;color:#EDEDED;line-height:1.7;margin-top:6px">1. Veg Kofta / Egg curry<br>2. Alo pata gobi matar<br>3. Chana Dal fry<br>4. Rice<br>5. Roti<br>7. Mandatory iteams</div>
+</div>
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:14px 14px 16px">
+<div style="display:flex;align-items:center;gap:9px"><span style="font-size:19px;line-height:1">&#128682;</span><span style="font-size:16px;font-weight:700;color:#fff">Gatelog</span><span style="flex:1"></span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6E6E6E" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"></path></svg></div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:16px">
+<div style="border:1px solid #303030;border-radius:22px;padding:10px;text-align:center;font-size:13.5px;font-weight:500;color:#2FD46B">To City</div>
+<div style="border:1px solid #303030;border-radius:22px;padding:10px;text-align:center;font-size:13.5px;font-weight:500;color:#2FD46B">To Khoka</div>
+<div style="border:1px solid #303030;border-radius:22px;padding:10px;text-align:center;font-size:13.5px;font-weight:500;color:#2FD46B">Others</div>
+</div>
+</div>
+</div>
+<div style="font-size:22px;font-weight:700;color:#fff;margin:22px 2px 16px">Quick Access</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);row-gap:22px;column-gap:6px">
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:76px;padding:6px 2px"><span style="font-size:31px;line-height:1">&#128682;</span><span style="font-size:12px;color:#EDEDED;text-align:center;line-height:1.3">GateLog</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:76px;padding:6px 2px"><span style="font-size:31px;line-height:1;position:relative">&#129689;<span style="position:absolute;top:-1px;right:-4px;width:9px;height:9px;border-radius:50%;background:#3B82F6"></span></span><span style="font-size:12px;color:#EDEDED;text-align:center;line-height:1.3">Library Token</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:76px;padding:6px 2px"><span style="font-size:31px;line-height:1">&#128100;</span><span style="font-size:12px;color:#EDEDED;text-align:center;line-height:1.3">Contacts</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:76px;padding:6px 2px"><span style="font-size:31px;line-height:1">&#128662;</span><span style="font-size:12px;color:#EDEDED;text-align:center;line-height:1.3">Cab Sharing</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:76px;padding:6px 2px"><span style="font-size:31px;line-height:1">&#127978;</span><span style="font-size:12px;color:#EDEDED;text-align:center;line-height:1.3">SAC Room Booking</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:76px;padding:6px 2px"><span style="font-size:31px;line-height:1">&#128235;</span><span style="font-size:12px;color:#EDEDED;text-align:center;line-height:1.3">Complaints</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:76px;padding:6px 2px"><span style="font-size:31px;line-height:1">&#129520;</span><span style="font-size:12px;color:#EDEDED;text-align:center;line-height:1.3">Lost and Found</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:76px;padding:6px 2px"><span style="font-size:31px;line-height:1">&#128717;</span><span style="font-size:12px;color:#EDEDED;text-align:center;line-height:1.3">Buy and Sell</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:76px;padding:6px 2px"><span style="font-size:31px;line-height:1">&#127942;</span><span style="font-size:12px;color:#EDEDED;text-align:center;line-height:1.3">GC Score Board</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:76px;padding:6px 2px"><span style="font-size:31px;line-height:1">&#127973;</span><span style="font-size:12px;color:#EDEDED;text-align:center;line-height:1.3">Medical Section</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:76px;padding:6px 2px"><span style="font-size:31px;line-height:1">&#128225;</span><span style="font-size:12px;color:#EDEDED;text-align:center;line-height:1.3">LAN</span></div>
+</div>
+</div>
+<div style="flex:none;background:#161616;border-top:1px solid #232323;padding:8px 12px 12px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+<div style="display:flex;flex-direction:column;align-items:center;gap:3px;background:#17301F;border-radius:16px;padding:7px 0 6px"><svg width="21" height="21" viewBox="0 0 24 24" fill="#2FD46B" stroke="#2FD46B" stroke-width="1.6"><path d="M4 10.8 12 4.4l8 6.4V20h-5.2v-5.6H9.2V20H4z"></path></svg><span style="font-size:11px;font-weight:600;color:#2FD46B">Home</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0 6px"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#C8C8C8" stroke-width="1.7" stroke-linecap="round"><path d="M7 4v7a2 2 0 0 0 4 0V4M9 11v9"></path><path d="M16 4c-1.4 1.5-1.4 4 0 5.5V20"></path></svg><span style="font-size:11px;color:#C8C8C8">Food</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0 6px"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#C8C8C8" stroke-width="1.7"><rect x="4" y="4" width="16" height="12" rx="2"></rect><path d="M4 11h16"></path><circle cx="8" cy="18.5" r="1.4"></circle><circle cx="16" cy="18.5" r="1.4"></circle></svg><span style="font-size:11px;color:#C8C8C8">Travel</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0 6px"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#C8C8C8" stroke-width="1.7"><circle cx="12" cy="8" r="3.4"></circle><path d="M5.5 20c1.4-3.2 4-4.6 6.5-4.6s5.1 1.4 6.5 4.6"></path></svg><span style="font-size:11px;color:#C8C8C8">Profile</span></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="0b">
+<div class="dv-olabel"><a class="dv-oid" href="#0b">0b</a>Quick Links</div>
+<div style="width:398px;height:840px;background:#000;border-radius:40px;padding:9px;box-shadow:0 18px 50px rgba(0,0,0,.28)">
+<div style="width:100%;height:100%;background:#0F0F0F;border-radius:32px;overflow:hidden;display:flex;flex-direction:column;position:relative;isolation:isolate">
+<div style="position:absolute;left:0;right:0;top:0;height:150px;background:linear-gradient(180deg,#132A1C 0%,rgba(15,15,15,0) 100%);pointer-events:none;z-index:-1"></div>
+<div style="height:16px;flex:none"></div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px 4px;flex:none;position:relative">
+<div style="font-size:28px;font-weight:700;color:#fff;letter-spacing:-.4px">One<span style="color:#2FD46B">.</span></div>
+<div style="width:42px;height:42px;border-radius:50%;background:#1C1C1C;display:flex;align-items:center;justify-content:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#2FD46B" stroke-width="1.7" stroke-linecap="round"><path d="M18 15V10a6 6 0 1 0-12 0v5l-1.6 2.6h15.2z"></path><path d="M10 20.2h4"></path></svg></div>
+</div>
+<div style="font-size:22px;font-weight:700;color:#fff;padding:0 18px 10px;flex:none;position:relative">Quick Links</div>
+<div class="sc" style="flex:1;overflow-y:auto;padding:6px 16px 20px;display:flex;flex-direction:column;gap:11px">
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:19px 18px;display:flex;align-items:center"><span style="flex:1;font-size:16px;font-weight:600;color:#EDEDED">Bus Route</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4E4E4E" stroke-width="2" stroke-linecap="round"><path d="M7 17L17 7M9 7h8v8"></path></svg></div>
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:19px 18px;display:flex;align-items:center"><span style="flex:1;font-size:16px;font-weight:600;color:#EDEDED">GateLog Feedback</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4E4E4E" stroke-width="2" stroke-linecap="round"><path d="M7 17L17 7M9 7h8v8"></path></svg></div>
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:19px 18px;display:flex;align-items:center"><span style="flex:1;font-size:16px;font-weight:600;color:#EDEDED">Academic SSO</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4E4E4E" stroke-width="2" stroke-linecap="round"><path d="M7 17L17 7M9 7h8v8"></path></svg></div>
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:19px 18px;display:flex;align-items:center"><span style="flex:1;font-size:16px;font-weight:600;color:#EDEDED">Academic Calendar</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4E4E4E" stroke-width="2" stroke-linecap="round"><path d="M7 17L17 7M9 7h8v8"></path></svg></div>
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:19px 18px;display:flex;align-items:center"><span style="flex:1;font-size:16px;font-weight:600;color:#EDEDED">Placement Stats</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4E4E4E" stroke-width="2" stroke-linecap="round"><path d="M7 17L17 7M9 7h8v8"></path></svg></div>
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:19px 18px;display:flex;align-items:center"><span style="flex:1;font-size:16px;font-weight:600;color:#EDEDED">Guest House</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4E4E4E" stroke-width="2" stroke-linecap="round"><path d="M7 17L17 7M9 7h8v8"></path></svg></div>
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:19px 18px;display:flex;align-items:center"><span style="flex:1;font-size:16px;font-weight:600;color:#EDEDED">SWC Website</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4E4E4E" stroke-width="2" stroke-linecap="round"><path d="M7 17L17 7M9 7h8v8"></path></svg></div>
+<div style="background:#1B1B1B;border:1px solid #262626;border-radius:20px;padding:19px 18px;display:flex;align-items:center"><span style="flex:1;font-size:16px;font-weight:600;color:#EDEDED">QuickLink</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4E4E4E" stroke-width="2" stroke-linecap="round"><path d="M7 17L17 7M9 7h8v8"></path></svg></div>
+</div>
+<div style="flex:none;background:#161616;border-top:1px solid #232323;padding:8px 12px 12px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+<div style="display:flex;flex-direction:column;align-items:center;gap:3px;background:#17301F;border-radius:16px;padding:7px 0 6px"><svg width="21" height="21" viewBox="0 0 24 24" fill="#2FD46B" stroke="#2FD46B" stroke-width="1.6"><path d="M4 10.8 12 4.4l8 6.4V20h-5.2v-5.6H9.2V20H4z"></path></svg><span style="font-size:11px;font-weight:600;color:#2FD46B">Home</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0 6px"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#C8C8C8" stroke-width="1.7" stroke-linecap="round"><path d="M7 4v7a2 2 0 0 0 4 0V4M9 11v9"></path><path d="M16 4c-1.4 1.5-1.4 4 0 5.5V20"></path></svg><span style="font-size:11px;color:#C8C8C8">Food</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0 6px"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#C8C8C8" stroke-width="1.7"><rect x="4" y="4" width="16" height="12" rx="2"></rect><path d="M4 11h16"></path><circle cx="8" cy="18.5" r="1.4"></circle><circle cx="16" cy="18.5" r="1.4"></circle></svg><span style="font-size:11px;color:#C8C8C8">Travel</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0 6px"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#C8C8C8" stroke-width="1.7"><circle cx="12" cy="8" r="3.4"></circle><path d="M5.5 20c1.4-3.2 4-4.6 6.5-4.6s5.1 1.4 6.5 4.6"></path></svg><span style="font-size:11px;color:#C8C8C8">Profile</span></div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</section>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1000,&quot;height&quot;:940},&quot;guardNumber&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Security&quot;,&quot;label&quot;:&quot;Test override number (blank = route to the location's warden)&quot;},&quot;clearBaseUrl&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;snake-clear.html&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Security&quot;,&quot;label&quot;:&quot;Clearance page URL (set to your deployed snake-clear.html)&quot;}}">
+class Component extends DCLogic {
+  SPECIES = [
+    { id:"rat", common:"Indian Rat Snake", sci:"Ptyas mucosa", venom:"non-venomous", blurb:"Long and fast-moving, often mistaken for a cobra when it rears up. Harmless and helps control rodents." },
+    { id:"keel", common:"Checkered Keelback", sci:"Fowlea piscator", venom:"non-venomous", blurb:"Found near drains, ponds and the lake-side path. Flattens its head when threatened but is not dangerous." },
+    { id:"wolf", common:"Common Wolf Snake", sci:"Lycodon aulicus", venom:"non-venomous", blurb:"Small and banded — frequently confused with the venomous krait. Active at night around hostels." },
+    { id:"vine", common:"Green Vine Snake", sci:"Ahaetulla nasuta", venom:"non-venomous", blurb:"Thin, bright green, lives in hedges and low branches. Mildly rear-fanged but not medically significant to humans." },
+    { id:"cobra", common:"Monocled Cobra", sci:"Naja kaouthia", venom:"venomous", blurb:"Identified by the round 'monocle' mark on its hood. Will raise its body and hood when it feels cornered." },
+    { id:"king", common:"King Cobra", sci:"Ophiophagus hannah", venom:"venomous", blurb:"The world's longest venomous snake; rare on campus but sighted near the green belt. Give it a wide berth." },
+    { id:"viper", common:"Russell's Viper", sci:"Daboia russelii", venom:"venomous", blurb:"Stout body with chain-like blotches. Sluggish but strikes fast and hard — never try to move it." },
+    { id:"krait", common:"Common Krait", sci:"Bungarus caeruleus", venom:"venomous", blurb:"Smooth, dark, thin white bands. Nocturnal and often enters rooms at night; bites can be painless at first." }
+  ];
+
+  LOCS = [
+    { label:"HOSTELS", items:["Lohit","Brahmaputra","Disang","Kameng","Barak","Manas","Dihing","Umiam","Siang","Kapili","Dhansiri","Subansiri","MSH","Gaurang","Dibang"] },
+    { label:"ACADEMIC", items:["Core 1 (Lecture Hall Complex)","Core 2","Core 3","Department Complex A","Department Complex B","Central Library"] },
+    { label:"COMMON AREAS", items:["Central Canteen","Market Complex","Students' Activity Centre (SAC)","Health Centre","Gymkhana / Sports Complex","Guest House"] },
+    { label:"OUTDOORS & ROADS", items:["Main Gate Road","Inner Ring Road","KV Road","Suryamukhi Road","Godhuli Gopal Road","Radhasura Road","View Point Road","IIT Border Road","Football Ground","Botanical Garden / Green Belt","Lake-side Path","Cycle Track behind Core"] },
+    { label:"LAKES", items:["Serpentine Lake bank","Tihor Lake bank"] },
+    { label:"GATES", items:["Main Gate","KV Gate","Khoka Gate","A.S.E.B Gate","Faculty Gate","Lothia Baghicha Gate"] }
+  ];
+
+  SIGHTINGS = [
+    { id:"s1", sp:"krait", loc:"Kameng Hostel · back gate", note:"Went under the parked cycles near the back gate, hasn't come out. Security has been told.", reporter:"Ananya S.", time:"9 min ago", venom:"venomous", lat:26.19005, lng:91.70190, status:"active" },
+    { id:"s2", sp:null, loc:"Lake-side Path · near bench 4", note:"Something long and dark crossed the path. Couldn't get a good look at it.", reporter:"Rohit K.", time:"41 min ago", venom:"unsure", lat:26.19075, lng:91.69410, status:"active" },
+    { id:"s3", sp:"rat", loc:"Core 3 · rear stairs", note:"Big rat snake on the landing. Guard moved it to the green belt.", reporter:"Meghna B.", time:"1 hr ago", venom:"non-venomous", lat:26.18700, lng:91.69200, status:"cleared" }
+  ];
+
+  COORDS = {
+    "Lohit":[26.1892187,91.6984403],"Brahmaputra":[26.1862883,91.6992779],"Disang":[26.1865188,91.6968269],
+    "Kameng":[26.1904331,91.7015615],"Barak":[26.1895494,91.7018049],"Manas":[26.188789,91.6997065],
+    "Dihing":[26.1879555,91.6994107],"Umiam":[26.1885985,91.7020372],"Siang":[26.1893036,91.696633],
+    "Kapili":[26.188462,91.6963131],"Dhansiri":[26.1942514,91.6983422],"Subansiri":[26.1928409,91.6950619],
+    "MSH":[26.1950639,91.6983889],"Gaurang":[26.1918225,91.7008905],"Dibang":[26.1875044,91.6966781],
+    "Core 1 (Lecture Hall Complex)":[26.1889848,91.6914584],"Core 2":[26.1862129,91.6915695],
+    "Core 3":[26.1870115,91.6920000],"Department Complex A":[26.1866,91.6905],"Department Complex B":[26.1858,91.6900],
+    "Central Library":[26.1893128,91.6929648],"Central Canteen":[26.1890279,91.691529],
+    "Market Complex":[26.1949951,91.68792],"Students' Activity Centre (SAC)":[26.1931005,91.6958668],
+    "Health Centre":[26.1965798,91.6975021],"Gymkhana / Sports Complex":[26.1930177,91.6979662],
+    "Guest House":[26.1966497,91.6960309],"Main Gate Road":[26.1955,91.6905],
+    "Inner Ring Road":[26.1912,91.6962],"Football Ground":[26.1919221,91.6980184],
+    "Botanical Garden / Green Belt":[26.1975,91.6945],"Lake-side Path":[26.19075,91.69410],
+    "Cycle Track behind Core":[26.1883,91.6925],
+    "KV Road":[26.1983,91.6905],"Suryamukhi Road":[26.1908,91.6970],
+    "Godhuli Gopal Road":[26.1864,91.6988],"Radhasura Road":[26.1962,91.6970],
+    "View Point Road":[26.1830,91.6940],"IIT Border Road":[26.1990,91.6960],
+    "Serpentine Lake bank":[26.19050,91.69480],"Tihor Lake bank":[26.19485,91.69640],
+    "Main Gate":[26.19619,91.68756],"KV Gate":[26.19855,91.69211],"Khoka Gate":[26.18440,91.68741],
+    "A.S.E.B Gate":[26.19730,91.70180],"Faculty Gate":[26.18700,91.70385],"Lothia Baghicha Gate":[26.18371,91.69301]
+  };
+
+  // One recipient per location. Numbers are placeholders — swap for the real warden/office lines.
+  WARDENS = {
+    "Lohit":["Lohit Hostel Warden","8377992838"],
+    "Brahmaputra":["Brahmaputra Hostel Warden","8377992838"],
+    "Disang":["Disang Hostel Warden","8377992838"],
+    "Kameng":["Kameng Hostel Warden","8377992838"],
+    "Barak":["Barak Hostel Warden","8377992838"],
+    "Manas":["Manas Hostel Warden","8377992838"],
+    "Dihing":["Dihing Hostel Warden","8377992838"],
+    "Umiam":["Umiam Hostel Warden","8377992838"],
+    "Siang":["Siang Hostel Warden","8377992838"],
+    "Kapili":["Kapili Hostel Warden","8377992838"],
+    "Dhansiri":["Dhansiri Hostel Warden","8377992838"],
+    "Subansiri":["Subansiri Hostel Warden","8377992838"],
+    "MSH":["Married Scholars Hostel Warden","8377992838"],
+    "Gaurang":["Gaurang Hostel Warden","8377992838"],
+    "Dibang":["Dibang Hostel Warden","8377992838"]
+  };
+  DEFAULT_RECIPIENT = ["Security Control Room","8377992838"];
+
+  // Warden accounts: phone → the one hostel they are responsible for.
+  WARDEN_ACCOUNTS = {
+    "8377992838": { name:"Dr. P. Saikia", hostel:"Kameng", staffId:"IITG/W/2291" }
+  };
+
+  wardenFor(phone) { return this.WARDEN_ACCOUNTS[String(phone).replace(/\D/g, "")] || null; }
+
+  isRoad(loc) {
+    const head = String(loc || "").split(" · ")[0];
+    return /\b(road|path|lane|street|lake|bank|gate)\b/i.test(head) || /^open campus$/i.test(head.trim());
+  }
+
+  recipient(loc) {
+    const place = String(loc || "").split(" · ")[0].replace(/ Hostel$/i, "").trim();
+    return this.WARDENS[place] || this.DEFAULT_RECIPIENT;
+  }
+
+  state = {
+    screen:"home", role:"student", locOpen:false, locQuery:"",
+    loc:"", spot:"", venom:"", species:"", note:"", photo:false, gps:"", gpsErr:false,
+    scanStage:"camera", sos:"idle", sosPct:0, detail:"s1", cleared:{}, pin:null, notifsRead:false, notifTab:"focused", notifCat:"All", waSent:false,
+    sightings: this.SIGHTINGS, myReport:null,
+    wStep:"phone", wPhone:"", wOtp:"", wIdFile:false, wSession:null, wErr:""
+  };
+
+  sendOtp = () => {
+    const digits = this.state.wPhone.replace(/\D/g, "");
+    if (digits.length !== 10) { this.setState({ wErr:"Enter the 10-digit number registered with the Hostel Office." }); return; }
+    if (!this.wardenFor(digits)) { this.setState({ wErr:"This number is not registered as a warden. Contact the Hostel Affairs office." }); return; }
+    this.setState({ wStep:"otp", wErr:"", wOtp:"" });
+  };
+
+  verifyOtp = () => {
+    if (this.state.wOtp.replace(/\D/g, "").length !== 6) { this.setState({ wErr:"Enter the 6-digit code." }); return; }
+    this.setState({ wStep:"id", wErr:"" });
+  };
+
+  finishLogin = () => {
+    if (!this.state.wIdFile) { this.setState({ wErr:"Attach your IITG identity card to finish." }); return; }
+    const acct = this.wardenFor(this.state.wPhone);
+    this.setState({ wSession:acct, wStep:"in", wErr:"", screen:"warden" });
+  };
+
+  wardenSignOut = () => this.setState({
+    wSession:null, wStep:"phone", wPhone:"", wOtp:"", wIdFile:false, wErr:"", screen:"signin"
+  });
+
+  clearInApp = (id) => {
+    const short = String(id).slice(-5).toUpperCase();
+    try {
+      const seen = JSON.parse(localStorage.getItem("onestop.snake.cleared") || "[]");
+      if (seen.indexOf(short) < 0) seen.push(short);
+      localStorage.setItem("onestop.snake.cleared", JSON.stringify(seen));
+    } catch (e) {}
+    if (this.chan) this.chan.postMessage({ type:"cleared", id:short });
+    this.setState(p => ({ cleared: Object.assign({}, p.cleared, { [id]: true }), notifsRead:false }),
+      () => this.broadcastSightings());
+  };
+
+  componentDidMount() {
+    // installed app launches at sign-in; the design canvas stays on the student home
+    if (/[?&]app=1/.test(location.search)) this.setState({ screen:"signin" });
+
+    this.onMsg = (e) => {
+      const d = e.data;
+      if (d && d.source === "snakeApp" && d.type === "appMode") {
+        if (!this.appMode) {
+          this.appMode = true;
+          this.setState(s => (s.screen === "home" && !s.wSession) ? { screen:"signin" } : {});
+        }
+        return;
+      }
+      if (!d || d.source !== "snakeMap") return;
+      if (d.type === "ready" && e.source) { try { e.source.postMessage(this.mapPayload(), "*"); } catch (err) {} }
+      if (d.type === "open") this.setState({ screen:"detail", detail:d.id });
+      if ((d.type === "pick" || d.type === "pickHere") && (d.kind === "road" || d.kind === "open" || d.kind === "lake")) {
+        const next = { loc: d.name, pin: d, locKind: "road" };
+        if (d.type === "pickHere") next.screen = "report";
+        this.setState(next);
+        return;
+      }
+      if (d.type === "pick" || d.type === "pickHere") {
+        const flat = this.LOCS.reduce((a, g) => a.concat(g.items), []);
+        const bare = d.name.replace(/ Hostel$/i, "");
+        const match = flat.find(n => n.toLowerCase() === bare.toLowerCase())
+          || flat.find(n => d.name.toLowerCase().indexOf(n.toLowerCase()) === 0);
+        const next = { loc: match || d.name, pin: d, locKind: "place" };
+        if (d.type === "pickHere") next.screen = "report";
+        this.setState(next);
+      }
+    };
+    window.addEventListener("message", this.onMsg);
+
+    this.forgetCleared = (id) => {
+      const key = String(id).slice(-5).toUpperCase();
+      try {
+        const seen = JSON.parse(localStorage.getItem("onestop.snake.cleared") || "[]")
+          .filter(x => String(x).toUpperCase() !== key);
+        localStorage.setItem("onestop.snake.cleared", JSON.stringify(seen));
+      } catch (e) {}
+      if (this.chan) this.chan.postMessage({ type: "reopened", id: key });
+    };
+
+    this.applyCleared = (shortId) => {
+      const hit = this.state.sightings.find(s => s.id.slice(-5).toUpperCase() === shortId);
+      if (!hit || this.state.cleared[hit.id]) return;
+      this.setState(p => ({ cleared: Object.assign({}, p.cleared, { [hit.id]: true }), notifsRead: false }),
+        () => this.broadcastSightings());
+    };
+    this.pollCleared = () => {
+      let seen = [];
+      try { seen = JSON.parse(localStorage.getItem("onestop.snake.cleared") || "[]"); } catch (e) {}
+      seen.forEach(this.applyCleared);
+    };
+    this.onStorage = (e) => { if (e.key === "onestop.snake.cleared") this.pollCleared(); };
+    window.addEventListener("storage", this.onStorage);
+    if (window.BroadcastChannel) {
+      this.chan = new BroadcastChannel("onestop-snake");
+      this.chan.onmessage = (e) => { if (e.data && e.data.type === "cleared") this.applyCleared(e.data.id); };
+      this.pollCleared();
+    }
+    this.pollTimer = setInterval(this.pollCleared, 2000);
+    this.pollCleared();
+  }
+  componentWillUnmount() {
+    window.removeEventListener("message", this.onMsg);
+    window.removeEventListener("storage", this.onStorage);
+    clearInterval(this.pollTimer);
+    if (this.chan) this.chan.close();
+  }
+
+  img(id) { return id ? 'url("assets/snakes/' + id + '.png") center/cover no-repeat' : "transparent"; }
+
+  go = (screen) => () => this.setState({ screen, locOpen:false });
+
+  venomStyle(v) {
+    if (v === "venomous") return { color:"#FF453A", bg:"#26100F", fg:"#FF8A8E", label:"Venomous" };
+    if (v === "non-venomous") return { color:"#2FD46B", bg:"#17301F", fg:"#7FE0A5", label:"Non-venomous" };
+    return { color:"#FFB020", bg:"#2A2110", fg:"#FFB020", label:"Unidentified" };
+  }
+
+  sightingName(s) {
+    if (!s.sp) return "Unidentified snake";
+    const sp = this.SPECIES.find(x => x.id === s.sp);
+    return sp ? sp.common : "Snake";
+  }
+
+  sel() { const l = this.state.sightings; return l.find(s => s.id === this.state.detail) || l[0]; }
+
+  submitReport = () => {
+    const st = this.state;
+    if (!st.loc || !st.venom) return;
+    const c = this.COORDS[st.loc] || [26.19035, 91.69720];
+    const id = "u" + Date.now();
+    const sighting = {
+      id: id,
+      sp: (st.species && st.species !== "none") ? st.species : null,
+      loc: st.loc + (st.spot ? " · " + st.spot : ""),
+      note: st.note || "No extra details added.",
+      reporter: "You", time: "just now",
+      venom: st.venom,
+      lat: st.pin ? st.pin.lat : c[0],
+      lng: st.pin ? st.pin.lng : c[1],
+      status: "active",
+      road: this.isRoad(st.loc),
+      expiresIn: this.isRoad(st.loc) ? "Expires in 3 days" : null
+    };
+    this.setState(p => ({
+      screen: "done", myReport: sighting, detail: id, waSent: false,
+      sightings: [sighting].concat(p.sightings), notifsRead: false
+    }), () => {
+      this.broadcastSightings();
+      const what = sighting.sp
+        ? (this.SPECIES.find(x => x.id === sighting.sp) || {}).common
+        : "Snake";
+      this.notify(
+        (st.venom === "venomous" ? "⚠ Venomous snake — " : "Snake reported — ") + st.loc,
+        what + " reported just now. Keep 3 m back and avoid the area.",
+        "sighting-" + id
+      );
+    });
+  };
+
+  clearUrl() {
+    const r = this.state.myReport;
+    if (!r) return "";
+    const sp = r.sp ? (this.SPECIES.find(x => x.id === r.sp) || {}).common : "Unidentified snake";
+    const base = this.props.clearBaseUrl || "https://onestop.iitg.ac.in/s/";
+    return base + "#" + new URLSearchParams({
+      id: r.id.slice(-5).toUpperCase(), sp: sp, v: r.venom, l: r.loc,
+      n: r.note, lat: String(r.lat), lng: String(r.lng), ts: "just now"
+    }).toString();
+  }
+
+  waLink() {
+    const r = this.state.myReport;
+    const rec = this.recipient(r && r.loc);
+    const num = (rec[1] || this.props.guardNumber || "").replace(/\D/g, "");
+    const sp = r && r.sp ? (this.SPECIES.find(x => x.id === r.sp) || {}).common : "Unidentified snake";
+    const venom = r ? (r.venom === "venomous" ? "VENOMOUS" : r.venom === "non-venomous" ? "NON-VENOMOUS" : "UNIDENTIFIED — treat as venomous") : "";
+    const clearUrl = this.clearUrl();
+    const lines = r ? [
+      "To: " + rec[0],
+      "",
+      "SNAKE REPORT · " + venom,
+      "",
+      sp + " reported at " + r.loc + ".",
+      "",
+      "Note: \u201c" + r.note + "\u201d",
+      "",
+      "Location: https://maps.google.com/?q=" + r.lat + "," + r.lng,
+      "",
+      "Reported just now via OneStop by a student.",
+      "",
+      "Open the OneStop app to mark the area cleared, or use this link:",
+      clearUrl
+    ] : ["Snake report from OneStop."];
+    return "https://wa.me/91" + num + "?text=" + encodeURIComponent(lines.join("\n"));
+  }
+
+  mapColor(s) {
+    if (s.status === "cleared" || this.state.cleared[s.id]) return "#2FD46B";
+    return s.venom === "venomous" ? "#FF453A" : s.venom === "unsure" ? "#FFB020" : "#2FD46B";
+  }
+
+  mapPayload() {
+    return {
+      source: "snakeHost", type: "sightings",
+      list: this.state.sightings.map(s => ({
+        id: s.id, name: s.sp ? (this.SPECIES.find(x => x.id === s.sp) || {}).common : "Unidentified snake",
+        where: s.loc, lat: s.lat, lng: s.lng, color: this.mapColor(s)
+      }))
+    };
+  }
+
+  broadcastSightings() {
+    const p = this.mapPayload();
+    document.querySelectorAll("iframe").forEach(f => {
+      try { f.contentWindow.postMessage(p, "*"); } catch (e) {}
+    });
+  }
+
+  holdTimer = null;
+  holdStart = () => {
+    if (this.holdTimer) return;
+    this.holdTimer = setInterval(() => {
+      this.setState(s => {
+        const p = s.sosPct + 7;
+        if (p >= 100) { clearInterval(this.holdTimer); this.holdTimer = null; return { sosPct:100, sos:"calling" }; }
+        return { sosPct:p };
+      });
+    }, 60);
+  };
+  holdEnd = () => {
+    if (this.holdTimer) { clearInterval(this.holdTimer); this.holdTimer = null; }
+    this.setState(s => (s.sos === "calling" ? {} : { sosPct:0 }));
+  };
+
+  notify(title, body, tag) {
+    try { parent.postMessage({ source:"snakeApp", type:"notify", title, body, tag }, "*"); } catch (e) {}
+    if (!("Notification" in window)) return;
+    const fire = () => { try { new Notification(title, { body, icon:"icons/icon-192.png", tag }); } catch (e) {} };
+    if (Notification.permission === "granted") { if (window.parent === window) fire(); }
+    else if (Notification.permission !== "denied") Notification.requestPermission();
+    if (navigator.vibrate) { try { navigator.vibrate([90, 50, 90]); } catch (e) {} }
+  }
+
+  nearestPlace(lat, lng) {
+    let best = null, bd = Infinity;
+    Object.keys(this.COORDS).forEach(k => {
+      const c = this.COORDS[k];
+      const dx = (lng - c[1]) * Math.cos(lat * Math.PI / 180), dy = lat - c[0];
+      const d = Math.sqrt(dx*dx + dy*dy) * 111320;
+      if (d < bd) { bd = d; best = k; }
+    });
+    return { name: best, dist: Math.round(bd) };
+  }
+
+  useGps = () => {
+    if (!navigator.geolocation) {
+      this.setState({ gps:"This device can't share its location — pick a place below.", gpsErr:true });
+      return;
+    }
+    this.setState({ gps:"Getting your location…", gpsErr:false });
+    navigator.geolocation.getCurrentPosition(p => {
+      const lat = p.coords.latitude, lng = p.coords.longitude;
+      const n = this.nearestPlace(lat, lng);
+      const near = n.dist < 140;
+      this.setState({
+        loc: near ? n.name : "Open campus · " + lat.toFixed(4) + ", " + lng.toFixed(4),
+        pin: { lat:+lat.toFixed(5), lng:+lng.toFixed(5), kind: near ? "place" : "open", name: n.name },
+        locOpen:false, locQuery:"", gps:"", gpsErr:false
+      });
+    }, err => {
+      this.setState({
+        gps: err.code === 1
+          ? "Location permission denied — allow it in settings, or pick a place below."
+          : "Couldn't get a fix here. Pick a place below.",
+        gpsErr:true
+      });
+    }, { enableHighAccuracy:true, timeout:12000, maximumAge:30000 });
+  };
+
+  onPickFile = (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const url = URL.createObjectURL(f);
+    if (this.shotUrl) { try { URL.revokeObjectURL(this.shotUrl); } catch (err) {} }
+    this.shotUrl = url;
+    this.setState({ shotUrl: url });
+    this.startScan();
+    e.target.value = "";
+  };
+
+  startScan = () => {
+    this.setState({ scanStage:"scanning" });
+    setTimeout(() => this.setState({ scanStage:"result" }), 2200);
+  };
+
+  renderVals() {
+    const st = this.state;
+    const scr = st.screen;
+    const authScr = st.screen === "wlogin" || st.screen === "signin";
+    const wardenMode = !!st.wSession;
+    const guard = authScr || wardenMode;
+    const sel = this.sel();
+    const selCleared = ["cleared"].indexOf(sel.status) >= 0 || !!st.cleared[sel.id];
+    const selV = this.venomStyle(selCleared ? "non-venomous" : sel.venom);
+    const on = v => v ? "#2FD46B" : "#262626";
+
+    const speciesList = this.SPECIES.map(sp => {
+      const v = this.venomStyle(sp.venom);
+      return Object.assign({}, sp, { img: this.img(sp.id), venomLabel: v.label.toUpperCase(), badgeBg: v.bg, badgeFg: v.fg });
+    });
+
+    const pickFilter = st.venom === "venomous" ? "venomous" : st.venom === "non-venomous" ? "non-venomous" : null;
+    const pickable = this.SPECIES.filter(sp => !pickFilter || sp.venom === pickFilter).map(sp => ({
+      common: sp.common, sci: sp.sci, img: this.img(sp.id),
+      ring: st.species === sp.id ? "#2FD46B" : "transparent",
+      fg: st.species === sp.id ? "#B6F0CD" : "#DCDCDC",
+      pick: () => this.setState({ species: sp.id, venom: st.venom || sp.venom })
+    }));
+
+    const sightings = st.sightings.map(s => {
+      const cleared = s.status === "cleared" || st.cleared[s.id];
+      const v = this.venomStyle(s.venom);
+      return {
+        name: this.sightingName(s), location: s.loc, img: this.img(s.sp),
+        color: cleared ? "#2FD46B" : v.color,
+        meta: s.reporter + " · " + s.time + (!cleared && this.isRoad(s.loc) ? " · expires in 3 days" : ""),
+        badge: cleared ? "CLEARED" : v.label.toUpperCase(),
+        badgeBg: cleared ? "#17301F" : v.bg, badgeFg: cleared ? "#7FE0A5" : v.fg,
+        open: () => this.setState({ screen:"detail", detail:s.id })
+      };
+    });
+
+    const pins = st.sightings.map(s => ({
+      left: s.x + "px", top: s.y + "px",
+      color: (s.status === "cleared" || st.cleared[s.id]) ? "#2FD46B" : this.venomStyle(s.venom).color,
+      open: () => this.setState({ screen:"detail", detail:s.id })
+    }));
+
+    const q = st.locQuery.trim().toLowerCase();
+    const locGroups = this.LOCS.map(g => ({
+      label: g.label,
+      items: g.items.filter(n => !q || n.toLowerCase().includes(q)).map(n => ({
+        name: n, on: st.loc === n,
+        bg: st.loc === n ? "#17301F" : "transparent",
+        fg: st.loc === n ? "#B6F0CD" : "#DCDCDC",
+        icon: st.loc === n ? "#2FD46B" : "#7A7A7A",
+        pick: () => this.setState({ loc:n, locOpen:false, locQuery:"" })
+      }))
+    })).filter(g => g.items.length);
+
+    const top = this.SPECIES.find(s => s.id === "krait");
+    const topV = this.venomStyle(top.venom);
+    const alternates = ["wolf","cobra"].map(id => {
+      const sp = this.SPECIES.find(x => x.id === id);
+      return {
+        common: sp.common, img: this.img(id), venomLabel: this.venomStyle(sp.venom).label,
+        conf: id === "wolf" ? "18%" : "6%",
+        pick: () => this.setState({ species:id, venom:sp.venom, photo:true, screen:"report", scanStage:"camera" })
+      };
+    });
+
+    const timeline = [
+      { title:"Reported", sub: sel.reporter + " · " + sel.time, dot:"#2FD46B", line:"#2FD46B", fg:"#fff", lineH:"18px" },
+      { title:"Students nearby notified", sub:"412 students within 500 m", dot:"#2FD46B", line: selCleared ? "#2FD46B" : "#2E2E2E", fg:"#fff", lineH:"18px" },
+      this.isRoad(sel.loc) && !selCleared
+      ? { title:"No warden assigned to this spot", sub:"Nobody is on call here. The pin expires on its own in 3 days.",
+          dot:"#FFB020", line:"transparent", fg:"#FFB020", lineH:"0px" }
+      : { title: selCleared ? "Area cleared by security" : "WhatsApp sent to the " + this.recipient(sel.loc)[0],
+        sub: selCleared
+          ? "Cleared by the " + this.recipient(sel.loc)[0] + " · 6 min after report"
+          : "Delivered to the " + this.recipient(sel.loc)[0] + " · +91 " + (this.recipient(sel.loc)[1] || this.props.guardNumber) + " · awaiting reply",
+        dot: selCleared ? "#2FD46B" : "#FFB020", line:"transparent",
+        fg: selCleared ? "#7FE0A5" : "#FFB020", lineH:"0px" }
+    ];
+
+    const mineCleared = st.myReport && st.cleared[st.myReport.id] ? [{
+      cat:"Snake Watch", tab:"focused", tag:"CLEARED", accent:"#2FD46B", time:"just now", unread:!st.notifsRead,
+      title:"Area cleared by security",
+      body:"A guard has checked " + st.myReport.loc + " and marked it safe. Thanks for reporting it.",
+      open: () => this.setState({ screen:"detail", detail:st.myReport.id })
+    }] : [];
+
+    const mine = st.myReport ? [{
+      cat:"Snake Watch", tab:"focused", tag:"YOUR REPORT", accent:"#2FD46B", time:"just now", unread:!st.notifsRead,
+      title:"Your report is live",
+      body: (st.myReport.sp ? (this.SPECIES.find(x => x.id === st.myReport.sp) || {}).common : "Unidentified snake")
+        + " at " + st.myReport.loc + ". Students nearby and campus security have been notified.",
+      open: () => this.setState({ screen:"detail", detail:st.myReport.id })
+    }] : [];
+
+    const allNotifs = mineCleared.concat(mine).concat([
+      { cat:"Snake Watch", tab:"focused", tag:"SNAKE WATCH", accent:"#FF453A", time:"9 min ago", unread:!st.notifsRead,
+        title:"Venomous snake reported",
+        body:"Common Krait spotted near Kameng Hostel (back gate). Avoid the area until security clears it.",
+        open: () => this.setState({ screen:"detail", detail:"s1" }) },
+      { cat:"Snake Watch", tab:"focused", tag:"SNAKE WATCH", accent:"#FFB020", time:"41 min ago", unread:!st.notifsRead,
+        title:"Snake sighting reported",
+        body:"An unidentified snake spotted near Lake-side Path. Avoid the area until security clears it.",
+        open: () => this.setState({ screen:"detail", detail:"s2" }) },
+      { cat:"Snake Watch", tab:"focused", tag:"SNAKE WATCH", accent:"#2FD46B", time:"1 hr ago", unread:false,
+        title:"Area cleared",
+        body:"Core 3 (rear stairs) has been checked and cleared by security. Safe to pass.",
+        open: () => this.setState({ screen:"detail", detail:"s3" }) },
+      { cat:"Gatelog", tab:"focused", tag:"GATELOG", accent:"#8A8A8A", time:"Yesterday", unread:false,
+        title:"Gatelog entry approved",
+        body:"Your 'To City' request for 6 September was approved.", open: () => {} },
+      { cat:"Cab Sharing", tab:"focused", tag:"CAB SHARING", accent:"#8A8A8A", time:"Yesterday", unread:false,
+        title:"Someone joined your ride",
+        body:"Rohit K. joined your 6:30 AM cab to Guwahati Airport.", open: () => {} },
+      { cat:"Buy and Sell", tab:"general", tag:"BUY AND SELL", accent:"#8A8A8A", time:"2 days ago", unread:false,
+        title:"New listing in Cycles",
+        body:"Firefox Bad Attitude, ₹4,500 — posted by a Kapili resident.", open: () => {} },
+      { cat:"Mess", tab:"general", tag:"MESS", accent:"#8A8A8A", time:"3 hr ago", unread:false,
+        title:"Dinner menu updated",
+        body:"Kameng mess dinner menu for 7th September is now live.", open: () => {} }
+    ]);
+    const notifs = allNotifs.filter(n =>
+      n.tab === st.notifTab && (st.notifCat === "All" || n.cat === st.notifCat));
+
+    const active = st.sightings.filter(s => s.status === "active" && !st.cleared[s.id]);
+    const latest = active[0];
+    const latestVenom = latest ? (latest.venom === "venomous" ? "Venomous snake"
+      : latest.venom === "non-venomous" ? "Non-venomous snake" : "Unidentified snake") : "";
+    const latestPlace = latest ? latest.loc.split(" · ")[0].replace(/ Hostel$/i, "") : "";
+    const latestSpot = latest ? (latest.loc.split(" · ")[1] || latestPlace) : "";
+
+    const myHostel = st.wSession ? st.wSession.hostel : null;
+    const mineToClear = myHostel
+      ? st.sightings.filter(s => String(s.loc).split(" · ")[0].replace(/ Hostel$/i, "").trim() === myHostel)
+      : [];
+    const wardenOpen = mineToClear.filter(s => s.status !== "cleared" && !st.cleared[s.id]);
+    const wardenQueue = mineToClear.map(s => {
+      const done = s.status === "cleared" || !!st.cleared[s.id];
+      const v = this.venomStyle(s.venom);
+      return {
+        name: this.sightingName(s), location: s.loc, img: this.img(s.sp), 
+        note: "“" + s.note + "”",
+        meta: "Reported by " + s.reporter + " · " + s.time,
+        badge: done ? "CLEARED" : v.label.toUpperCase(),
+        badgeBg: done ? "#17301F" : v.bg, badgeFg: done ? "#7FE0A5" : v.fg,
+        border: done ? "#22392A" : "#303030",
+        actLabel: done ? "Cleared — students notified" : "Mark area cleared",
+        actBg: done ? "#17301F" : "#2FD46B", actFg: done ? "#7FE0A5" : "#06210F",
+        mapHref: "https://maps.google.com/?q=" + s.lat + "," + s.lng,
+        clear: () => { if (!done) this.clearInApp(s.id); },
+        open: () => this.setState({ screen:"detail", detail:s.id })
+      };
+    });
+
+    const s1Cleared = !!st.cleared["s1"];
+    const doneRec = this.recipient(st.myReport ? st.myReport.loc : st.loc);
+    const formRec = this.recipient(st.loc);
+
+    return {
+      linkBadge: s1Cleared ? "CLEARED 11:39 · SAFE TO PASS" : "VENOMOUS · NOT YET CLEARED",
+      linkBadgeBg: s1Cleared ? "#17301F" : "#26100F",
+      linkBadgeFg: s1Cleared ? "#7FE0A5" : "#FF8A8E",
+      clearBtnLabel: s1Cleared ? "Area cleared — students notified" : "Area cleared — safe to pass",
+      clearBtnBg: s1Cleared ? "#17301F" : "#2FD46B",
+      clearBtnFg: s1Cleared ? "#7FE0A5" : "#06210F",
+      clearS1: () => this.setState(
+        p => ({ cleared: Object.assign({}, p.cleared, { s1: true }) }),
+        () => this.broadcastSightings()),
+      unclearS1: () => {
+        this.forgetCleared("s1");
+        this.setState(p => {
+          const c = Object.assign({}, p.cleared); delete c.s1; return { cleared: c };
+        }, () => this.broadcastSightings());
+      },
+
+      activeLabel: active.length + " ACTIVE",
+      activeSubtitle: active.length === 1 ? "1 active report on campus" : active.length + " active reports on campus",
+      latestHeadline: latest ? latestVenom + " near " + latestPlace : "No active sightings",
+      latestMeta: latest ? latestSpot + " · " + latest.time + " · not yet cleared" : "Campus is clear right now",
+
+      isHome: scr === "home" && !guard,
+      isWatch: scr === "watch" && !guard,
+      isReport: scr === "report" && !guard,
+      isDone: scr === "done" && !guard,
+      isSpecies: scr === "species" && !guard,
+      isNotifs: scr === "notifs" && !guard,
+      bellDot: st.notifsRead ? "transparent" : "#FF453A",
+      goNotifs: () => this.setState({ screen:"notifs", notifsRead:true }),
+
+      tabFocused: () => this.setState({ notifTab:"focused" }),
+      tabGeneral: () => this.setState({ notifTab:"general" }),
+      focBg: st.notifTab === "focused" ? "#2A2A2A" : "transparent",
+      focFg: st.notifTab === "focused" ? "#fff" : "#8A8A8A",
+      focWeight: st.notifTab === "focused" ? "600" : "400",
+      genBg: st.notifTab === "general" ? "#2A2A2A" : "transparent",
+      genFg: st.notifTab === "general" ? "#fff" : "#8A8A8A",
+      genWeight: st.notifTab === "general" ? "600" : "400",
+
+      cats: ["All","Snake Watch","Cab Sharing","Buy and Sell","Gatelog","Mess"].map(c => ({
+        label: c,
+        bg: st.notifCat === c ? "#2FD46B" : "transparent",
+        border: st.notifCat === c ? "#2FD46B" : "#3A3A3A",
+        fg: st.notifCat === c ? "#06210F" : "#C8C8C8",
+        weight: st.notifCat === c ? "600" : "400",
+        pick: () => this.setState({ notifCat:c })
+      })),
+
+      notifs: notifs,
+      notifsEmpty: notifs.length === 0,
+      notifsAny: notifs.length > 0,
+      isScan: scr === "scan" && !guard,
+      jumpStudent: () => this.setState({ wSession:null, wStep:"phone", wPhone:"", wOtp:"", wIdFile:false, wErr:"", screen:"home" }),
+      jumpSignin: () => this.setState({ wSession:null, wStep:"phone", wPhone:"", wOtp:"", wIdFile:false, wErr:"", screen:"signin" }),
+      jumpWLogin: () => this.setState({ wSession:null, wStep:"phone", wPhone:"", wOtp:"", wIdFile:false, wErr:"", screen:"wlogin" }),
+      jumpWarden: () => this.setState({ wSession:this.WARDEN_ACCOUNTS["8377992838"], wStep:"in", wPhone:"8377992838", wIdFile:true, wErr:"", screen:"warden" }),
+      jStudentBg: (!wardenMode && !authScr) ? "#1a1a1a" : "#fff",
+      jStudentFg: (!wardenMode && !authScr) ? "#fff" : "#1a1a1a",
+      jSigninBg: scr === "signin" ? "#1a1a1a" : "#fff",
+      jSigninFg: scr === "signin" ? "#fff" : "#1a1a1a",
+      jWLoginBg: scr === "wlogin" ? "#1a1a1a" : "#fff",
+      jWLoginFg: scr === "wlogin" ? "#fff" : "#1a1a1a",
+      jWardenBg: (wardenMode && scr === "warden") ? "#1a1a1a" : "#fff",
+      jWardenFg: (wardenMode && scr === "warden") ? "#fff" : "#1a1a1a",
+
+      isSignin: scr === "signin",
+      isProfile: scr === "profile" && !guard,
+      goSignin: () => this.setState({ screen:"signin" }),
+      goProfile: () => this.setState({ screen:"profile" }),
+      signinStudent: () => this.setState({ screen:"home" }),
+      isWLogin: scr === "wlogin",
+      isWarden: scr === "warden" && wardenMode,
+      wPhoneStep: st.wStep === "phone", wOtpStep: st.wStep === "otp", wIdStep: st.wStep === "id",
+      step2Bg: (st.wStep === "otp" || st.wStep === "id") ? "#2FD46B" : "#2A2A2A",
+      step3Bg: st.wStep === "id" ? "#2FD46B" : "#2A2A2A",
+      wPhone: st.wPhone, wOtp: st.wOtp,
+      onWPhone: e => this.setState({ wPhone: e.target.value, wErr:"" }),
+      onWOtp: e => this.setState({ wOtp: e.target.value, wErr:"" }),
+      sendOtp: this.sendOtp, verifyOtp: this.verifyOtp, finishLogin: this.finishLogin,
+      backToPhone: () => this.setState({ wStep:"phone", wErr:"" }),
+      goWLogin: () => this.setState({
+        wSession: st.wSession || this.WARDEN_ACCOUNTS["8377992838"],
+        wStep:"in", wPhone: st.wPhone || "8377992838", wIdFile:true,
+        screen:"warden", wErr:""
+      }),
+      wEntryTitle: st.wSession ? st.wSession.hostel + " Hostel · warden console" : "Open the warden console",
+      wEntrySub: st.wSession
+        ? (wardenOpen.length === 1 ? "1 open report" : wardenOpen.length + " open reports")
+        : "Kameng Hostel · Dr R Baruah",
+      wErr: st.wErr, wHasErr: !!st.wErr,
+      wOtpTo: "Sent to +91 " + (st.wPhone.replace(/\D/g, "") || "") + " · valid 10 min",
+      attachId: () => this.setState({ wIdFile:true, wErr:"" }),
+      wIdAttached: st.wIdFile,
+      wIdLabel: st.wIdFile ? "identity-card.jpg attached" : "Attach your IITG identity card",
+      wIdSubLabel: st.wIdFile ? "Checked against staff record IITG/W/2291" : "Photo of the card — front side, name readable",
+      wIdBorder: st.wIdFile ? "#235536" : "#333",
+      wFinishBg: st.wIdFile ? "#2FD46B" : "#242424",
+      wFinishFg: st.wIdFile ? "#06210F" : "#6E6E6E",
+      wardenName: st.wSession ? st.wSession.name : "",
+      wardenHostel: st.wSession ? st.wSession.hostel + " Hostel" : "",
+      wardenInitials: st.wSession ? st.wSession.name.replace(/^Dr\.?\s*/i, "").split(/\s+/).map(x => x[0]).join("").slice(0,2).toUpperCase() : "",
+      wardenStaffId: st.wSession ? st.wSession.staffId : "",
+      wardenSignOut: this.wardenSignOut,
+      wardenQueue: wardenQueue,
+      wardenQueueEmpty: wardenQueue.length === 0,
+      wardenOpenLabel: wardenOpen.length + " OPEN",
+      wardenScopeNote: st.wSession
+        ? "You only see reports for " + st.wSession.hostel + " Hostel. Other hostels go to their own warden."
+        : "",
+
+      isDetail: scr === "detail" && !authScr,
+      isSos: scr === "sos" && !authScr,
+      goDetailBack: wardenMode ? () => this.setState({ screen:"warden" }) : this.go("watch"),
+      goRoot: wardenMode ? () => this.setState({ screen:"warden" }) : this.go("home"),
+      showChrome: !guard && scr === "home",
+
+      goHome: this.go("home"), goWatch: this.go("watch"), goReport: this.go("report"),
+      goSpecies: this.go("species"), goSos: this.go("sos"),
+      goScan: () => this.setState({ screen:"scan", scanStage:"camera" }),
+
+      speciesList, pickable, sightings, pins, locGroups,
+
+      locOpen: st.locOpen, locQuery: st.locQuery,
+      useGps: this.useGps, gpsShow: !!st.gps, gpsLabel: st.gps,
+      gpsColor: st.gpsErr ? "#FFB020" : "#7FE0A5",
+      openLoc: () => this.setState({ locOpen:true }),
+      closeLoc: () => this.setState({ locOpen:false, locQuery:"" }),
+      onLocQuery: e => this.setState({ locQuery: e.target.value }),
+      locLabel: st.loc || "Choose a hostel or campus place",
+      locColor: st.loc ? "#fff" : "#7A7A7A",
+      locBorder: st.loc ? "#2FD46B" : "#262626",
+      reportIntro: this.isRoad(st.loc)
+        ? "Your report warns every student nearby. Roads and open ground have no warden on call. Do not approach the snake."
+        : "Your report notifies every student nearby and the warden of the place you pick. Do not approach the snake.",
+      recipientLabel: !st.loc
+        ? "Pick a location — the report goes to that hostel's warden"
+        : this.isRoad(st.loc)
+          ? "No warden covers this spot. Students nearby are warned and the pin clears itself in 3 days."
+          : "This report goes to the " + formRec[0] + " only",
+      recipientBg: st.loc ? "#17301F" : "#1B1B1B",
+      recipientBorder: st.loc ? "#235536" : "#262626",
+      recipientFg: st.loc ? "#B6F0CD" : "#7A7A7A",
+      recipientIcon: st.loc ? "#2FD46B" : "#7A7A7A",
+
+      pinText: !st.pin
+        ? "Tap the map to drop a pin on the exact spot"
+        : st.pin.kind === "open"
+          ? "Marked at " + st.pin.lat + ", " + st.pin.lng + "  ·  no named place nearby"
+          : "Marked " + st.pin.dist + " m from " + st.pin.name + "  ·  " + st.pin.lat + ", " + st.pin.lng,
+      pinBg: st.pin ? "#17301F" : "#1B1B1B",
+      pinBorder: st.pin ? "#235536" : "#262626",
+      pinIcon: st.pin ? "#2FD46B" : "#7A7A7A",
+      pinFg: st.pin ? "#B6F0CD" : "#7A7A7A",
+
+      spot: st.spot, onSpot: e => this.setState({ spot: e.target.value }),
+      note: st.note, onNote: e => this.setState({ note: e.target.value }),
+
+      venBg: st.venom === "venomous" ? "#26100F" : "#1B1B1B", venBorder: on(st.venom === "venomous"), venFg: st.venom === "venomous" ? "#FF8A8E" : "#DCDCDC",
+      nonBg: st.venom === "non-venomous" ? "#17301F" : "#1B1B1B", nonBorder: on(st.venom === "non-venomous"), nonFg: st.venom === "non-venomous" ? "#7FE0A5" : "#DCDCDC",
+      unsBg: st.venom === "unsure" ? "#2A2110" : "#1B1B1B", unsBorder: on(st.venom === "unsure"), unsFg: st.venom === "unsure" ? "#FFB020" : "#DCDCDC",
+      pickVen: () => this.setState({ venom:"venomous", species:"" }),
+      pickNon: () => this.setState({ venom:"non-venomous", species:"" }),
+      pickUnsure: () => this.setState({ venom:"unsure", species:"" }),
+      noSpRing: st.species === "none" ? "#2FD46B" : "#333",
+      noSpBg: st.species === "none" ? "#17301F" : "#1B1B1B",
+      noSpFg: st.species === "none" ? "#B6F0CD" : "#B0B0B0",
+      noSpHint: st.species === "none" ? "#7FBF97" : "#6E6E6E",
+      pickNoSpecies: () => this.setState({ species:"none" }),
+
+      photoLabel: st.photo ? "Photo attached · scanned match saved" : "Take a photo & identify the snake",
+      submitBg: (st.loc && st.venom) ? "#D22E22" : "#242424",
+      submitFg: (st.loc && st.venom) ? "#FFFFFF" : "#6E6E6E",
+      submit: this.submitReport,
+      doneWhere: st.loc || "Kameng",
+      waLink: this.waLink(),
+      waBtnLabel: st.waSent ? "Sent — open WhatsApp again" : "Send report on WhatsApp",
+      waBtnBg: st.waSent ? "#17301F" : "#25D366",
+      waBtnFg: st.waSent ? "#7FE0A5" : "#06210F",
+      waCaption: st.waSent
+        ? "WhatsApp opened in a new tab · press send there, then come back"
+        : "Goes only to the " + doneRec[0] + " · +91 " + (doneRec[1] || this.props.guardNumber),
+      markWaSent: () => this.setState({ waSent: true }),
+      isRoadReport: this.isRoad(st.myReport ? st.myReport.loc : st.loc),
+      waNeeded: !this.isRoad(st.myReport ? st.myReport.loc : st.loc),
+      doneRecipientLine: this.isRoad(st.myReport ? st.myReport.loc : st.loc)
+        ? "No warden alerted — no one is on call here"
+        : "WhatsApp ready for the " + doneRec[0],
+
+      scanCam: st.scanStage === "camera", isScanning: st.scanStage === "scanning", scanResult: st.scanStage === "result",
+      scanImg: st.shotUrl ? 'url("' + st.shotUrl + '") center/cover no-repeat' : this.img("krait"),
+      onPickFile: this.onPickFile,
+      scanImgOpacity: st.scanStage === "camera" ? "0" : "1",
+      camHintOpacity: st.scanStage === "camera" ? "1" : "0",
+      startScan: this.startScan,
+      retake: () => this.setState({ scanStage:"camera", shotUrl:null }),
+      topImg: this.img("krait"), topCommon: top.common, topSci: top.sci,
+      topVenom: topV.label.toUpperCase(), topBadgeBg: topV.bg, topBadgeFg: topV.fg, topConfidence: "76%",
+      alternates,
+      confirmTop: () => this.setState({ species:"krait", venom:"venomous", photo:true, screen:"report", scanStage:"camera" }),
+
+      selImg: this.img(sel.sp), selNoPhoto: !sel.sp, selName: this.sightingName(sel), selLocation: sel.loc,
+      selNote: sel.note, selReporter: "Reported by " + sel.reporter, selTime: sel.time,
+      selBadge: selCleared ? "CLEARED BY SECURITY" : selV.label.toUpperCase(),
+      selBadgeBg: selCleared ? "#17301F" : selV.bg,
+      selBadgeFg: selCleared ? "#7FE0A5" : selV.fg,
+      selTimeline: timeline,
+      selAdvice: selCleared
+        ? "This area has been checked. Still keep to the lit paths at night — sightings repeat in the same spots."
+        : this.isRoad(sel.loc)
+          ? "No guard is on call here. Keep 3 metres back, warn people walking past, and let it move off on its own."
+          : "Do not approach or try to move it. Keep 3 metres back, keep others away, and wait for the guard.",
+
+      sosIdle: st.sos === "idle", sosCalling: st.sos === "calling",
+      sosDeg: (st.sosPct * 3.6) + "deg",
+      sosHint: st.sosPct > 0 ? "keep holding…" : "hold to call",
+      holdStart: this.holdStart, holdEnd: this.holdEnd,
+      sosReset: () => this.setState({ sos:"idle", sosPct:0 })
+    };
+  }
+}
+</script>
+</body>
+</html>

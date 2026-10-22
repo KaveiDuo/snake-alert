@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
+<style>
+:root{
+  --bg:#0E120F; --panel:rgba(20,26,21,.94); --panelSolid:#141A15; --bd:#2A362C;
+  --ink:#E8F0E9; --dim:#9DAE9F; --accent:#34D27B;
+  --halo:rgba(8,12,9,.95); --labInk:#DCE6DD; --labHostel:#B7A6F0; --labAcad:#F2C766;
+  --labHosp:#FF8A80; --labWater:#6FC7F0; --labGreen:#7FD48C; --labRoad:#9FACA0; --labGate:#FF7A6B;
+}
+body.light{
+  --bg:#EDEFEA; --panel:rgba(255,255,255,.95); --panelSolid:#FFFFFF; --bd:#D8DDD4;
+  --ink:#1E241F; --dim:#6C766C; --accent:#1F8F4E;
+  --halo:rgba(255,255,255,.96); --labInk:#334034; --labHostel:#5B47A0; --labAcad:#8A6412;
+  --labHosp:#A72A2A; --labWater:#1F6E93; --labGreen:#3D6B31; --labRoad:#6E695C; --labGate:#B23A2E;
+}
+html,body{margin:0;height:100%;background:var(--bg);font-family:Figtree,system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+#map{position:absolute;inset:0;background:var(--bg)}
+.leaflet-container{background:var(--bg);font-family:Figtree,system-ui,sans-serif}
+.leaflet-control-attribution{background:var(--panel)!important;color:var(--dim)!important;font-size:8px!important;padding:1px 5px!important;border-radius:6px 0 0 0}
+.leaflet-control-attribution a{color:var(--accent)!important}
+.leaflet-control-zoom{border:none!important;box-shadow:none!important;margin:10px!important}
+.leaflet-control-zoom a{background:var(--panelSolid)!important;color:var(--ink)!important;border:1px solid var(--bd)!important;width:30px!important;height:30px!important;line-height:29px!important;font-size:17px!important;border-radius:9px!important;margin-bottom:5px!important;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.leaflet-control-zoom a:hover{color:var(--accent)!important;border-color:var(--accent)!important}
+.leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.78) contrast(1.05) saturate(.55)}
+body.light .leaflet-tile-pane{filter:saturate(.85) brightness(1.02)}
+.lab{font:600 9.5px Figtree,system-ui,sans-serif;color:var(--labInk);white-space:nowrap;pointer-events:none;text-shadow:0 0 3px var(--halo),0 0 2px var(--halo),0 0 5px var(--halo);transform:translate(-50%,-50%);text-align:center;line-height:1.15}
+.lab.hostel{color:var(--labHostel)}
+.lab.acad{color:var(--labAcad)}
+.lab.hosp{color:var(--labHosp)}
+.lab.water{color:var(--labWater);font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:9px}
+.lab.green{color:var(--labGreen);font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:8.5px}
+.lab.road{color:var(--labRoad);font-weight:800;letter-spacing:.1em;text-transform:uppercase;font-size:7.5px}
+.lab.gate{font:800 9px Figtree,system-ui,sans-serif;color:var(--labGate);letter-spacing:.04em;text-transform:uppercase}
+.gatepin{width:12px;height:12px;border-radius:3px;background:var(--labGate);border:2px solid var(--panelSolid);box-shadow:0 1px 3px rgba(0,0,0,.4);transform:rotate(45deg)}
+.sight{position:relative;width:15px;height:15px}
+.sight i{position:absolute;inset:0;border-radius:50%;border:2.5px solid var(--panelSolid);display:block;box-shadow:0 1px 5px rgba(0,0,0,.5)}
+.sight u{position:absolute;inset:0;border-radius:50%;opacity:.45;animation:pp 2.6s ease-out infinite;display:block}
+@keyframes pp{0%{transform:scale(1);opacity:.5}70%,100%{transform:scale(2.8);opacity:0}}
+.drop{width:30px;height:30px;position:relative;animation:drp .28s cubic-bezier(.3,1.5,.5,1)}
+.drop b{position:absolute;left:4px;top:0;width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--accent);border:2.5px solid var(--panelSolid);box-shadow:0 3px 9px rgba(0,0,0,.4);display:block}
+@keyframes drp{0%{transform:translateY(-14px) scale(.7);opacity:0}100%{transform:none;opacity:1}}
+.hint{position:absolute;left:10px;right:56px;top:10px;z-index:500;background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:9px 12px;font:550 11.5px Figtree,system-ui,sans-serif;color:var(--ink);text-align:center;box-shadow:0 3px 12px rgba(0,0,0,.3)}
+.readout{position:absolute;left:10px;right:10px;bottom:10px;z-index:502;background:var(--panelSolid);border:1px solid var(--bd);border-left:4px solid var(--accent);border-radius:12px;padding:10px 13px;box-shadow:0 6px 20px rgba(0,0,0,.4);display:none;align-items:center;gap:10px}
+.readout .rn{font:700 12.5px Figtree,system-ui,sans-serif;color:var(--ink);line-height:1.25}
+.readout .rs{font:500 10px Figtree,system-ui,sans-serif;color:var(--dim);margin-top:2px}
+.key{position:absolute;left:10px;bottom:10px;z-index:500;display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--bd);border-radius:11px;padding:7px 11px;box-shadow:0 3px 12px rgba(0,0,0,.3)}
+.key span{display:flex;align-items:center;gap:5px;font:600 9.5px Figtree,system-ui,sans-serif;color:var(--ink);white-space:nowrap}
+.key b{width:8px;height:8px;border-radius:50%;display:block}
+.themebtn{position:absolute;right:10px;bottom:10px;z-index:501;width:34px;height:34px;border-radius:11px;background:var(--panelSolid);border:1px solid var(--bd);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.themebtn:hover{border-color:var(--accent);color:var(--accent)}
+.themebtn svg{width:16px;height:16px;display:block}
+.recenter{position:absolute;right:54px;bottom:10px;z-index:501;height:34px;padding:0 11px;border-radius:11px;background:var(--panelSolid);border:1px solid var(--bd);color:var(--ink);display:flex;align-items:center;cursor:pointer;font:600 10.5px Figtree,system-ui,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.recenter:hover{border-color:var(--accent);color:var(--accent)}
+body.showres .key,body.showres .recenter,body.showres .themebtn{display:none}
+body.sm .recenter{display:none}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div class="hint" id="hint" style="display:none">Tap the map to mark exactly where you saw it</div>
+<div class="key" id="key">
+  <span><b style="background:#F0533F"></b>Venomous</span>
+  <span><b style="background:#E8A33D"></b>Unsure</span>
+  <span><b style="background:#34D27B"></b>Cleared</span>
+</div>
+<div class="recenter" id="recenter">Whole campus</div>
+<div class="themebtn" id="themebtn" title="Switch map theme"></div>
+<div class="readout" id="readout"><div><div class="rn" id="rn"></div><div class="rs" id="rs"></div></div></div>
+<script src="data/map-features.js"></script>
+<script>
+var params = new URLSearchParams(location.search);
+var PICK = params.get("mode") === "pick";
+var SIGHTINGS = [];
+
+var ESRI = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+var TILES = { dark: ESRI, light: ESRI };
+var ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+var saved = params.get("theme") || localStorage.getItem("snakeMapTheme") || "dark";
+var theme = saved === "light" ? "light" : "dark";
+
+var map = L.map("map", { zoomControl:false, attributionControl:true, zoomSnap:.25, minZoom:13, maxZoom:19 })
+  .setView([26.19100, 91.69450], 15.25);
+L.control.zoom({ position:"topright" }).addTo(map);
+
+var tileLayer = L.tileLayer(TILES[theme], { attribution:ATTR, maxZoom:19, maxNativeZoom:19 }).addTo(map);
+
+var SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+var MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+var btn = document.getElementById("themebtn");
+function applyTheme(t) {
+  theme = t === "light" ? "light" : "dark";
+  document.body.classList.toggle("light", theme === "light");
+  tileLayer.setUrl(TILES[theme]);
+  btn.innerHTML = theme === "light" ? MOON : SUN;
+  drawCampus();
+  try { localStorage.setItem("snakeMapTheme", theme); } catch (e) {}
+}
+applyTheme(theme);
+btn.onclick = function () { applyTheme(theme === "light" ? "dark" : "light"); };
+
+// campus outline + fit
+var CAMPUS = ROADS.filter(function (r) { return r[0] === "IIT Border Road"; })[0][1];
+var CAMPUS_B = L.latLngBounds(CAMPUS);
+var campusLayer = null;
+var FITZ = 15;
+function fitCampus() {
+  FITZ = map.getBoundsZoom(CAMPUS_B, false, [10,10]);
+  map.fitBounds(CAMPUS_B, { padding:[10,10] });
+}
+document.getElementById("recenter").onclick = fitCampus;
+
+// ── campus vector overlay (the basemap has no campus interior detail) ───
+var CAT = {
+  acad:{f:"#F3C144"}, admin:{f:"#AEBB63"}, hostel:{f:"#B7A9DF"}, res:{f:"#F4A98B"},
+  hosp:{f:"#E04A4A"}, sac:{f:"#C6B788"}, field:{f:"#CBBE90"}, tech:{f:"#CBDA78"},
+  school:{f:"#E9D27A"}, guest:{f:"#AEBB63"}, park:{f:"#9FD08F"}, other:{f:"#EF8C34"}
+};
+var campusLayer = L.layerGroup().addTo(map);
+function shade(hex, amt) { // amt<0 darken, >0 lighten
+  var n = parseInt(hex.slice(1), 16), r = n>>16, g = (n>>8)&255, b = n&255;
+  function m(v){ return Math.max(0, Math.min(255, Math.round(amt<0 ? v*(1+amt) : v + (255-v)*amt))); }
+  return "#" + ((1<<24) + (m(r)<<16) + (m(g)<<8) + m(b)).toString(16).slice(1);
+}
+function footprint(p) {
+  var dLat = (p[5] / 2) / 111320, dLng = (p[4] / 2) / (111320 * Math.cos(p[1] * Math.PI / 180));
+  return [[p[1]-dLat,p[2]-dLng],[p[1]-dLat,p[2]+dLng],[p[1]+dLat,p[2]+dLng],[p[1]+dLat,p[2]-dLng]];
+}
+function drawCampus() {
+  if (!campusLayer) return;
+  campusLayer.clearLayers();
+  L.polygon(CAMPUS, { color: theme === "light" ? "#1F8F4E" : "#34D27B", weight:1.5, opacity:.5, dashArray:"5 5", fill:false, interactive:false }).addTo(campusLayer);
+}
+function drawCampusVectors_unused() {
+  if (!campusLayer) return;
+  campusLayer.clearLayers();
+  var dark = theme !== "light";
+  var P = dark
+    ? { greenF:"#152A19", greenL:"#20381F", waterF:"#13303F", waterL:"#1F4E63",
+        roadCase:"#0C110D", roadFill:"#6E7A70", ring:"#34D27B", bOp:.5, bLight:-0.72 }
+    : { greenF:"#D7E7C8", greenL:"#BBD3A8", waterF:"#CDE7F3", waterL:"#9BC9DE",
+        roadCase:"#D9D4C6", roadFill:"#FFFFFF", ring:"#1F8F4E", bOp:.75, bLight:0.45 };
+  GREENS.forEach(function (g) {
+    L.polygon(g[1], { color:P.greenL, weight:1, fillColor:P.greenF, fillOpacity:dark?.7:.85, interactive:false }).addTo(campusLayer);
+  });
+  LAKES.forEach(function (w) {
+    L.polygon(w[1], { color:P.waterL, weight:1.2, fillColor:P.waterF, fillOpacity:dark?.85:.95, interactive:false }).addTo(campusLayer);
+  });
+  ROADS.forEach(function (r) {
+    var ring = r[0] === "IIT Border Road";
+    L.polyline(r[1], { color:P.roadCase, weight: ring?8:7, opacity:1, lineJoin:"round", lineCap:"round", interactive:false }).addTo(campusLayer);
+    L.polyline(r[1], { color:P.roadFill, weight: ring?5:4, opacity: dark?.85:1, lineJoin:"round", lineCap:"round", interactive:false }).addTo(campusLayer);
+  });
+  PLACES.forEach(function (p) {
+    if (!p[4] || !p[5]) return;
+    var base = (CAT[p[3]] || CAT.other).f;
+    var fill = shade(base, P.bLight);
+    L.polygon(footprint(p), { color:shade(fill, dark?0.12:-0.12), weight:1, fillColor:fill, fillOpacity:P.bOp, interactive:false }).addTo(campusLayer);
+  });
+  L.polygon(CAMPUS, { color:P.ring, weight:1.5, opacity:.6, dashArray:"5 5", fill:false, interactive:false }).addTo(campusLayer);
+}
+drawCampus();
+
+// ── place labels (screen-space declutter over the basemap) ──────────────
+var NAMED_LAKES2 = { "Serpentine Lake":1, "Tihor Lake":1 };
+var labelLayer = L.layerGroup().addTo(map);
+function labelIcon(cls, text) {
+  return L.divIcon({ className:"", html:'<div class="'+cls+'">'+text+'</div>', iconSize:[0,0] });
+}
+function centroid(ring) {
+  return ring.reduce(function (a, p) { return [a[0]+p[0]/ring.length, a[1]+p[1]/ring.length]; }, [0,0]);
+}
+function drawLabels() {
+  var z = map.getZoom(), taken = [];
+  labelLayer.clearLayers();
+  function place(ll, cls, text, w, h, force) {
+    var pt = map.latLngToContainerPoint(ll);
+    var r = { x:pt.x - w/2, y:pt.y - h/2, w:w, h:h };
+    if (!force) for (var i=0;i<taken.length;i++) { var t = taken[i];
+      if (r.x < t.x+t.w && t.x < r.x+r.w && r.y < t.y+t.h && t.y < r.y+r.h) return false; }
+    taken.push(r);
+    L.marker(ll, { interactive:false, icon:labelIcon(cls, text) }).addTo(labelLayer);
+    return true;
+  }
+  var far = false; // the OSM basemap carries its own place labels at every zoom
+  if (far) LAKES.forEach(function (w) {
+    if (!NAMED_LAKES2[w[0]]) return;
+    place(centroid(w[1]), "lab water", w[0].replace(" ", "<br>"), w[0].length*4.6, 22, true);
+  });
+  if (far) GREENS.forEach(function (g) {
+    if (z < FITZ) return;
+    place(centroid(g[1]), "lab green", g[0], g[0].length*5.4, 13, false);
+  });
+  GATES.forEach(function (g) {
+    L.marker([g[1],g[2]], { interactive:false, icon:L.divIcon({ className:"", html:'<div class="gatepin"></div>', iconSize:[12,12], iconAnchor:[6,6] }) }).addTo(labelLayer);
+    if (z >= FITZ) place([g[1],g[2]], "lab gate", '<span style="display:inline-block;transform:translateY(-15px)">'+g[0]+'</span>', g[0].length*5.6, 12, false);
+  });
+  if (z >= FITZ && far) ROADS.forEach(function (r) {
+    if (r[0] === "IIT Border Road") return;
+    var pts = r[1], i = Math.floor(pts.length/2), mid = pts[i];
+    var a = pts[Math.max(0,i-1)], b = pts[Math.min(pts.length-1,i+1)];
+    var ang = Math.atan2(b[0]-a[0], (b[1]-a[1])*Math.cos(mid[0]*Math.PI/180)) * 180/Math.PI;
+    if (ang > 90) ang -= 180; if (ang < -90) ang += 180;
+    place(mid, "lab road", '<span style="display:inline-block;transform:rotate('+(-ang).toFixed(1)+'deg)">'+r[0]+'</span>', r[0].length*5, 12, false);
+  });
+  PLACES.slice().sort(function (a,b) { return (b[6]-a[6]) || (a[0].length-b[0].length); }).forEach(function (p) {
+    if (!far || (z < FITZ - 0.25 && !p[6])) return;
+    var cls = "lab" + (p[3]==="hostel" ? " hostel" : p[3]==="acad" ? " acad" : p[3]==="hosp" ? " hosp" : "");
+    var txt = p[0].length > 17 ? p[0].replace(/ (\S+)$/, "<br>$1") : p[0];
+    place([p[1],p[2]], cls, txt, Math.min(p[0].length,17)*5.2, txt.indexOf("<br>")>-1 ? 22 : 12, false);
+  });
+}
+map.on("zoomend moveend", drawLabels);
+
+function fit() {
+  document.body.classList.toggle("sm", window.innerWidth < 380);
+}
+fit(); fitCampus(); drawLabels();
+map.whenReady(fitCampus);
+setTimeout(function () { map.invalidateSize(); fitCampus(); drawLabels(); }, 60);
+window.addEventListener("resize", function () { fit(); map.invalidateSize(); fitCampus(); });
+
+document.getElementById("hint").style.display = "block";
+if (!PICK) {
+  document.getElementById("hint").textContent = "Tap anywhere on the map to report a sighting there";
+  document.getElementById("key").style.display = "flex";
+} else {
+  document.getElementById("key").style.display = "none";
+}
+
+// ── sightings ───────────────────────────────────────────────────────────
+var sightLayer = L.layerGroup().addTo(map);
+function renderSightings(list) {
+  SIGHTINGS = list || [];
+  sightLayer.clearLayers();
+  if (PICK) return;
+  SIGHTINGS.forEach(function (s) {
+    if (!isFinite(s.lat) || !isFinite(s.lng)) return;
+    L.marker([s.lat, s.lng], {
+      icon: L.divIcon({ className:"",
+        html:'<div class="sight"><u style="background:'+s.color+'"></u><i style="background:'+s.color+'"></i></div>',
+        iconSize:[15,15], iconAnchor:[7.5,7.5] }),
+      title: s.name + " — " + s.where
+    }).addTo(sightLayer).on("click", function () {
+      parent.postMessage({ source:"snakeMap", type:"open", id:s.id }, "*");
+    });
+  });
+}
+window.addEventListener("message", function (e) {
+  var d = e.data;
+  if (!d || d.source !== "snakeHost") return;
+  if (d.type === "sightings") renderSightings(d.list);
+  if (d.type === "theme") applyTheme(d.theme);
+});
+parent.postMessage({ source:"snakeMap", type:"ready" }, "*");
+
+// ── location resolver ───────────────────────────────────────────────────
+var NAMED_LAKES = { "Serpentine Lake":1, "Tihor Lake":1 };
+function mdist(lat, lng, lat2, lng2) {
+  var dx = (lng - lng2) * Math.cos(lat * Math.PI / 180), dy = lat - lat2;
+  return Math.sqrt(dx*dx + dy*dy) * 111320;
+}
+function segDist(lat, lng, a, b) {
+  var k = Math.cos(lat * Math.PI / 180);
+  var px = (lng - a[1]) * k, py = lat - a[0];
+  var vx = (b[1] - a[1]) * k, vy = b[0] - a[0];
+  var L2 = vx*vx + vy*vy;
+  var t = L2 ? Math.max(0, Math.min(1, (px*vx + py*vy) / L2)) : 0;
+  var dx = px - vx*t, dy = py - vy*t;
+  return Math.sqrt(dx*dx + dy*dy) * 111320;
+}
+function nearestRoad(lat, lng) {
+  var best = null, bd = Infinity;
+  ROADS.forEach(function (r) {
+    for (var i = 0; i < r[1].length - 1; i++) {
+      var d = segDist(lat, lng, r[1][i], r[1][i+1]);
+      if (d < bd) { bd = d; best = r[0]; }
+    }
+  });
+  return { name: best, dist: Math.round(bd) };
+}
+function inPoly(lat, lng, ring) {
+  var inside = false;
+  for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    var yi = ring[i][0], xi = ring[i][1], yj = ring[j][0], xj = ring[j][1];
+    if (((yi > lat) !== (yj > lat)) && (lng < (xj - xi) * (lat - yi) / (yj - yi) + xi)) inside = !inside;
+  }
+  return inside;
+}
+function nearestLake(lat, lng) {
+  var best = null, bd = Infinity, insideName = null;
+  LAKES.forEach(function (w) {
+    var ring = w[1], nm = NAMED_LAKES[w[0]] ? w[0] : "Campus pond";
+    if (inPoly(lat, lng, ring)) insideName = nm;
+    for (var i = 0; i < ring.length; i++) {
+      var d = segDist(lat, lng, ring[i], ring[(i+1) % ring.length]);
+      if (d < bd) { bd = d; best = nm; }
+    }
+  });
+  return { name: insideName || best, dist: Math.round(bd), inside: !!insideName };
+}
+function nearestGate(lat, lng) {
+  var best = null, bd = Infinity;
+  GATES.forEach(function (g) {
+    var d = mdist(lat, lng, g[1], g[2]);
+    if (d < bd) { bd = d; best = g[0]; }
+  });
+  return { name: best, dist: Math.round(bd) };
+}
+function footprint(p) {
+  var dLat = (p[5] / 2) / 111320, dLng = (p[4] / 2) / (111320 * Math.cos(p[1] * Math.PI / 180));
+  return [[p[1]-dLat,p[2]-dLng],[p[1]-dLat,p[2]+dLng],[p[1]+dLat,p[2]+dLng],[p[1]+dLat,p[2]-dLng]];
+}
+function nearest(lat, lng) {
+  var best = null, bd = Infinity, insideP = null;
+  PLACES.forEach(function (p) {
+    if (p[4] && p[5] && inPoly(lat, lng, footprint(p))) insideP = p[0];
+    var d = mdist(lat, lng, p[1], p[2]);
+    if (d < bd) { bd = d; best = p[0]; }
+  });
+  if (insideP) return { name:insideP, dist:0, kind:"place" };
+  var lake = nearestLake(lat, lng), road = nearestRoad(lat, lng), gate = nearestGate(lat, lng);
+  if (gate.name && gate.dist < 40 && gate.dist < bd) return { name:gate.name, dist:gate.dist, kind:"road" };
+  if (lake.inside && bd > 30) return { name:lake.name + " bank", dist:0, kind:"lake" };
+  if (road.name && road.dist < 20 && road.dist + 15 < bd) return { name:road.name, dist:road.dist, kind:"road" };
+  if (lake.name && lake.dist < 35 && lake.dist < road.dist && lake.dist < bd) return { name:lake.name + " bank", dist:lake.dist, kind:"lake" };
+  if (road.name && road.dist < 25 && road.dist < bd) return { name:road.name, dist:road.dist, kind:"road" };
+  if (bd > 150 && road.dist > 150) return { name:"Open campus · " + lat.toFixed(4) + ", " + lng.toFixed(4), dist:Math.round(bd), kind:"open" };
+  return { name:best, dist:Math.round(bd), kind:"place" };
+}
+
+var dropped = null, ring = null;
+map.on("click", function (e) {
+  if (dropped) map.removeLayer(dropped);
+  if (ring) map.removeLayer(ring);
+  ring = L.circle(e.latlng, { radius:25, color:"#34D27B", weight:1, opacity:.5, fillColor:"#34D27B", fillOpacity:.12, interactive:false }).addTo(map);
+  dropped = L.marker(e.latlng, {
+    icon: L.divIcon({ className:"", html:'<div class="drop"><b></b></div>', iconSize:[30,30], iconAnchor:[15,27] })
+  }).addTo(map);
+  var n = nearest(e.latlng.lat, e.latlng.lng);
+  document.getElementById("readout").style.display = "flex";
+  document.body.classList.add("showres");
+  document.getElementById("rn").textContent = n.name;
+  document.getElementById("rs").textContent =
+    n.kind === "place" ? (n.dist ? "About " + n.dist + " m away" : "You marked this building") + " · a warden covers this spot"
+    : n.kind === "lake" ? (n.dist ? "About " + n.dist + " m from the water" : "On the water's edge") + " · no warden here"
+    : n.kind === "road" ? "About " + n.dist + " m away · no warden here"
+    : "Open ground · no warden here";
+  parent.postMessage({
+    source:"snakeMap", type: PICK ? "pick" : "pickHere",
+    name:n.name, dist:n.dist, kind:n.kind,
+    lat:+e.latlng.lat.toFixed(5), lng:+e.latlng.lng.toFixed(5)
+  }, "*");
+});
+</script>
+</body>
+</html>

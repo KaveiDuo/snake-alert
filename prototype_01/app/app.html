@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Snake Watch</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0F0F0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+html,body{margin:0;height:100%;background:#0F0F0F;overflow:hidden;overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
+#app{position:fixed;inset:0;width:100%;height:100%;border:0;display:block;background:#0F0F0F}
+#splash{position:fixed;inset:0;z-index:5;background:#0F0F0F;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .35s;font-family:Figtree,system-ui,sans-serif}
+#splash.gone{opacity:0;pointer-events:none}
+#splash .mark{font:700 34px Figtree,system-ui,sans-serif;color:#fff;letter-spacing:-.6px}
+#splash .mark span{color:#2FD46B}
+#splash .sub{font:500 12px Figtree,system-ui,sans-serif;color:#6E6E6E}
+#splash .bar{width:120px;height:3px;border-radius:2px;background:#1C1C1C;overflow:hidden}
+#splash .bar i{display:block;width:40%;height:100%;background:#2FD46B;animation:sl 1.1s ease-in-out infinite}
+@keyframes sl{0%{transform:translateX(-100%)}100%{transform:translateX(320%)}}
+#install{position:fixed;left:12px;right:12px;bottom:12px;z-index:8;display:none;align-items:center;gap:10px;background:#1B1B1B;border:1px solid #2E2E2E;border-radius:18px;padding:12px 14px;font-family:Figtree,system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+#install.on{display:flex}
+#install .t{flex:1;font-size:12.5px;color:#DCDCDC;line-height:1.45}
+#install b{color:#fff}
+#install button{flex:none;border:0;border-radius:12px;padding:10px 13px;font:700 12px Figtree,system-ui,sans-serif;background:#2FD46B;color:#06210F;cursor:pointer}
+#install .x{flex:none;background:none;color:#6E6E6E;padding:10px 4px;font-weight:600}
+</style>
+</head>
+<body>
+<iframe id="app" src="OneStop Snake Watch.dc.html?app=1" allow="geolocation; camera; microphone" allowfullscreen></iframe>
+
+<div id="splash">
+  <div class="mark">One<span>.</span></div>
+  <div class="sub">Snake Watch</div>
+  <div class="bar"><i></i></div>
+</div>
+
+<div id="install">
+  <div class="t" id="itext"><b>Install Snake Watch</b> — add it to your home screen to use it offline.</div>
+  <button id="ibtn">Install</button>
+  <button class="x" id="ix">Later</button>
+</div>
+
+<script>
+// ── app-shell CSS injected into the design so only the phone screen shows ──
+var APPCSS = [
+  'html,body{margin:0!important;padding:0!important;background:#0F0F0F!important;height:100%!important;overflow:hidden!important}',
+  '#t0,.dv-thd,.dv-olabel,.dv-jump,.dv-next{display:none!important}',
+  '.dv-turn{padding:0!important;border:0!important}',
+  '.dv-opts,.dv-opt{gap:0!important;display:block!important}',
+  '.pf{width:100vw!important;height:100vh!important;height:100dvh!important;padding:0!important;',
+  'border-radius:0!important;box-shadow:none!important;background:#0F0F0F!important}',
+  '.pfsc{border-radius:0!important}'
+].join('');
+
+var frame = document.getElementById('app');
+var splash = document.getElementById('splash');
+var styled = false;
+
+function style() {
+  try {
+    var d = frame.contentDocument;
+    if (!d || !d.body) return false;
+    if (!d.getElementById('__appshell')) {
+      var s = d.createElement('style');
+      s.id = '__appshell';
+      s.textContent = APPCSS;
+      d.head.appendChild(s);
+    }
+    var ok = !!d.querySelector('.pf');
+    if (ok && !styled) {
+      styled = true;
+      splash.classList.add('gone');
+      setTimeout(function () { splash.remove(); }, 400);
+    }
+    return ok;
+  } catch (e) { return false; }
+}
+var tries = 0;
+function handshake() {
+  try { frame.contentWindow.postMessage({ source:'snakeApp', type:'appMode' }, '*'); } catch (e) {}
+}
+var poll = setInterval(function () {
+  handshake();
+  if (style() || ++tries > 120) { handshake(); clearInterval(poll); }
+}, 120);
+frame.addEventListener('load', function () { style(); handshake(); });
+setTimeout(function () { splash.classList.add('gone'); }, 9000);
+
+// ── service worker (offline) ─────────────────────────────────────────────
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').then(function (reg) {
+      reg.update();
+      if (reg.waiting) reg.waiting.postMessage({ type:'skipWaiting' });
+    }).catch(function () {});
+  });
+}
+
+// notifications requested on first tap (Android needs a user gesture)
+function askNotify() {
+  if (!('Notification' in window) || Notification.permission !== 'default') return;
+  try { Notification.requestPermission(); } catch (e) {}
+}
+window.addEventListener('pointerdown', function once() {
+  window.removeEventListener('pointerdown', once);
+  askNotify();
+}, { passive: true });
+
+// the design posts alerts up; route them through the service worker
+window.addEventListener('message', function (e) {
+  var d = e.data;
+  if (!d || d.source !== 'snakeApp' || d.type !== 'notify') return;
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({ type: 'notify', title: d.title, body: d.body, tag: d.tag });
+  } else {
+    try { new Notification(d.title, { body: d.body, icon: 'icons/icon-192.png' }); } catch (err) {}
+  }
+  if (navigator.vibrate) navigator.vibrate([90, 50, 90]);
+});
+
+// ── install prompt ───────────────────────────────────────────────────────
+var standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+var bar = document.getElementById('install'), deferred = null;
+var dismissed = false;
+try { dismissed = localStorage.getItem('snakewatch.install.hidden') === '1'; } catch (e) {}
+
+window.addEventListener('beforeinstallprompt', function (e) {
+  e.preventDefault();
+  deferred = e;
+  if (!standalone && !dismissed) setTimeout(function () { bar.classList.add('on'); }, 2600);
+});
+document.getElementById('ibtn').onclick = function () {
+  bar.classList.remove('on');
+  if (deferred) { deferred.prompt(); deferred = null; }
+};
+document.getElementById('ix').onclick = function () {
+  bar.classList.remove('on');
+  try { localStorage.setItem('snakewatch.install.hidden', '1'); } catch (e) {}
+};
+// iOS / browsers without beforeinstallprompt get the manual hint
+if (!standalone && !dismissed && !('onbeforeinstallprompt' in window)) {
+  document.getElementById('itext').innerHTML = '<b>Add to Home Screen</b> — open the browser menu and choose “Add to Home screen”.';
+  document.getElementById('ibtn').style.display = 'none';
+  setTimeout(function () { bar.classList.add('on'); }, 3200);
+}
+
+// keep the viewport locked (no pinch-zoom / pull-to-refresh inside the app)
+document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
+</script>
+</body>
+</html>

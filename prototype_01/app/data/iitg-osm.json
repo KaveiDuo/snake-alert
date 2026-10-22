@@ -1,0 +1,398 @@
+[
+ {
+  "n": "Transit Complex",
+  "t": "yes",
+  "lat": 26.1922583,
+  "lon": 91.7024275
+ },
+ {
+  "n": "Baskin Robbins",
+  "t": "fast_food",
+  "lat": 26.192402,
+  "lon": 91.6993253
+ },
+ {
+  "n": "Subway",
+  "t": "fast_food",
+  "lat": 26.19258,
+  "lon": 91.6992923
+ },
+ {
+  "n": "Computer centre",
+  "t": "community_centre",
+  "lat": 26.1893128,
+  "lon": 91.6929648
+ },
+ {
+  "n": "IIT to PB firststop",
+  "t": "bus_stop",
+  "lat": 26.1960159,
+  "lon": 91.697398
+ },
+ {
+  "n": "Deka",
+  "t": "fast_food",
+  "lat": 26.1853485,
+  "lon": 91.7010565
+ },
+ {
+  "n": "Manikanta Restraunt",
+  "t": "restaurant",
+  "lat": 26.1923003,
+  "lon": 91.6992861
+ },
+ {
+  "n": "Foodie's World",
+  "t": "restaurant",
+  "lat": 26.1925652,
+  "lon": 91.6993755
+ },
+ {
+  "n": "Cafe Coffee Day",
+  "t": "cafe",
+  "lat": 26.1895236,
+  "lon": 91.6926804
+ },
+ {
+  "n": "Lecture hall canteen",
+  "t": "fast_food",
+  "lat": 26.1890279,
+  "lon": 91.691529
+ },
+ {
+  "n": "Agthori",
+  "t": "",
+  "lat": 26.198642,
+  "lon": 91.6860097
+ },
+ {
+  "n": "State Bank of India",
+  "t": "bank",
+  "lat": 26.189805,
+  "lon": 91.6921473
+ },
+ {
+  "n": "Canara Bank",
+  "t": "bank",
+  "lat": 26.1897947,
+  "lon": 91.692132
+ },
+ {
+  "n": "Cycle repair shop",
+  "t": "bicycle_repair_station",
+  "lat": 26.1892993,
+  "lon": 91.6939425
+ },
+ {
+  "n": "Tapri",
+  "t": "restaurant",
+  "lat": 26.1893427,
+  "lon": 91.694894
+ },
+ {
+  "n": "birthday celebration place",
+  "t": "park",
+  "lat": 26.1893864,
+  "lon": 91.6947411
+ },
+ {
+  "n": "Gaurang Hostel",
+  "t": "",
+  "lat": 26.1913613,
+  "lon": 91.7008015
+ },
+ {
+  "n": "Center for Educational Technology",
+  "t": "",
+  "lat": 26.1873995,
+  "lon": 91.692164
+ },
+ {
+  "n": "Kamakhya Junction - Rangiya Junction",
+  "t": "",
+  "lat": 26.2458617,
+  "lon": 91.6945156
+ },
+ {
+  "n": "Indian Institute of Technology Guwahati",
+  "t": "university",
+  "lat": 26.1921003,
+  "lon": 91.6951352
+ },
+ {
+  "n": "Fancy Bazar",
+  "t": "",
+  "lat": 26.2384635,
+  "lon": 91.8311398
+ },
+ {
+  "n": "B",
+  "t": "pitch",
+  "lat": 26.1919221,
+  "lon": 91.6980184
+ },
+ {
+  "n": "Guest House",
+  "t": "hotel",
+  "lat": 26.1955302,
+  "lon": 91.6952015
+ },
+ {
+  "n": "Transit Complex",
+  "t": "yes",
+  "lat": 26.1930352,
+  "lon": 91.702071
+ },
+ {
+  "n": "Academic Complex",
+  "t": "university",
+  "lat": 26.1862129,
+  "lon": 91.6915695
+ },
+ {
+  "n": "Administrative Block",
+  "t": "office",
+  "lat": 26.1901685,
+  "lon": 91.6920432
+ },
+ {
+  "n": "Dihing Hostel",
+  "t": "dormitory",
+  "lat": 26.1879555,
+  "lon": 91.6994107
+ },
+ {
+  "n": "Kameng Hostel",
+  "t": "dormitory",
+  "lat": 26.1904331,
+  "lon": 91.7015615
+ },
+ {
+  "n": "Siang Hostel",
+  "t": "dormitory",
+  "lat": 26.1893036,
+  "lon": 91.696633
+ },
+ {
+  "n": "Subansiri Hostel",
+  "t": "dormitory",
+  "lat": 26.1928409,
+  "lon": 91.6950619
+ },
+ {
+  "n": "Kapili Hostel",
+  "t": "dormitory",
+  "lat": 26.188462,
+  "lon": 91.6963131
+ },
+ {
+  "n": "Manas Hostel",
+  "t": "residential",
+  "lat": 26.188789,
+  "lon": 91.6997065
+ },
+ {
+  "n": "Umiam Hostel",
+  "t": "dormitory",
+  "lat": 26.1885985,
+  "lon": 91.7020372
+ },
+ {
+  "n": "Shopping Complex",
+  "t": "retail",
+  "lat": 26.1949951,
+  "lon": 91.68792
+ },
+ {
+  "n": "Bhupen Hazarika Auditorium",
+  "t": "university",
+  "lat": 26.1909756,
+  "lon": 91.6930545
+ },
+ {
+  "n": "athletics",
+  "t": "sports_centre",
+  "lat": 26.1930177,
+  "lon": 91.6979662
+ },
+ {
+  "n": "IITG lake",
+  "t": "water",
+  "lat": 26.1903414,
+  "lon": 91.6947472
+ },
+ {
+  "n": "Lake opposite guest house",
+  "t": "water",
+  "lat": 26.194826,
+  "lon": 91.6962769
+ },
+ {
+  "n": "Student Activity Center",
+  "t": "yes",
+  "lat": 26.1931005,
+  "lon": 91.6958668
+ },
+ {
+  "n": "Faculty Higer Secondary School",
+  "t": "school",
+  "lat": 26.1837312,
+  "lon": 91.7010926
+ },
+ {
+  "n": "New Student Activity Center",
+  "t": "university",
+  "lat": 26.1925615,
+  "lon": 91.6990824
+ },
+ {
+  "n": "Food Court",
+  "t": "restaurant",
+  "lat": 26.1925082,
+  "lon": 91.6993351
+ },
+ {
+  "n": "Brahmaputra",
+  "t": "",
+  "lat": 26.5009043,
+  "lon": 92.7175239
+ },
+ {
+  "n": "Brahmaputra Hostel",
+  "t": "dormitory",
+  "lat": 26.1862883,
+  "lon": 91.6992779
+ },
+ {
+  "n": "Barak Hostel",
+  "t": "dormitory",
+  "lat": 26.1895494,
+  "lon": 91.7018049
+ },
+ {
+  "n": "Dibang Hostel",
+  "t": "dormitory",
+  "lat": 26.1875044,
+  "lon": 91.6966781
+ },
+ {
+  "n": "Mechnical Workshop",
+  "t": "university",
+  "lat": 26.1870115,
+  "lon": 91.6895729
+ },
+ {
+  "n": "Lohit Hostel",
+  "t": "dormitory",
+  "lat": 26.1892187,
+  "lon": 91.6984403
+ },
+ {
+  "n": "General Gym",
+  "t": "yes",
+  "lat": 26.1910738,
+  "lon": 91.697845
+ },
+ {
+  "n": "Children's Park",
+  "t": "park",
+  "lat": 26.1986187,
+  "lon": 91.6949657
+ },
+ {
+  "n": "Food stalls place",
+  "t": "park",
+  "lat": 26.190157,
+  "lon": 91.6937923
+ },
+ {
+  "n": "IITG Hospital",
+  "t": "hospital",
+  "lat": 26.1965798,
+  "lon": 91.6975021
+ },
+ {
+  "n": "Guest House",
+  "t": "hotel",
+  "lat": 26.1966497,
+  "lon": 91.6960309
+ },
+ {
+  "n": "Conference Hall",
+  "t": "university",
+  "lat": 26.1911405,
+  "lon": 91.6924735
+ },
+ {
+  "n": "Lecture Halls",
+  "t": "university",
+  "lat": 26.1889848,
+  "lon": 91.6914584
+ },
+ {
+  "n": "GNRC Institute of Medical Science",
+  "t": "hospital",
+  "lat": 26.2021448,
+  "lon": 91.6939491
+ },
+ {
+  "n": "Disang Hostel",
+  "t": "dormitory",
+  "lat": 26.1865188,
+  "lon": 91.6968269
+ },
+ {
+  "n": "Dhansiri Hostel",
+  "t": "residential",
+  "lat": 26.1942514,
+  "lon": 91.6983422
+ },
+ {
+  "n": "Planning and Management Section",
+  "t": "yes",
+  "lat": 26.1889417,
+  "lon": 91.6946769
+ },
+ {
+  "n": "Core 5",
+  "t": "yes",
+  "lat": 26.1856675,
+  "lon": 91.68937
+ },
+ {
+  "n": "Footpath surrounding sports area",
+  "t": "footway",
+  "lat": 26.1929611,
+  "lon": 91.6971956
+ },
+ {
+  "n": "Married Scholars Hostel",
+  "t": "residential",
+  "lat": 26.1950639,
+  "lon": 91.6983889
+ },
+ {
+  "n": "Kamakhya Junction - Rangiya Junction",
+  "t": "",
+  "lat": 26.2812092,
+  "lon": 91.6826933
+ },
+ {
+  "n": "Gaurang Hostel",
+  "t": "dormitory",
+  "lat": 26.1918225,
+  "lon": 91.7008905
+ },
+ {
+  "n": "Kamakhya Junction - Rangiya Junction",
+  "t": "",
+  "lat": 26.1911511,
+  "lon": 91.6789202
+ },
+ {
+  "n": "Cricket Ground - IITG",
+  "t": "college",
+  "lat": 26.1950188,
+  "lon": 91.7022161
+ }
+]
