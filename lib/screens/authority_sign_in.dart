@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import '../data/app_state.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
-import 'authority_console.dart';
+import 'home_shell.dart';
 
 class _Steps extends StatelessWidget {
   final int done;
@@ -75,7 +75,10 @@ class _AuthorityPhoneScreenState extends State<AuthorityPhoneScreen> {
       if (_userTyped || !mounted) return t.cancel();
       if (t.tick < 7) return; // ~0.5 s pause before "typing"
       i++;
-      _ctrl.value = TextEditingValue(text: number.substring(0, i), selection: TextSelection.collapsed(offset: i));
+      _ctrl.value = TextEditingValue(
+        text: number.substring(0, i),
+        selection: TextSelection.collapsed(offset: i),
+      );
       if (i >= number.length) t.cancel();
     });
   }
@@ -282,7 +285,7 @@ class _AuthorityCodeScreenState extends State<AuthorityCodeScreen> {
     Navigator.of(context).pushAndRemoveUntil(
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 400),
-        pageBuilder: (_, _, _) => const AuthorityShell(),
+        pageBuilder: (_, _, _) => const HomeShell(),
         transitionsBuilder: (_, a, _, c) => FadeTransition(opacity: a, child: c),
       ),
       (_) => false,

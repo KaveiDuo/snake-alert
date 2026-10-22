@@ -6,6 +6,7 @@ import '../data/app_state.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
 import '../widgets/response.dart';
+import 'authority_console.dart';
 import 'notifications.dart';
 import 'profile.dart';
 import 'snake_watch.dart';
@@ -70,8 +71,14 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
-    final tabs = [const _HomeTab(), const _NotInDemo('Food'), const _NotInDemo('Travel'), const StudentProfile()];
-    return Scaffold(
+    final admin = AppScope.of(context).role == Role.authority;
+    final tabs = [
+      const _HomeTab(),
+      const _NotInDemo('Food'),
+      const _NotInDemo('Travel'),
+      admin ? const AuthorityProfile() : const StudentProfile(),
+    ];
+    final page = Scaffold(
       backgroundColor: C.bg,
       body: IndexedStack(index: _tab, children: tabs),
       floatingActionButton: _tab == 0
@@ -88,8 +95,14 @@ class _HomeShellState extends State<HomeShell> {
         ],
       ),
     );
+    // Admins get escalation alerts wherever they are in the app.
+    return admin ? EscalationWatcher(onOpen: () => openAdminSnakeAlert(context), child: page) : page;
   }
 }
+
+/// The admin's Snake Alert (reports and team), from their Onestop home.
+void openAdminSnakeAlert(BuildContext context) =>
+    Navigator.push(context, MaterialPageRoute(builder: (_) => const AuthorityShell()));
 
 class _NotInDemo extends StatelessWidget {
   final String name;
@@ -125,6 +138,10 @@ class _HomeTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = AppScope.of(context);
     final latest = s.latestOpen;
+    final admin = s.role == Role.authority;
+    void openSnakeAlert() => admin
+        ? openAdminSnakeAlert(context)
+        : Navigator.push(context, MaterialPageRoute(builder: (_) => const SnakeWatchScreen()));
     return DarkPage(
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
@@ -147,7 +164,9 @@ class _HomeTab extends StatelessWidget {
               RoundButton(
                 Icons.notifications_none_rounded,
                 size: 42,
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen())),
+                onTap: admin
+                    ? () => openAdminSnakeAlert(context)
+                    : () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen())),
                 badge: Container(
                   width: 10,
                   height: 10,
@@ -161,99 +180,105 @@ class _HomeTab extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-          // Snake Alert alert card
-          Panel(
-            border: s.activeCount > 0 ? const Color(0xFF3A2E14) : C.line,
-            padding: EdgeInsets.zero,
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SnakeWatchScreen())),
-            child: IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (s.activeCount > 0) Container(width: 3, color: C.amber),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 15, 16, 15),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const Text('🐍', style: TextStyle(fontSize: 17)),
-                              const SizedBox(width: 8),
-                              Text('Snake Alert', style: ft(17, w: 700)),
-                              Text('  ·  ', style: ft(13, color: C.muted)),
+          // Snake Alert alert card (admins: what needs them)
+          if (admin)
+            _AdminSnakeCard(onTap: openSnakeAlert)
+          else
+            Panel(
+              border: s.activeCount > 0 ? const Color(0xFF3A2E14) : C.line,
+              padding: EdgeInsets.zero,
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SnakeWatchScreen())),
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (s.activeCount > 0) Container(width: 3, color: C.amber),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 15, 16, 15),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Text('🐍', style: TextStyle(fontSize: 17)),
+                                const SizedBox(width: 8),
+                                Text('Snake Alert', style: ft(17, w: 700)),
+                                Text('  ·  ', style: ft(13, color: C.muted)),
+                                Text(
+                                  s.activeCount > 0 ? '${s.activeCount} ACTIVE' : 'ALL CLEAR',
+                                  style: ft(12.5, w: 700, color: s.activeCount > 0 ? C.amber : C.green, ls: 0.6),
+                                ),
+                                const Spacer(),
+                                const Icon(Icons.chevron_right_rounded, color: C.muted),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            if (latest != null) ...[
                               Text(
-                                s.activeCount > 0 ? '${s.activeCount} ACTIVE' : 'ALL CLEAR',
-                                style: ft(12.5, w: 700, color: s.activeCount > 0 ? C.amber : C.green, ls: 0.6),
+                                '${latest.treatAsVenomous ? (latest.venom == Venom.venomous ? 'Venomous snake' : 'Snake') : 'Non-venomous snake'} near ${latest.place.replaceAll(' Hostel', '')}',
+                                style: ft(17, color: C.text),
                               ),
-                              const Spacer(),
-                              const Icon(Icons.chevron_right_rounded, color: C.muted),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          if (latest != null) ...[
-                            Text(
-                              '${latest.treatAsVenomous ? (latest.venom == Venom.venomous ? 'Venomous snake' : 'Snake') : 'Non-venomous snake'} near ${latest.place.replaceAll(' Hostel', '')}',
-                              style: ft(17, color: C.text),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${latest.spot.isEmpty ? latest.place : latest.spot} · ${ago(latest.time)}',
-                              style: ft(13, color: C.muted),
-                            ),
-                            if (latest.covered) ...[
-                              const SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  StatusChip(latest),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      latest.flagged
-                                          ? (latest.level == AdminRole.warden
-                                                ? 'Security guard and warden alerted'
-                                                : 'Hostel security guard alerted')
-                                          : latest.statusLine,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: ft(12.5, w: 600, color: latest.flagged ? C.redText : C.sub),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${latest.spot.isEmpty ? latest.place : latest.spot} · ${ago(latest.time)}',
+                                style: ft(13, color: C.muted),
+                              ),
+                              if (latest.covered) ...[
+                                const SizedBox(height: 10),
+                                Row(
+                                  children: [
+                                    StatusChip(latest),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        latest.flagged
+                                            ? (latest.level == AdminRole.warden
+                                                  ? 'Security guard and warden alerted'
+                                                  : 'Hostel security guard alerted')
+                                            : latest.statusLine,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: ft(12.5, w: 600, color: latest.flagged ? C.redText : C.sub),
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ] else
-                            Text('No active reports on campus', style: ft(15, color: C.muted)),
-                        ],
+                                  ],
+                                ),
+                              ],
+                            ] else
+                              Text('No active reports on campus', style: ft(15, color: C.muted)),
+                          ],
+                        ),
                       ),
                     ),
+                  ],
+                ),
+              ),
+            ),
+          const SizedBox(height: 11),
+          if (admin)
+            const _DutyCard()
+          else
+            Panel(
+              onTap: () => _soon(context, 'Time Table'),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Text('📅', style: TextStyle(fontSize: 17)),
+                      const SizedBox(width: 8),
+                      Text('Time Table', style: ft(17, w: 700)),
+                      Text('  ·  7TH SEPTEMBER', style: ft(12, color: C.muted, ls: 0.6)),
+                      const Spacer(),
+                      const Icon(Icons.chevron_right_rounded, color: C.muted),
+                    ],
                   ),
+                  const SizedBox(height: 8),
+                  Text('No upcoming classes', style: ft(17, color: C.muted)),
                 ],
               ),
             ),
-          ),
-          const SizedBox(height: 11),
-          Panel(
-            onTap: () => _soon(context, 'Time Table'),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Text('📅', style: TextStyle(fontSize: 17)),
-                    const SizedBox(width: 8),
-                    Text('Time Table', style: ft(17, w: 700)),
-                    Text('  ·  7TH SEPTEMBER', style: ft(12, color: C.muted, ls: 0.6)),
-                    const Spacer(),
-                    const Icon(Icons.chevron_right_rounded, color: C.muted),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text('No upcoming classes', style: ft(17, color: C.muted)),
-              ],
-            ),
-          ),
           const SizedBox(height: 11),
           IntrinsicHeight(
             child: Row(
@@ -352,7 +377,7 @@ class _HomeTab extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                   onTap: () {
                     if (label == 'Snake Alert') {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const SnakeWatchScreen()));
+                      openSnakeAlert();
                     } else {
                       _soon(context, label);
                     }
@@ -412,6 +437,137 @@ class _HomeTab extends StatelessWidget {
                 ),
               ),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The admin's Snake Alert card on the Onestop home: how many reports need
+/// them, and the most urgent one. Tapping opens their Snake Alert screen.
+class _AdminSnakeCard extends StatelessWidget {
+  final VoidCallback onTap;
+  const _AdminSnakeCard({required this.onTap});
+  @override
+  Widget build(BuildContext context) {
+    final s = AppScope.of(context);
+    final needs = s.needsMe..sort((a, b) => (b.flagged ? 1 : 0).compareTo(a.flagged ? 1 : 0));
+    final r = needs.isEmpty ? null : needs.first;
+    final urgent = r != null && r.flagged;
+    final accent = r == null ? C.green : (urgent ? C.redText : C.amber);
+    return Panel(
+      border: r == null ? C.line : (urgent ? const Color(0xFF5A2424) : const Color(0xFF3A2E14)),
+      padding: EdgeInsets.zero,
+      onTap: onTap,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (r != null) Container(width: 3, color: urgent ? C.red : C.amber),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 15, 16, 15),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Text('🐍', style: TextStyle(fontSize: 17)),
+                        const SizedBox(width: 8),
+                        Text('Snake Alert', style: ft(17, w: 700)),
+                        Text('  ·  ', style: ft(13, color: C.muted)),
+                        Text(
+                          r == null ? 'ALL CLEAR' : '${needs.length} NEED${needs.length == 1 ? 'S' : ''} YOU',
+                          style: ft(12.5, w: 700, color: accent, ls: 0.6),
+                        ),
+                        const Spacer(),
+                        const Icon(Icons.chevron_right_rounded, color: C.muted),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    if (r == null)
+                      Text(
+                        s.adminRole == AdminRole.housekeeping
+                            ? 'No new reports for ${s.authorityHostel}'
+                            : 'Nothing is overdue for you',
+                        style: ft(15, color: C.muted),
+                      )
+                    else ...[
+                      Text(r.title, style: ft(17, color: C.text)),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${r.where} · ${ago(r.time)}',
+                        style: ft(13, color: C.muted),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          StatusChip(r),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              r.flagged
+                                  ? (r.escalated ? '${r.reporter} says it’s still there' : 'Overdue by ${mins(-r.dueIn)}')
+                                  : 'Tap to open and take it',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: ft(12.5, w: 600, color: urgent ? C.redText : C.sub),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// In place of the students' Time Table: the admin's shift and on-duty switch.
+class _DutyCard extends StatelessWidget {
+  const _DutyCard();
+  @override
+  Widget build(BuildContext context) {
+    final s = AppScope.of(context);
+    final duty = s.onDuty(s.me);
+    return Panel(
+      padding: const EdgeInsets.fromLTRB(16, 12, 10, 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Text('🕒', style: TextStyle(fontSize: 17)),
+                    const SizedBox(width: 8),
+                    Text('My duty', style: ft(17, w: 700)),
+                    Flexible(
+                      child: Text(
+                        '  ·  ${s.me.shift.toUpperCase()}',
+                        style: ft(12, color: C.muted, ls: 0.6),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  duty ? 'On duty · you get Snake Alert reports' : 'Off duty · no alerts until you’re back',
+                  style: ft(15, color: duty ? C.greenText : C.muted),
+                ),
+              ],
+            ),
+          ),
+          Switch(value: duty, activeThumbColor: C.green, onChanged: s.setOnDuty),
         ],
       ),
     );

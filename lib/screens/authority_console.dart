@@ -14,24 +14,24 @@ import 'profile.dart';
 import 'report_location.dart';
 import 'sighting_detail.dart';
 
-/// The authority's app: Reports (the console) and Profile, switched with the
-/// bottom bar like the student app.
-class AuthorityShell extends StatefulWidget {
-  const AuthorityShell({super.key});
+/// Wraps the admin's app: escalations reach them as an alert at the top,
+/// wherever they are (a real build would send a push notification with an
+/// alarm sound). Tapping it opens their Snake Alert reports.
+class EscalationWatcher extends StatefulWidget {
+  final Widget child;
+  final VoidCallback onOpen;
+  const EscalationWatcher({super.key, required this.child, required this.onOpen});
   @override
-  State<AuthorityShell> createState() => _AuthorityShellState();
+  State<EscalationWatcher> createState() => _EscalationWatcherState();
 }
 
-class _AuthorityShellState extends State<AuthorityShell> {
-  int _tab = 0;
+class _EscalationWatcherState extends State<EscalationWatcher> {
   Timer? _poll;
   OverlayEntry? _alert;
 
   @override
   void initState() {
     super.initState();
-    // Escalations reach the admin as an alert, wherever they are in the app
-    // (a real build would send a push notification with an alarm sound).
     _poll = Timer.periodic(const Duration(seconds: 3), (_) => _check());
   }
 
@@ -61,7 +61,7 @@ class _AuthorityShellState extends State<AuthorityShell> {
           onTap: () {
             entry.remove();
             if (_alert == entry) _alert = null;
-            setState(() => _tab = 1);
+            widget.onOpen();
           },
         ),
       ),
@@ -78,28 +78,32 @@ class _AuthorityShellState extends State<AuthorityShell> {
 
   @override
   Widget build(BuildContext context) {
-    AppScope.of(context); // re-check right away when the role changes
+    AppScope.of(context); // re-check right away when something changes
     WidgetsBinding.instance.addPostFrameCallback((_) => _check());
-    return _scaffold();
+    return widget.child;
   }
+}
 
-  Widget _scaffold() => Scaffold(
+/// The admin's Snake Alert screen, opened from the Snake Alert card on their
+/// Onestop home: Reports (the console) and Team (who's on duty, numbers).
+class AuthorityShell extends StatefulWidget {
+  const AuthorityShell({super.key});
+  @override
+  State<AuthorityShell> createState() => _AuthorityShellState();
+}
+
+class _AuthorityShellState extends State<AuthorityShell> {
+  int _tab = 0;
+  @override
+  Widget build(BuildContext context) => Scaffold(
     backgroundColor: C.bg,
-    body: IndexedStack(
-      index: _tab,
-      children: [
-        AdminHome(onOpenReports: () => setState(() => _tab = 1)),
-        const AuthorityConsole(),
-        const AuthorityProfile(),
-      ],
-    ),
+    body: IndexedStack(index: _tab, children: const [AuthorityConsole(), TeamTab()]),
     bottomNavigationBar: AppTabBar(
       index: _tab,
       onTap: (i) => setState(() => _tab = i),
       items: const [
-        (Icons.home_outlined, Icons.home_rounded, 'Home'),
         (Icons.assignment_outlined, Icons.assignment_rounded, 'Reports'),
-        (Icons.person_outline_rounded, Icons.person_rounded, 'Profile'),
+        (Icons.groups_outlined, Icons.groups_rounded, 'Team'),
       ],
     ),
   );
@@ -169,6 +173,10 @@ class _AuthorityConsoleState extends State<AuthorityConsole> {
               padding: const EdgeInsets.fromLTRB(16, 8, 8, 10),
               child: Row(
                 children: [
+                  if (Navigator.canPop(context)) ...[
+                    RoundButton(Icons.chevron_left_rounded, onTap: () => Navigator.maybePop(context)),
+                    const SizedBox(width: 10),
+                  ],
                   Expanded(child: Text(s.authorityHostel, style: ft(23, w: 700))),
                   // Who is signed in: the role decides which escalations alert you.
                   _RolePill(s.adminRole),
@@ -1539,11 +1547,10 @@ class StaffAvatar extends StatelessWidget {
   }
 }
 
-/// The admin's Home (different from the students'): who you are and whether
-/// you're on duty, what needs you right now, and the team on duty to call.
-class AdminHome extends StatelessWidget {
-  final VoidCallback onOpenReports;
-  const AdminHome({super.key, required this.onOpenReports});
+/// Team tab of the admin's Snake Alert screen: everyone on duty, with call
+/// buttons, and the emergency numbers.
+class TeamTab extends StatelessWidget {
+  const TeamTab({super.key});
 
   Future<void> _call(BuildContext context, String number) async {
     if (!await launchUrl(Uri.parse('tel:${number.replaceAll(' ', '')}')) && context.mounted) {
@@ -1555,9 +1562,6 @@ class AdminHome extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = AppScope.of(context);
     final me = s.me;
-    final duty = s.onDuty(me);
-    final needs = s.needsMe;
-    final role = s.adminRole;
     Widget title(String t, [String? trailing]) => Padding(
       padding: const EdgeInsets.only(top: 22, bottom: 10),
       child: Row(
@@ -1599,109 +1603,17 @@ class AdminHome extends StatelessWidget {
         builder: (context) => ListView(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 30),
           children: [
-            // Who you are
             Row(
               children: [
-                StaffAvatar(me, size: 48),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Hello, ${me.name}', style: ft(21, w: 700)),
-                      Text('${role.label} · ${s.authorityHostel}', style: ft(13.5, color: C.muted)),
-                    ],
-                  ),
-                ),
+                if (Navigator.canPop(context)) ...[
+                  RoundButton(Icons.chevron_left_rounded, onTap: () => Navigator.maybePop(context)),
+                  const SizedBox(width: 10),
+                ],
+                Expanded(child: Text('Team', style: ft(23, w: 700))),
               ],
             ),
-            const SizedBox(height: 16),
-            // On duty
-            Panel(
-              color: duty ? C.greenSoft : C.card,
-              border: duty ? const Color(0xFF245A36) : C.line2,
-              padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
-              child: Row(
-                children: [
-                  Icon(
-                    duty ? Icons.notifications_active_rounded : Icons.notifications_off_outlined,
-                    color: duty ? C.green : C.muted,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(duty ? 'On duty' : 'Off duty', style: ft(16, w: 700, color: duty ? C.greenText : C.text)),
-                        Text(
-                          duty
-                              ? 'Shift ${me.shift} · you get Snake Alert reports'
-                              : 'You won’t get alerts until you’re back on duty',
-                          style: ft(12.5, color: duty ? C.greenText : C.muted, height: 1.35),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Switch(value: duty, activeThumbColor: C.green, onChanged: s.setOnDuty),
-                ],
-              ),
-            ),
-            // What needs you
-            title('Needs you now', needs.isEmpty ? null : '${needs.length}'),
-            if (needs.isEmpty)
-              Panel(
-                child: Row(
-                  children: [
-                    const Icon(Icons.verified_outlined, color: C.green),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        role == AdminRole.housekeeping
-                            ? 'All clear. New reports will show here.'
-                            : 'Nothing is overdue for you right now.',
-                        style: ft(14, color: C.sub),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            else ...[
-              for (final r in needs.take(4))
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Panel(
-                    onTap: onOpenReports,
-                    border: r.flagged ? const Color(0xFF5A2424) : C.line2,
-                    padding: const EdgeInsets.all(12),
-                    child: Row(
-                      children: [
-                        SnakeThumb(r, size: 44),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(r.title, style: ft(15, w: 700)),
-                              Text(
-                                r.where,
-                                style: ft(12.5, color: C.muted),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 4),
-                              StatusChip(r),
-                            ],
-                          ),
-                        ),
-                        const Icon(Icons.chevron_right_rounded, color: C.sub),
-                      ],
-                    ),
-                  ),
-                ),
-              Btn('Open reports', kind: BtnKind.ghost, height: 46, icon: Icons.assignment_outlined, onTap: onOpenReports),
-            ],
             // Team on duty, to call
-            title('On duty now'),
+            title('On duty now', s.authorityHostel),
             for (final post in AdminRole.values)
               for (final st in s.onDutyIn(post))
                 if (st != me) callRow(StaffAvatar(st, size: 40), st.name, '${post.label} · ${st.shift}', st.phone),
