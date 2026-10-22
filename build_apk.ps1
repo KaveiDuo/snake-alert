@@ -35,5 +35,6 @@ if (Test-Path $groqFile) {
 }
 flutter build apk --release "--dart-define=SCANNER_KEY_R=$keyR" "--dart-define=GROQ_KEY_R=$groqR"
 Remove-Item Env:APP_ID_SUFFIX, Env:APP_LABEL -ErrorAction SilentlyContinue
+if ($LASTEXITCODE -ne 0) { Write-Host "APK build FAILED"; exit 1 }
 Copy-Item "$here\build\app\outputs\flutter-apk\app-release.apk" "$here\$out" -Force
 Write-Host "APK ready: $here\$out"
